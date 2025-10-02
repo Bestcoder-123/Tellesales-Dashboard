@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Rotator</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- iFrame to load dashboards -->
+  <iframe id="dashboardFrame" src="BB_Telesales_Statistics.html"></iframe>
+
+  <script>
+    // Dashboards to rotate
+    const dashboards = [
+      "BB_Telesales_Statistics.html",
+      "Telesales_Statistics.html"
+    ];
+
+    let index = 0;
+    const frame = document.getElementById("dashboardFrame");
+
+    // Change every 10 minutes (600000 ms)
+    setInterval(() => {
+      index = (index + 1) % dashboards.length;
+      frame.src = dashboards[index];
+    }, 600000); // 10 minutes in milliseconds
+  </script>
+
+</body>
+</html>
