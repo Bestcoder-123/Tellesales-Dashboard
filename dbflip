@@ -39,8 +39,8 @@
 <body>
 
 <div class="container">
-  <iframe id="cashierFrame" src="BB_Telesales_Statistics.html" class="active"></iframe>
-  <iframe id="riderFrame" src="Telesales_Statistics.html"></iframe>
+  <iframe id="cashierFrame" src="BB_Telesales_Statistics" class="active"></iframe>
+  <iframe id="riderFrame" src="Telesales_Statistics"></iframe>
 </div>
 
 <script>
@@ -52,13 +52,13 @@
 
   function switchDashboard() {
     if (showingCashier) {
-      riderFrame.src = "Telesales_Statistics.html?nocache=" + new Date().getTime();
+      riderFrame.src = "Telesales_Statistics?nocache=" + new Date().getTime();
       cashierFrame.classList.remove('active');
       riderFrame.classList.add('active');
       showingCashier = false;
       timer = setTimeout(switchDashboard, 180000); // 3 minutes for rider
     } else {
-      cashierFrame.src = "BB_Telesales_Statistics.html?nocache=" + new Date().getTime();
+      cashierFrame.src = "BB_Telesales_Statistics?nocache=" + new Date().getTime();
       riderFrame.classList.remove('active');
       cashierFrame.classList.add('active');
       showingCashier = true;
