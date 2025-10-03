@@ -32,14 +32,15 @@
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
 
-    // Change every 1 minutes (60000 ms)
+    // Change every 5 minutes (300000 ms)
     setInterval(() => {
       index = (index + 1) % dashboards.length;
       frame.src = dashboards[index];
-    }, 60000); // 1 minutes in milliseconds
+    }, 300000); // 5 minutes in milliseconds
   </script>
 
 </body>
 </html>
+
 
 
