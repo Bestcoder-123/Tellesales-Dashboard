@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <title>Dashboard Rotator</title>
   <style>
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      height: 100vh; /* full viewport height */
       overflow: hidden;
     }
     iframe {
       width: 100%;
-      height: 100%;
+      height: 100vh; /* full viewport height */
       border: none;
+      display: block;
       transition: opacity 1s ease-in-out; /* fade effect */
       opacity: 1;
     }
@@ -24,7 +25,7 @@
 </head>
 <body>
   <!-- iFrame to load dashboards -->
-  <iframe id="dashboardFrame" src="BB_Telesales_Statistics.html"></iframe>
+  <iframe id="dashboardFrame" src=""></iframe>
 
   <script>
     // Dashboards to rotate
@@ -36,17 +37,34 @@
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
 
+    // Load a dashboard with cache-busting timestamp
+    function loadDashboard(i) {
+      frame.src = dashboards[i] + "?v=" + new Date().getTime();
+    }
+
+    // Rotate dashboards
     function rotateDashboard() {
       frame.classList.add("hidden"); // fade out
       setTimeout(() => {
         index = (index + 1) % dashboards.length;
-        frame.src = dashboards[index];
+        loadDashboard(index);
         frame.classList.remove("hidden"); // fade in
-      }, 1000); // match transition duration
+      }, 1000);
     }
+
+    // Auto-refresh current dashboard (even without flipping)
+    function refreshDashboard() {
+      loadDashboard(index);
+    }
+
+    // ---- Init ----
+    loadDashboard(index);
 
     // Rotate dashboards every 3 minutes (180,000 ms)
     setInterval(rotateDashboard, 180000);
+
+    // Refresh current dashboard every 1 minute (60,000 ms)
+    setInterval(refreshDashboard, 60000);
   </script>
 </body>
 </html>
