@@ -42,15 +42,30 @@
       frame.src = dashboards[i] + "?v=" + new Date().getTime();
     }
 
-    // Rotate dashboards
-    function rotateDashboard() {
-      frame.classList.add("hidden"); // fade out
-      setTimeout(() => {
-        index = (index + 1) % dashboards.length;
-        loadDashboard(index);
-        frame.classList.remove("hidden"); // fade in
-      }, 1000);
-    }
+    // Rotate dashboards with flower transition
+function rotateDashboard() {
+  // Hide the current dashboard
+  frame.classList.add("hidden"); // fade out
+
+  // Show flower animation overlay
+  const flower = document.createElement("div");
+  flower.classList.add("flower-animation"); // CSS will define the flowers
+  document.body.appendChild(flower);
+
+  // Wait for the animation duration
+  setTimeout(() => {
+    // Remove flower animation
+    document.body.removeChild(flower);
+
+    // Load next dashboard
+    index = (index + 1) % dashboards.length;
+    loadDashboard(index);
+
+    // Show dashboard again
+    frame.classList.remove("hidden"); // fade in
+  }, 3000); // 3 seconds for flower animation
+}
+
 
     // Auto-refresh current dashboard (even without flipping)
     function refreshDashboard() {
@@ -60,10 +75,10 @@
     // ---- Init ----
     loadDashboard(index);
 
-    // Rotate dashboards every 3 minutes (180,000 ms)
-    setInterval(rotateDashboard, 180000);
+    // Rotate dashboards every 2 minutes (120,000 ms)
+    setInterval(rotateDashboard, 120000);
 
-    // Refresh current dashboard every 1 minute (60,000 ms)
+    // Refresh current dashboard every 1 minutes (60,000 ms)
     setInterval(refreshDashboard, 60000);
   </script>
 </body>
