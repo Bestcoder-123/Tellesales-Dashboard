@@ -18,7 +18,6 @@
   </style>
 </head>
 <body>
-
   <!-- iFrame to load dashboards -->
   <iframe id="dashboardFrame" src="BB_Telesales_Statistics.html"></iframe>
 
@@ -32,16 +31,16 @@
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
 
-    // Change every 3 minutes (180000 ms)
+    // Rotate dashboards every 3 minutes (180,000 ms)
     setInterval(() => {
       index = (index + 1) % dashboards.length;
       frame.src = dashboards[index];
-    }, 180000); // 3 minutes in milliseconds
-  </script>
+    }, 180000);
 
+    // Refresh iframe content every 20 seconds (20,000 ms)
+    setInterval(() => {
+      frame.src = frame.src; // reload current iframe
+    }, 20000);
+  </script>
 </body>
 </html>
-
-
-
-
