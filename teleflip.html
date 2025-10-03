@@ -14,6 +14,11 @@
       width: 100%;
       height: 100%;
       border: none;
+      transition: opacity 1s ease-in-out; /* fade effect */
+      opacity: 1;
+    }
+    .hidden {
+      opacity: 0;
     }
   </style>
 </head>
@@ -31,13 +36,17 @@
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
 
-    // Rotate dashboards every 3 minutes (180,000 ms)
-    setInterval(() => {
-      index = (index + 1) % dashboards.length;
-      frame.src = dashboards[index];
-    }, 180000);
+    function rotateDashboard() {
+      frame.classList.add("hidden"); // fade out
+      setTimeout(() => {
+        index = (index + 1) % dashboards.length;
+        frame.src = dashboards[index];
+        frame.classList.remove("hidden"); // fade in
+      }, 1000); // match transition duration
+    }
 
+    // Rotate dashboards every 3 minutes (180,000 ms)
+    setInterval(rotateDashboard, 180000);
   </script>
 </body>
 </html>
-
