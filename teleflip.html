@@ -66,7 +66,8 @@
 
   <!-- Image + title overlay -->
   <div id="imageOverlay">
-    <img src="Logo_Title.jpg" alt="Telesales Performance">
+    <!-- ✅ Use the direct GitHub Pages URL for your image -->
+    <img src="https://faithnaliaka.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
     <h1 id="overlayTitle"></h1>
   </div>
 
@@ -86,31 +87,39 @@
       frame.src = dashboards[i] + "?v=" + new Date().getTime();
     }
 
-    // Replace flower animation with image overlay
+    // Show image overlay between flips
     function rotateDashboard() {
       frame.classList.add("hidden"); // fade out current dashboard
 
-      // Show the image overlay instead of flowers
+      // Display image overlay instead of flower animation
       const now = new Date();
-      const formattedTime = now.toLocaleString();
-      overlayTitle.textContent = `Telesales Performance as at ${formattedTime}  |  # OPERATION NIGHT HAMMER`;
+      const formattedTime = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(',', '');
+      
+      overlayTitle.textContent = `TELESALES PERFORMANCE AS AT ${formattedTime}  |  # OPERATION NIGHT HAMMER`;
 
       overlay.style.display = "flex";
-      requestAnimationFrame(() => { overlay.style.opacity = 1; }); // fade in
+      requestAnimationFrame(() => { overlay.style.opacity = 1; }); // fade in overlay
 
       // Keep the image visible for 30 seconds
       setTimeout(() => {
-        overlay.style.opacity = 0; // fade out image
+        overlay.style.opacity = 0; // fade out
         setTimeout(() => {
-          overlay.style.display = "none"; // hide it completely
+          overlay.style.display = "none"; // hide overlay
           index = (index + 1) % dashboards.length;
           loadDashboard(index);
-          frame.classList.remove("hidden"); // fade in new dashboard
+          frame.classList.remove("hidden"); // fade in next dashboard
         }, 1000);
       }, 30000); // 30 seconds display
     }
 
-    // Refresh the current dashboard
+    // Refresh current dashboard
     function refreshDashboard() {
       loadDashboard(index);
     }
@@ -118,13 +127,12 @@
     // Initialize
     loadDashboard(index);
 
-    // Rotate dashboards every 2 minutes (first rotation after 2 min)
+    // Rotate dashboards every 2 minutes
     setInterval(rotateDashboard, 120000);
 
-    // Refresh every 1 minute
+    // Refresh current dashboard every 1 minute
     setInterval(refreshDashboard, 60000);
   </script>
 
 </body>
 </html>
-
