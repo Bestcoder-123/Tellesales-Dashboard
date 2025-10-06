@@ -133,7 +133,7 @@
       overlay.style.display = "flex";
       requestAnimationFrame(() => { overlay.style.opacity = 1; });
 
-      // Keep overlay for 20 seconds
+      // Keep overlay for 10 seconds
       setTimeout(() => {
         overlay.style.opacity = 0;
         setTimeout(() => {
@@ -147,7 +147,7 @@
           rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
 
         }, 1000);
-      }, 20000);
+      }, 10000);
     }
 
     // Initialize
@@ -157,3 +157,4 @@
 
 </body>
 </html>
+
