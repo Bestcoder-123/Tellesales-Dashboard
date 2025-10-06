@@ -57,20 +57,22 @@
       transition: opacity 1s ease-in-out;
       color: white;
     }
-
     /* Banner header with styled background */
-    #imageOverlay header {
-      width: 100%;
-      background: linear-gradient(90deg, #001f1f, #004d4d);
-      padding: 20px;
-      text-align: center;
-      font-size: 2em;
-      font-weight: bold;
-      color: #00ffcc;
-      text-shadow: 2px 2px 10px black;
-      z-index: 2;
-      border-bottom: 3px solid #00ffcc;
-    }
+#imageOverlay header {
+  width: auto;               /* shrink to content */
+  max-width: 80%;            /* cap width */
+  margin: 20px auto;         /* center it horizontally */
+  background: linear-gradient(90deg, #001f1f, #004d4d);
+  padding: 15px 30px;        /* spacing around text */
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+  color: #00ffcc;
+  text-shadow: 2px 2px 10px black;
+  z-index: 2;
+  border: 2px solid #00ffcc; /* outline instead of full bottom border */
+  border-radius: 10px;       /* rounded edges */
+}
 
     /* Fullscreen background image */
     #imageOverlay img {
@@ -178,3 +180,4 @@
 
 </body>
 </html>
+
