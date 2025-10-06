@@ -13,32 +13,35 @@
       font-family: Arial, sans-serif;
     }
 
+    /* Dashboard frame */
     iframe {
       width: 100%;
-      height: 100vh;
+      height: calc(100vh - 10px); /* slightly shorter to allow last row scroll */
       border: none;
-      display: block;
       position: absolute;
       top: 0;
       left: 0;
       opacity: 0;
-      transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+      z-index: 0;
+      transition: opacity 1s ease-in-out, transform 1s ease-in-out;
     }
-
     iframe.active {
       opacity: 1;
-      transform: translateX(0);
       z-index: 1;
     }
 
-    /* transition effects */
-    .slide-in-right { transform: translateX(100%); }
-    .slide-in-left  { transform: translateX(-100%); }
-    .slide-in-top   { transform: translateY(-100%); }
-    .slide-in-bottom{ transform: translateY(100%); }
-    .fade-in        { opacity: 0; }
-    .zoom-in        { transform: scale(0.8); opacity: 0; }
-    .rotate-in      { transform: rotateY(90deg); opacity: 0; }
+    /* --- Transition Variants --- */
+    .fade { transform: none; }
+    .fade.active { opacity: 1; transform: none; }
+
+    .slide-right { transform: translateX(100%); }
+    .slide-right.active { transform: translateX(0); }
+
+    .slide-left { transform: translateX(-100%); }
+    .slide-left.active { transform: translateX(0); }
+
+    .scale { transform: scale(0.9); }
+    .scale.active { transform: scale(1); }
 
     /* Overlay for banner */
     #imageOverlay {
@@ -50,31 +53,30 @@
       background: black;
       display: none;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-start;
       z-index: 10;
       opacity: 0;
       transition: opacity 1s ease-in-out;
       color: white;
     }
+
     /* Banner header with styled background */
-#imageOverlay header {
-  position: absolute;       /* stick to top */
-  top: 0;
-  left: 0;                  /* align left */
-  width: auto;
-  max-width: 60%;           /* optional: limit length */
-  background: linear-gradient(90deg, #001f1f, #004d4d);
-  padding: 8px 15px;
-  text-align: left;
-  font-size: 1.2em;         /* smaller text size */
-  font-weight: bold;
-  color: #00ffcc;
-  text-shadow: 1px 1px 4px black;
-  z-index: 2;
-  border-bottom: 2px solid #00ffcc;
-  border-radius: 0 0 8px 0; /* rounded only bottom-right corner */
-}
+    #imageOverlay header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;   /* full width */
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      padding: 6px 0;
+      text-align: center;  /* center the text */
+      font-size: 1em;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+      z-index: 2;
+      border-bottom: 2px solid #00ffcc;
+    }
 
     /* Fullscreen background image */
     #imageOverlay img {
@@ -102,19 +104,12 @@
 
   <script>
     const dashboards = [
-      { url: "BB_Telesales_Statistics.html", duration: 120000 }, 
-      { url: "Telesales_Statistics.html", duration: 180000 }
+      { url: "BB_Telesales_Statistics.html", duration: 10000 }, 
+      { url: "Telesales_Statistics.html", duration: 10000 }
     ];
 
-    const transitions = [
-      "slide-in-right",
-      "slide-in-left",
-      "slide-in-top",
-      "slide-in-bottom",
-      "fade-in",
-      "zoom-in",
-      "rotate-in"
-    ];
+    // Smooth lightweight transitions
+    const transitions = ["fade", "slide-right", "slide-left", "scale"];
 
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
@@ -129,15 +124,12 @@
 
     function loadDashboard(i, transition) {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-
-      // Reset classes for transition
       frame.className = transition;
       void frame.offsetWidth; // force reflow
       frame.classList.add("active");
     }
 
     function rotateDashboard() {
-      // Hide dashboard
       frame.classList.remove("active");
 
       // Update header with current time
@@ -182,5 +174,3 @@
 
 </body>
 </html>
-
-
