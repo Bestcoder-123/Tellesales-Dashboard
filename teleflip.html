@@ -25,14 +25,15 @@
       z-index: 0;
       transition: opacity 1s ease-in-out, transform 1s ease-in-out;
     }
+
     iframe.active {
       opacity: 1;
       z-index: 1;
     }
 
-    /* --- Only one transition: slide-right --- */
-    .slide-right { transform: translateX(100%); }
-    .slide-right.active { transform: translateX(0); }
+    /* --- Updated Transition: slide-up --- */
+    .slide-up { transform: translateY(100%); }
+    .slide-up.active { transform: translateY(0); }
 
     /* Overlay for banner */
     #imageOverlay {
@@ -107,8 +108,8 @@
 
     function loadDashboard(i) {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      frame.className = "slide-right";
-      void frame.offsetWidth; // force reflow
+      frame.className = "slide-up";
+      void frame.offsetWidth; // force reflow for animation
       frame.classList.add("active");
     }
 
@@ -132,7 +133,7 @@
       overlay.style.display = "flex";
       requestAnimationFrame(() => { overlay.style.opacity = 1; });
 
-      // Keep overlay for 30 seconds
+      // Keep overlay for 20 seconds
       setTimeout(() => {
         overlay.style.opacity = 0;
         setTimeout(() => {
@@ -146,7 +147,7 @@
           rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
 
         }, 1000);
-      }, 30000);
+      }, 20000);
     }
 
     // Initialize
