@@ -16,7 +16,7 @@
     /* Dashboard frame */
     iframe {
       width: 100%;
-      height: calc(100vh - 10px); /* slightly shorter to allow last row scroll */
+      height: 100%; /* full height for scrolling */
       border: none;
       position: absolute;
       top: 0;
@@ -24,24 +24,17 @@
       opacity: 0;
       z-index: 0;
       transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+      overflow: auto; /* allow scrolling */
     }
     iframe.active {
       opacity: 1;
+      transform: translateX(0);
       z-index: 1;
     }
 
-    /* --- Transition Variants --- */
-    .fade { transform: none; }
-    .fade.active { opacity: 1; transform: none; }
-
-    .slide-right { transform: translateX(100%); }
-    .slide-right.active { transform: translateX(0); }
-
+    /* Slide from left only */
     .slide-left { transform: translateX(-100%); }
     .slide-left.active { transform: translateX(0); }
-
-    .scale { transform: scale(0.9); }
-    .scale.active { transform: scale(1); }
 
     /* Overlay for banner */
     #imageOverlay {
@@ -108,23 +101,15 @@
       { url: "Telesales_Statistics.html", duration: 10000 }
     ];
 
-    // Smooth lightweight transitions
-    const transitions = ["fade", "slide-right", "slide-left", "scale"];
-
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
     const overlay = document.getElementById("imageOverlay");
     const overlayTitle = document.getElementById("overlayTitle");
     let rotationTimer;
 
-    function randomTransition() {
-      const rand = Math.floor(Math.random() * transitions.length);
-      return transitions[rand];
-    }
-
-    function loadDashboard(i, transition) {
+    function loadDashboard(i) {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      frame.className = transition;
+      frame.className = "slide-left";
       void frame.offsetWidth; // force reflow
       frame.classList.add("active");
     }
@@ -156,8 +141,7 @@
           overlay.style.display = "none";
           index = (index + 1) % dashboards.length;
 
-          const transition = randomTransition();
-          loadDashboard(index, transition);
+          loadDashboard(index);
 
           // Schedule next rotation AFTER dashboard duration
           clearTimeout(rotationTimer);
@@ -168,7 +152,7 @@
     }
 
     // Initialize
-    loadDashboard(index, randomTransition());
+    loadDashboard(index);
     rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
   </script>
 
