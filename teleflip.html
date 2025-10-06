@@ -7,79 +7,170 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100vh; /* full viewport height */
+      height: 100vh;
       overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
     }
+
+    /* Dashboard frame */
     iframe {
       width: 100%;
-      height: 100vh; /* full viewport height */
+      height: calc(100vh - 10px); /* slightly shorter to allow last row scroll */
       border: none;
-      display: block;
-      transition: opacity 1s ease-in-out; /* fade effect */
-      opacity: 1;
-    }
-    .hidden {
+      position: absolute;
+      top: 0;
+      left: 0;
       opacity: 0;
+      z-index: 0;
+      transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+    }
+    iframe.active {
+      opacity: 1;
+      z-index: 1;
+    }
+
+    /* --- Transition Variants --- */
+    .fade { transform: none; }
+    .fade.active { opacity: 1; transform: none; }
+
+    .slide-right { transform: translateX(100%); }
+    .slide-right.active { transform: translateX(0); }
+
+    .slide-left { transform: translateX(-100%); }
+    .slide-left.active { transform: translateX(0); }
+
+    .scale { transform: scale(0.9); }
+    .scale.active { transform: scale(1); }
+
+    /* Overlay for banner */
+    #imageOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: none;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      color: white;
+    }
+
+    /* Banner header with styled background */
+    #imageOverlay header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;   /* full width */
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      padding: 6px 0;
+      text-align: center;  /* center the text */
+      font-size: 1em;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+      z-index: 2;
+      border-bottom: 2px solid #00ffcc;
+    }
+
+    /* Fullscreen background image */
+    #imageOverlay img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
-  <!-- iFrame to load dashboards -->
-  <iframe id="dashboardFrame" src=""></iframe>
+
+  <!-- Dashboard container -->
+  <iframe id="dashboardFrame"></iframe>
+
+  <!-- Image + title overlay -->
+  <div id="imageOverlay">
+    <img src="https://bestcoder-123.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
+    <header id="overlayTitle"></header>
+  </div>
 
   <script>
-    // Dashboards to rotate
     const dashboards = [
-      "BB_Telesales_Statistics.html",
-      "Telesales_Statistics.html"
+      { url: "BB_Telesales_Statistics.html", duration: 10000 }, 
+      { url: "Telesales_Statistics.html", duration: 10000 }
     ];
+
+    // Smooth lightweight transitions
+    const transitions = ["fade", "slide-right", "slide-left", "scale"];
 
     let index = 0;
     const frame = document.getElementById("dashboardFrame");
+    const overlay = document.getElementById("imageOverlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    let rotationTimer;
 
-    // Load a dashboard with cache-busting timestamp
-    function loadDashboard(i) {
-      frame.src = dashboards[i] + "?v=" + new Date().getTime();
+    function randomTransition() {
+      const rand = Math.floor(Math.random() * transitions.length);
+      return transitions[rand];
     }
 
-    // Rotate dashboards with flower transition
-function rotateDashboard() {
-  // Hide the current dashboard
-  frame.classList.add("hidden"); // fade out
-
-  // Show flower animation overlay
-  const flower = document.createElement("div");
-  flower.classList.add("flower-animation"); // CSS will define the flowers
-  document.body.appendChild(flower);
-
-  // Wait for the animation duration
-  setTimeout(() => {
-    // Remove flower animation
-    document.body.removeChild(flower);
-
-    // Load next dashboard
-    index = (index + 1) % dashboards.length;
-    loadDashboard(index);
-
-    // Show dashboard again
-    frame.classList.remove("hidden"); // fade in
-  }, 3000); // 3 seconds for flower animation
-}
-
-
-    // Auto-refresh current dashboard (even without flipping)
-    function refreshDashboard() {
-      loadDashboard(index);
+    function loadDashboard(i, transition) {
+      frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+      frame.className = transition;
+      void frame.offsetWidth; // force reflow
+      frame.classList.add("active");
     }
 
-    // ---- Init ----
-    loadDashboard(index);
+    function rotateDashboard() {
+      frame.classList.remove("active");
 
-    // Rotate dashboards every 2 minutes (120,000 ms)
-    setInterval(rotateDashboard, 120000);
+      // Update header with current time
+      const now = new Date();
+      const formattedTime = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(',', '');
+      
+      overlayTitle.textContent = TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER;
 
-    // Refresh current dashboard every 1 minutes (60,000 ms)
-    setInterval(refreshDashboard, 60000);
+      // Show overlay banner
+      overlay.style.display = "flex";
+      requestAnimationFrame(() => { overlay.style.opacity = 1; });
+
+      // Keep overlay for 30 seconds
+      setTimeout(() => {
+        overlay.style.opacity = 0;
+        setTimeout(() => {
+          overlay.style.display = "none";
+          index = (index + 1) % dashboards.length;
+
+          const transition = randomTransition();
+          loadDashboard(index, transition);
+
+          // Schedule next rotation AFTER dashboard duration
+          clearTimeout(rotationTimer);
+          rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
+
+        }, 1000);
+      }, 30000);
+    }
+
+    // Initialize
+    loadDashboard(index, randomTransition());
+    rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
   </script>
+
 </body>
 </html>
