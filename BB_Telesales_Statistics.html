@@ -2510,68 +2510,90 @@ color: #333;
 </head>
 <body style="background-color: white;">
 <div id="htmlwidget_container">
-  <div class="datatables html-widget html-fill-item" id="htmlwidget-19173ea2f0274519cc29" style="width:100%;height:auto;"></div>
+  <div class="datatables html-widget html-fill-item" id="htmlwidget-672373662dc03683cae7" style="width:100%;height:auto;"></div>
 </div>
-<script type="application/json" data-for="htmlwidget-19173ea2f0274519cc29">{"x":{"filter":"none","vertical":false,"caption":"<caption style=\"caption-side: top; text-align: center; font-size:24px; font-weight:700;&#10;             text-transform: uppercase; background-color:#FFEB3B; padding:10px;&#10;             width:100%;\">\n      📊 BEIBORA LTD TELESALES PERFORMANCE SUMMARY TABLE <br>\n      <div id='liveClock' style='font-size:22px; font-weight:700; margin-top:6px;'><\/div>\n    <\/caption>","data":[[1,2,3,4,5,6,7,8,9,10,11],["DEBORAH KERUBO","VIRGINIA WAMBUI","CYNTHIA MUASYA MWIKA","SELPHINE  KEMUNTO","MACLYNE ATIENO","SUSAN WAITHERERO","EDNA NYARANGI","MILKA ATIENO","CATHERINE MWONGELI","EUNICE NDUNGE","ANN AKINYI ODIE"],["NJENGA, HONEY SUCKLE, IMARA DAIMA","TASSIA,EMBAKASI, DONHOLM","MIHANG'O, UTAWALA","RUAI, KAMULU, JOSKA, MALAA","SAIKA: MOWLEM, SLAUGHTER, JUNCTION, OBAMA","CHOKAA, NJIRU","MATHARE, HURUMA, BABA DOGO","UMOJA 1, UMOJA 2, BEE CENTRE","KARIOBANGI, DANDORA","KAYOLE, SOWETO, KOMAROCK","KWARE, PIPELINE, TRANSAMI"],[0.5600000000000001,0.41,0.39,0.37,0.33,0.29,0.27,0.22,0.18,0.17,0.1],[0.2,0.51,0.5,0.53,0.35,0.39,0.35,0.21,0.24,0.29,0.2]],"container":"<table class=\"stripe hover cell-border\">\n  <thead>\n    <tr>\n      <th>Rank<\/th>\n      <th>Salesperson<\/th>\n      <th>Route<\/th>\n      <th>% Sales Score<\/th>\n      <th>% Call Conversion<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"deferRender":true,"scrollX":true,"scrollY":"100vh","paging":false,"dom":"t","autoWidth":false,"initComplete":"function(settings, json) {\n  var api = this.api();\n  var container = api.table().container();\n  var header = $(api.table().header());\n  header.css({\n    'background-color': '#00FF00',\n    'font-size':'22px',\n    'font-weight':'700',\n    'text-align':'center',\n    'white-space':'normal',\n    'vertical-align':'middle'\n  });\n  var scrollHead = $(container).find('.dataTables_scrollHead');\n  var scrollBody = $(container).find('.dataTables_scrollBody');\n  var headerTable = scrollHead.find('table');\n  var bodyTable = scrollBody.find('table');\n  headerTable.css({'table-layout':'fixed'});\n  bodyTable.css({'table-layout':'fixed'});\n  function syncHeaderWidths(){\n    var firstRow = bodyTable.find('tbody tr:first');\n    if(firstRow.length === 0) { return; }\n    firstRow.find('td').each(function(i, td){\n      var w = $(td).outerWidth();\n      headerTable.find('th').eq(i).css({'width': w + 'px', 'box-sizing': 'border-box'});\n    });\n    headerTable.css({'width': bodyTable.outerWidth() + 'px'});\n    headerTable.find('th').css('text-align', 'center');\n  }\n  setTimeout(syncHeaderWidths, 50);\n  $(window).on('resize', function(){ setTimeout(syncHeaderWidths, 100); });\n  api.on('draw', function(){ setTimeout(syncHeaderWidths, 50); });\n  api.columns().every(function(){ this.adjust(); });\n}","columnDefs":[{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 0, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 0, 3, \",\", \".\", null);\n  }"},{"width":"50px","targets":0},{"width":"250px","targets":1},{"width":"300px","targets":2},{"width":"150px","targets":3},{"width":"150px","targets":4},{"className":"dt-center","targets":[0,3,4]},{"className":"dt-left","targets":2},{"name":"Rank","targets":0},{"name":"Salesperson","targets":1},{"name":"Route","targets":2},{"name":"% Sales Score","targets":3},{"name":"% Call Conversion","targets":4}],"order":[],"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'background-color':'#FDEBD0'});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'background-color':'#D6EAF8'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'background-color':'#D5F5E3','text-align':'left','white-space':'pre-line'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'color':isNaN(parseFloat(value)) ? '' : value <= 0.6 ? \"red\" : \"blue\",'background-color':'#FCF3CF','text-align':'center'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'background-color':'#FADBD8','text-align':'center'});\n}"}},"evals":["options.initComplete","options.columnDefs.0.render","options.columnDefs.1.render","options.rowCallback"],"jsHooks":[]}</script>
-<script type="application/htmlwidget-sizing" data-for="htmlwidget-19173ea2f0274519cc29">{"viewer":{"width":"100%","height":"auto","padding":15,"fill":true},"browser":{"width":"100%","height":"auto","padding":40,"fill":false}}</script>
+<script type="application/json" data-for="htmlwidget-672373662dc03683cae7">{"x":{"filter":"none","vertical":false,"caption":"<caption style=\"caption-side: top; text-align: center; font-size:24px; font-weight:700;&#10;             text-transform: uppercase; background-color:#FFEB3B; padding:10px;&#10;             width:100%;\">\n      📊 BEIBORA LTD TELESALES PERFORMANCE SUMMARY TABLE <br>\n      <div id='liveClock' style='font-size:22px; font-weight:700; margin-top:6px;'><\/div>\n    <\/caption>","data":[[1,2,3,4,5,6,7,8,9,10,11],["DEBORAH KERUBO","VIRGINIA WAMBUI","CYNTHIA MUASYA MWIKA","SELPHINE  KEMUNTO","MACLYNE ATIENO","SUSAN WAITHERERO","EDNA NYARANGI","MILKA ATIENO","CATHERINE MWONGELI","EUNICE NDUNGE","ANN AKINYI ODIE"],["NJENGA, HONEY SUCKLE, IMARA DAIMA","TASSIA,EMBAKASI, DONHOLM","MIHANG'O, UTAWALA","RUAI, KAMULU, JOSKA, MALAA","SAIKA: MOWLEM, SLAUGHTER, JUNCTION, OBAMA","CHOKAA, NJIRU","MATHARE, HURUMA, BABA DOGO","UMOJA 1, UMOJA 2, BEE CENTRE","KARIOBANGI, DANDORA","KAYOLE, SOWETO, KOMAROCK","KWARE, PIPELINE, TRANSAMI"],[0.5600000000000001,0.41,0.39,0.37,0.33,0.29,0.27,0.22,0.18,0.17,0.1],[0.2,0.51,0.5,0.53,0.35,0.39,0.35,0.21,0.24,0.29,0.2]],"container":"<table class=\"stripe hover cell-border\">\n  <thead>\n    <tr>\n      <th>Rank<\/th>\n      <th>Salesperson<\/th>\n      <th>Route<\/th>\n      <th>% Sales Score<\/th>\n      <th>% Call Conversion<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"deferRender":true,"scrollX":true,"scrollY":"100vh","paging":false,"dom":"t","autoWidth":false,"initComplete":"function(settings, json) {\n  var api = this.api();\n  var container = api.table().container();\n  var header = $(api.table().header());\n  header.css({\n    'background-color': '#00FF00',\n    'font-size':'22px',\n    'font-weight':'700',\n    'text-align':'center',\n    'white-space':'normal',\n    'vertical-align':'middle'\n  });\n  var scrollHead = $(container).find('.dataTables_scrollHead');\n  var scrollBody = $(container).find('.dataTables_scrollBody');\n  var headerTable = scrollHead.find('table');\n  var bodyTable = scrollBody.find('table');\n  headerTable.css({'table-layout':'fixed'});\n  bodyTable.css({'table-layout':'fixed'});\n  function syncHeaderWidths(){\n    var firstRow = bodyTable.find('tbody tr:first');\n    if(firstRow.length === 0) { return; }\n    firstRow.find('td').each(function(i, td){\n      var w = $(td).outerWidth();\n      headerTable.find('th').eq(i).css({'width': w + 'px', 'box-sizing': 'border-box'});\n    });\n    headerTable.css({'width': bodyTable.outerWidth() + 'px'});\n    headerTable.find('th').css('text-align', 'center');\n  }\n  setTimeout(syncHeaderWidths, 50);\n  $(window).on('resize', function(){ setTimeout(syncHeaderWidths, 100); });\n  api.on('draw', function(){ setTimeout(syncHeaderWidths, 50); });\n  api.columns().every(function(){ this.adjust(); });\n}","columnDefs":[{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 0, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 0, 3, \",\", \".\", null);\n  }"},{"width":"50px","targets":0},{"width":"250px","targets":1},{"width":"300px","targets":2},{"width":"150px","targets":3},{"width":"150px","targets":4},{"className":"dt-center","targets":[0,3,4]},{"className":"dt-left","targets":2},{"name":"Rank","targets":0},{"name":"Salesperson","targets":1},{"name":"Route","targets":2},{"name":"% Sales Score","targets":3},{"name":"% Call Conversion","targets":4}],"order":[],"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'font-weight':'700','color':'black','font-size':'18px'});\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'background-color':'#FDEBD0'});\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'background-color':'#D6EAF8'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'background-color':'#D5F5E3','text-align':'left','white-space':'pre-line'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'color':isNaN(parseFloat(value)) ? '' : value <= 0.6 ? \"red\" : \"blue\",'background-color':'#FCF3CF','text-align':'center'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'background-color':'#FADBD8','text-align':'center'});\n}"}},"evals":["options.initComplete","options.columnDefs.0.render","options.columnDefs.1.render","options.rowCallback"],"jsHooks":[]}</script>
+<script type="application/htmlwidget-sizing" data-for="htmlwidget-672373662dc03683cae7">{"viewer":{"width":"100%","height":"auto","padding":15,"fill":true},"browser":{"width":"100%","height":"auto","padding":40,"fill":false}}</script>
 </body>
 </html>
 <script>(function(){
-var speed=2;
-var tickMs=60;
-var waitTimeTop=5000;     // 5s pause at top
-var waitTimeBottom=10000; // 10s pause at bottom
+var speed = 2;                 // scroll pixels per tick
+var tickMs = 60;               // frame interval (ms)
+var waitTimeTop = 5000;        // pause at top (ms)
+var waitTimeBottom = 10000;    // pause at bottom (ms)
 
 function findContainerThenStart(){
-  var container=document.querySelector('.dataTables_scrollBody');
-  if(container){initialize(container);}else{setTimeout(findContainerThenStart,200);}
+  var container = document.querySelector('.dataTables_scrollBody');
+  if (container) {
+    initialize(container);
+  } else {
+    setTimeout(findContainerThenStart, 200);
+  }
 }
 
 function adjustHeights(container){
-  var scrollWrapper=container.closest('.dataTables_scroll')||container.parentElement;
-  var head=scrollWrapper?scrollWrapper.querySelector('.dataTables_scrollHead'):null;
-  var headH=head?head.offsetHeight:0;
-  if(scrollWrapper)scrollWrapper.style.height=window.innerHeight+'px';
-  container.style.height=(window.innerHeight-headH)+'px';
-  container.style.overflowY='auto';
+  var scrollWrapper = container.closest('.dataTables_scroll') || container.parentElement;
+  var head = scrollWrapper ? scrollWrapper.querySelector('.dataTables_scrollHead') : null;
+  var headH = head ? head.offsetHeight : 0;
+
+  // Full window height correction for kiosk browsers
+  scrollWrapper.style.height = window.innerHeight + 'px';
+  container.style.height = (window.innerHeight - headH - 2) + 'px';
+  container.style.overflowY = 'auto';
 }
 
 function initialize(container){
-  document.body.style.margin='0';
-  document.body.style.padding='0';
-  document.body.style.overflow='hidden';
-  document.documentElement.style.height='100%';
-  document.body.style.background='#fff';
+  document.body.style.margin = '0';
+  document.body.style.padding = '0';
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.height = '100%';
+  document.body.style.background = '#fff';
+
   adjustHeights(container);
+  window.addEventListener('resize', function(){ adjustHeights(container); });
+  setInterval(function(){ adjustHeights(container); }, 5000); // re-check every 5s
 
-  window.addEventListener('resize',function(){adjustHeights(container);});
-  var direction=1;
-  var intervalId=null;
+  var direction = 1;
+  var intervalId = null;
 
-  function canScroll(){return container.scrollHeight>container.clientHeight+2;}
+  function canScroll(){
+    return container.scrollHeight > container.clientHeight + 4;
+  }
 
   function startInterval(){
-    if(!canScroll())return;
-    if(intervalId)return;
-    intervalId=setInterval(function(){
-      container.scrollTop=Math.max(0,Math.min(container.scrollTop+direction*speed,container.scrollHeight-container.clientHeight));
+    if (!canScroll()) return;
+    if (intervalId) return;
 
-      // stop at bottom properly
-      if(direction===1 && container.scrollTop+container.clientHeight>=container.scrollHeight-1){
-        container.scrollTop=container.scrollHeight; // snap to bottom
-        clearInterval(intervalId);intervalId=null;direction=-1;
-        setTimeout(startInterval,waitTimeBottom);
+    intervalId = setInterval(function(){
+      container.scrollTop = Math.max(
+        0,
+        Math.min(
+          container.scrollTop + direction * speed,
+          container.scrollHeight - container.clientHeight
+        )
+      );
+
+      // Ensure we actually reached bottom
+      if (direction === 1 &&
+          container.scrollTop + container.clientHeight >= container.scrollHeight - 2) {
+        container.scrollTop = container.scrollHeight; // hard snap to bottom
+        clearInterval(intervalId); intervalId = null; direction = -1;
+        setTimeout(startInterval, waitTimeBottom);
       }
-      // stop at top
-      else if(direction===-1 && container.scrollTop<=1){
-        clearInterval(intervalId);intervalId=null;direction=1;
-        setTimeout(startInterval,waitTimeTop);
+      // Ensure we actually reached top
+      else if (direction === -1 && container.scrollTop <= 1) {
+        container.scrollTop = 0;
+        clearInterval(intervalId); intervalId = null; direction = 1;
+        setTimeout(startInterval, waitTimeTop);
       }
-    },tickMs);
+    }, tickMs);
   }
+
   startInterval();
 }
 
-document.addEventListener('DOMContentLoaded',findContainerThenStart);
-if(document.readyState==='interactive'||document.readyState==='complete'){findContainerThenStart();}
+document.addEventListener('DOMContentLoaded', findContainerThenStart);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  findContainerThenStart();
+}
 })();</script><script>(function(){function updateClock(){var now=new Date();var options={weekday:'long',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true,timeZone:'Africa/Nairobi'};var el=document.getElementById('liveClock');if(el)el.innerHTML=now.toLocaleString('en-US',options).toUpperCase();}setInterval(updateClock,1000);updateClock();})();</script>
