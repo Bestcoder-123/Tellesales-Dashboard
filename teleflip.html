@@ -59,19 +59,21 @@
     }
     /* Banner header with styled background */
 #imageOverlay header {
-  width: auto;               /* shrink to content */
-  max-width: 80%;            /* cap width */
-  margin: 20px auto;         /* center it horizontally */
+  position: absolute;       /* stick to top */
+  top: 0;
+  left: 0;                  /* align left */
+  width: auto;
+  max-width: 60%;           /* optional: limit length */
   background: linear-gradient(90deg, #001f1f, #004d4d);
-  padding: 15px 30px;        /* spacing around text */
-  text-align: center;
-  font-size: 2em;
+  padding: 8px 15px;
+  text-align: left;
+  font-size: 1.2em;         /* smaller text size */
   font-weight: bold;
   color: #00ffcc;
-  text-shadow: 2px 2px 10px black;
+  text-shadow: 1px 1px 4px black;
   z-index: 2;
-  border: 2px solid #00ffcc; /* outline instead of full bottom border */
-  border-radius: 10px;       /* rounded edges */
+  border-bottom: 2px solid #00ffcc;
+  border-radius: 0 0 8px 0; /* rounded only bottom-right corner */
 }
 
     /* Fullscreen background image */
@@ -180,4 +182,5 @@
 
 </body>
 </html>
+
 
