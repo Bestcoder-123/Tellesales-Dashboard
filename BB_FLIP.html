@@ -41,7 +41,7 @@
     const frameB = document.getElementById("frameB");
 
     // Timing settings
-    const telesalesTime = 60 * 1000; // 1 minute
+    const telesalesTime = 1 * 60 * 1000; // 1 minutes
     const bannerTime = 30 * 1000;        // 30 seconds
     const fadeDuration = 1500;           // 1.5 seconds fade
 
@@ -50,7 +50,7 @@
     function swapFrames() {
       if (showingA) {
         // Switch to banner
-        frameB.src = "BANNER.html?t=" + new Date().getTime(); // always reload banner fresh
+        frameB.src = "Banner.html"; // always reload banner fresh
         frameB.classList.add("visible");
         frameA.classList.remove("visible");
 
@@ -59,7 +59,7 @@
           setTimeout(swapFrames, bannerTime); // show banner for 30 sec
         }, fadeDuration);
       } else {
-        // Switch back to telesales (updated file)
+        // Switch back to telesales and reload for updated data
         frameA.src = "BB_Telesales_Statistics.html?t=" + new Date().getTime(); 
         // the ?t=timestamp ensures browser doesn’t cache the old data
 
@@ -79,5 +79,3 @@
 
 </body>
 </html>
-
-
