@@ -33,7 +33,7 @@
 <body>
 
   <!-- Two iframes for smooth fade transition -->
-  <iframe id="frameA" src="Telesales_Statistics.html" class="visible"></iframe>
+  <iframe id="frameA" src="Pharma_Telesales_Statistics.html" class="visible"></iframe>
   <iframe id="frameB" src="Banner.html"></iframe>
 
   <script>
@@ -60,7 +60,7 @@
         }, fadeDuration);
       } else {
         // Switch back to telesales and reload for updated data
-        frameA.src = "Telesales_Statistics.html?t=" + new Date().getTime(); 
+        frameA.src = "Pharma_Telesales_Statistics.html?t=" + new Date().getTime(); 
         // the ?t=timestamp ensures browser doesn’t cache the old data
 
         frameA.classList.add("visible");
