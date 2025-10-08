@@ -70,14 +70,15 @@
 
     // 🔹 Auto-scale dashboard to fit any screen size
     function autoScale() {
-      const iframes = document.querySelectorAll("iframe");
-      const baseWidth = 1920;
-      const baseHeight = 1080;
-      const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight);
-      iframes.forEach(f => {
-        f.style.transform = `translate(-50%, -50%) scale(${scale})`;
-      });
-    }
+  const iframes = document.querySelectorAll("iframe");
+  const baseWidth = 1920;
+  const baseHeight = 1080;
+  const scale = window.innerHeight / baseHeight; // fill vertically
+  iframes.forEach(f => {
+    f.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  });
+}
+
 
     window.addEventListener("resize", autoScale);
     window.addEventListener("load", autoScale);
@@ -104,3 +105,4 @@
 
 </body>
 </html>
+
