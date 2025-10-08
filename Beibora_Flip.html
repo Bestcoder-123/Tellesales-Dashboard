@@ -33,7 +33,7 @@
 <body>
 
   <!-- Two iframes for smooth fade transition -->
-  <iframe id="frameA" src="BB_Telesales_Statistics.html" class="visible"></iframe>
+  <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible"></iframe>
   <iframe id="frameB" src="Banner.html"></iframe>
 
   <script>
@@ -60,7 +60,7 @@
         }, fadeDuration);
       } else {
         // Switch back to telesales and reload for updated data
-        frameA.src = "BB_Telesales_Statistics.html?t=" + new Date().getTime(); 
+        frameA.src = "Beibora_Telesales_Statistics.html?t=" + new Date().getTime(); 
         // the ?t=timestamp ensures browser doesn’t cache the old data
 
         frameA.classList.add("visible");
@@ -99,3 +99,4 @@ function enlargeFont() {
 
 </body>
 </html>
+
