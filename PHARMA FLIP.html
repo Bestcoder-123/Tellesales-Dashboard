@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telesales Dashboard Rotator</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      background-color: black;
+    }
+
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+    }
+
+    iframe.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <iframe id="frameA" src="Telesales_Statistics.html" class="visible"></iframe>
+  <iframe id="frameB" src="BANNER.html"></iframe>
+
+  <script>
+    const frameA = document.getElementById("frameA");
+    const frameB = document.getElementById("frameB");
+
+    const telesalesTime = 60 * 1000; // 1 minute
+    const bannerTime = 30 * 1000;        // 30 seconds
+
+    let showingA = true;
+
+    function swapFrames() {
+      if (showingA) {
+        frameB.classList.add("visible");
+        frameA.classList.remove("visible");
+
+        // reload the banner so the time refreshes
+        frameB.src = "BANNER.html";
+
+        setTimeout(() => {
+          showingA = false;
+          setTimeout(swapFrames, bannerTime);
+        }, 1500); // wait for fade duration
+      } else {
+        frameA.classList.add("visible");
+        frameB.classList.remove("visible");
+
+        // reload the telesales stats
+        frameA.src = "Telesales_Statistics.html";
+
+        setTimeout(() => {
+          showingA = true;
+          setTimeout(swapFrames, telesalesTime);
+        }, 1500); // wait for fade duration
+      }
+    }
+
+    // Start the rotation after initial telesales display
+    setTimeout(swapFrames, telesalesTime);
+  </script>
+
+</body>
+</html>
