@@ -73,18 +73,20 @@
       }
     }
 
-     // 🔹 Function to inject font-size styling into the telesales frame
+// 🔹 Function to inject extra-large font sizes into the telesales frame
 function enlargeFont() {
   try {
     const doc = frameA.contentDocument || frameA.contentWindow.document;
     const style = doc.createElement('style');
     style.textContent = `
+      /* Super large fonts for big display screens */
       body, h1, h2, h3, h4, h5, h6, p, td, th, div, span {
-        font-size: 1.2em !important; /* increase font size globally */
+        font-size: 3em !important;  /* everything 3x normal size */
       }
-      h1 { font-size: 2em !important; }
-      h2 { font-size: 1.6em !important; }
-      h3 { font-size: 1.4em !important; }
+      h1 { font-size: 3em !important; }
+      h2 { font-size: 3em !important; }
+      h3 { font-size: 3em !important; }
+      p, td, th { font-size: 3em !important; }
     `;
     doc.head.appendChild(style);
   } catch (err) {
@@ -97,5 +99,6 @@ function enlargeFont() {
 
 </body>
 </html>
+
 
 
