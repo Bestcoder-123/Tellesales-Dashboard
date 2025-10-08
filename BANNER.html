@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telesales Performance</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #1d3561; /* dark blue header */
+      color: white;
+      text-align: center;
+      padding: 15px 10px; /* compact height */
+      font-weight: bold;
+      font-size: 20px; /* unified text size */
+    }
+
+    .banner img {
+      width: 100vw;        /* full width */
+      height: 80vh;        /* 80% of viewport height */
+      object-fit: cover;   /* fill screen neatly */
+      display: block;
+      margin: 0 auto;
+    }
+
+    main {
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header id="chartTitle">Loading...</header>
+
+  <div class="banner">
+    <img src="https://raw.githubusercontent.com/Dataanalyst-11/presentation/main/WhatsApp%20Image%202025-10-03%20at%2017.17.05_1f556b58.jpg" 
+         alt="Operation Night Hammer Banner">
+  </div>
+
+  <script>
+    function updateTitle() {
+      const header = document.getElementById('chartTitle');
+      const now = new Date();
+      const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      };
+      const formattedTime = now.toLocaleString('en-GB', options).replace(',', '');
+      const titleText = `TELESALES PERFORMANCE AS AT ${formattedTime} — # OPERATION NIGHT HAMMER`;
+      header.textContent = titleText;
+      document.title = titleText;
+    }
+
+    updateTitle();
+    setInterval(updateTitle, 1000);
+  </script>
+
+</body>
+</html>
