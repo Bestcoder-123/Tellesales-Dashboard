@@ -18,8 +18,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       border: none;
       opacity: 0;
       transition: opacity 1.5s ease-in-out;
@@ -32,7 +32,7 @@
 </head>
 <body>
 
-  <!-- Two iframes for smooth fade transition -->
+  <!-- Two iframes for smooth transitions -->
   <iframe id="frameA" src="BB_Telesales_Statistics.html" class="visible"></iframe>
   <iframe id="frameB" src="Banner.html"></iframe>
 
@@ -40,60 +40,35 @@
     const frameA = document.getElementById("frameA");
     const frameB = document.getElementById("frameB");
 
-    // Timing settings
-    const telesalesTime = 1 * 60 * 1000; // 1 minutes
-    const bannerTime = 30 * 1000;        // 30 seconds
-    const fadeDuration = 1500;           // 1.5 seconds fade
+    // Timing configuration
+    const telesalesTime = 1 * 60 * 1000; // 5 minutes
+    const bannerTime = 60 * 1000;        // 1 minute
+    const fadeDuration = 1500;           // fade time
 
     let showingA = true;
 
     function swapFrames() {
       if (showingA) {
-        // Switch to banner
-        frameB.src = "Banner.html"; // always reload banner fresh
+        frameB.src = "BANNER.html?t=" + new Date().getTime(); // reload banner
         frameB.classList.add("visible");
         frameA.classList.remove("visible");
 
         setTimeout(() => {
           showingA = false;
-          setTimeout(swapFrames, bannerTime); // show banner for 30 sec
+          setTimeout(swapFrames, bannerTime);
         }, fadeDuration);
       } else {
-        // Switch back to telesales and reload for updated data
-        frameA.src = "BB_Telesales_Statistics.html?t=" + new Date().getTime(); 
-        // the ?t=timestamp ensures browser doesn’t cache the old data
-
+        frameA.src = "BB_Telesales_Statistics.html?t=" + new Date().getTime();
         frameA.classList.add("visible");
         frameB.classList.remove("visible");
-        
+
         setTimeout(() => {
           showingA = true;
-          setTimeout(swapFrames, telesalesTime); // show telesales for 5 min
+          setTimeout(swapFrames, telesalesTime);
         }, fadeDuration);
       }
     }
 
- // 🔹 Function to inject extra-large font sizes into the telesales frame
-function enlargeFont() {
-  try {
-    const doc = frameA.contentDocument || frameA.contentWindow.document;
-    const style = doc.createElement('style');
-    style.textContent = `
-      /* Super large fonts for big display screens */
-      body, h1, h2, h3, h4, h5, h6, p, td, th, div, span {
-        font-size: 3em !important;  /* everything 3x normal size */
-      }
-      h1 { font-size: 3em !important; }
-      h2 { font-size: 3em !important; }
-      h3 { font-size: 3em !important; }
-      p, td, th { font-size: 3em !important; }
-    `;
-    doc.head.appendChild(style);
-  } catch (err) {
-    console.warn("Font resize skipped (cross-origin):", err);
-  }
-}
-    // Start rotation after first telesales period
     setTimeout(swapFrames, telesalesTime);
   </script>
 
