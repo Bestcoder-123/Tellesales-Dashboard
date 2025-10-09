@@ -100,19 +100,20 @@
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
-      overlayTitle.textContent = `TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+      overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // Flip between Beibora dashboard and Banner every 15 seconds
+    // Flip between Beibora dashboard and Banner every 5 Minutes
     let flipState = false;
     setInterval(() => {
       flipState = !flipState;
       flipper.classList.toggle("flip", flipState);
-    }, 15000); // Adjust duration if needed
+    }, 300000); // Adjust duration if needed
   </script>
 
 </body>
 </html>
+
