@@ -74,7 +74,7 @@
     <div class="flipper" id="flipper">
       <!-- FRONT: Beibora dashboard -->
       <div class="front">
-        <iframe src="Beibora_Telesales_Statistics.html"></iframe>
+        <iframe id="beiboraFrame" src="Beibora_Telesales_Statistics.html"></iframe>
       </div>
 
       <!-- BACK: Banner page -->
@@ -88,6 +88,7 @@
   <script>
     const flipper = document.getElementById("flipper");
     const overlayTitle = document.getElementById("overlayTitle");
+    const beiboraFrame = document.getElementById("beiboraFrame");
 
     // Function to update banner header time
     function updateHeader() {
@@ -118,6 +119,10 @@
         flipper.classList.remove("flip");
         showingBanner = false;
         localStorage.setItem('lastFlip', Date.now());
+
+        // 🔁 Force reload of the Beibora data each time it flips back
+        beiboraFrame.src = "Beibora_Telesales_Statistics.html?reload=" + new Date().getTime();
+
         setTimeout(flipCycle, beiboraDuration);
       } else {
         // Switch to Banner
@@ -155,3 +160,4 @@
 
 </body>
 </html>
+
