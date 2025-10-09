@@ -107,9 +107,9 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing ---
+    // --- Flip Timing (Persistent with localStorage) ---
     const pharmaDuration = 300000; // 5 minutes
-    const bannerDuration = 15000;   // 15 seconds
+    const bannerDuration = 15000;  // 15 seconds
     let showingBanner = false;
 
     function flipCycle() {
@@ -117,17 +117,40 @@
         // Switch to Pharma dashboard
         flipper.classList.remove("flip");
         showingBanner = false;
+        localStorage.setItem('pharmaLastFlip', Date.now());
         setTimeout(flipCycle, pharmaDuration);
       } else {
         // Switch to Banner
         flipper.classList.add("flip");
         showingBanner = true;
+        localStorage.setItem('pharmaLastFlip', Date.now());
         setTimeout(flipCycle, bannerDuration);
       }
     }
 
-    // Start with Pharma showing, flip to Banner after 5 mins
-    setTimeout(flipCycle, pharmaDuration);
+    // --- Resume timing across refresh ---
+    const lastFlip = localStorage.getItem('pharmaLastFlip');
+    if (lastFlip) {
+      const elapsed = Date.now() - lastFlip;
+      const totalCycle = pharmaDuration + bannerDuration;
+      const modTime = elapsed % totalCycle;
+
+      if (modTime < pharmaDuration) {
+        // Still within Pharma display period
+        flipper.classList.remove("flip");
+        showingBanner = false;
+        setTimeout(flipCycle, pharmaDuration - modTime);
+      } else {
+        // Should be showing Banner
+        flipper.classList.add("flip");
+        showingBanner = true;
+        setTimeout(flipCycle, totalCycle - modTime);
+      }
+    } else {
+      // First load: start with Pharma for 5 minutes
+      localStorage.setItem('pharmaLastFlip', Date.now());
+      setTimeout(flipCycle, pharmaDuration);
+    }
   </script>
 
 </body>
