@@ -1,97 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Telesales Dashboard Rotator</title>
+  <meta charset="UTF-8">
+  <title>Beibora Dashboard Flip</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Flip animation container */
+    .flip-container {
+      perspective: 1000px;
       width: 100%;
       height: 100%;
-      background: black;
-      overflow: hidden;
+      position: relative;
+    }
+
+    .flipper {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 1s ease-in-out;
+    }
+
+    .flip {
+      transform: rotateY(180deg);
+    }
+
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+    }
+
+    .back {
+      transform: rotateY(180deg);
     }
 
     iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    header {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
-      border: none;
-      background: black;
-      opacity: 0;
-      transition: opacity 1.5s ease-in-out;
-      display: block;
-      pointer-events: auto;
-    }
-
-    iframe.visible {
-      opacity: 1;
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      padding: 6px 0;
+      text-align: center;
+      font-size: 1em;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+      border-bottom: 2px solid #00ffcc;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
 
-  <!-- Main telesales dashboard -->
-  <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible"></iframe>
+  <div class="flip-container">
+    <div class="flipper" id="flipper">
+      <!-- FRONT: Beibora dashboard -->
+      <div class="front">
+        <iframe src="Beibora_Telesales_Statistics.html"></iframe>
+      </div>
 
-  <!-- Banner / announcement screen -->
-  <iframe id="frameB" src="Banner.html"></iframe>
+      <!-- BACK: Banner page -->
+      <div class="back">
+        <iframe src="Banner.html"></iframe>
+        <header id="overlayTitle"></header>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const frameA = document.getElementById("frameA");
-    const frameB = document.getElementById("frameB");
+    const flipper = document.getElementById("flipper");
+    const overlayTitle = document.getElementById("overlayTitle");
 
-    const telesalesTime = 1 * 60 * 1000;  // 1 minute
-    const bannerTime = 30 * 1000;         // 30 seconds
-    const fadeDuration = 1500;
-    let showingA = true;
-
-    function adjustSize() {
-      [frameA, frameB].forEach(f => {
-        f.style.width  = window.innerWidth  + "px";
-        f.style.height = window.innerHeight + "px";
-      });
-    }
-    window.addEventListener("resize", adjustSize);
-    window.addEventListener("load", adjustSize);
-    setInterval(adjustSize, 2000);
-
-    // Flip logic
-    function swapFrames() {
-      if (showingA) {
-        frameB.src = "Banner.html?t=" + Date.now();
-        frameB.classList.add("visible");
-        frameA.classList.remove("visible");
-        setTimeout(() => {
-          showingA = false;
-          setTimeout(swapFrames, bannerTime);
-        }, fadeDuration);
-      } else {
-        frameA.src = "Beibora_Telesales_Statistics.html?t=" + Date.now();
-        frameA.classList.add("visible");
-        frameB.classList.remove("visible");
-        setTimeout(() => {
-          showingA = true;
-          setTimeout(swapFrames, telesalesTime);
-        }, fadeDuration);
-      }
+    // Update the banner header time
+    function updateHeader() {
+      const now = new Date();
+      const formattedTime = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(',', '');
+      overlayTitle.textContent = `TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
-    // 🔹 Tell Beibora page to start scrolling (works when same folder / same origin)
-    frameA.addEventListener("load", () => {
-      try {
-        frameA.contentWindow.postMessage("startScroll", "*");
-      } catch (e) {
-        console.warn("Scroll message skipped:", e);
-      }
-    });
+    setInterval(updateHeader, 1000);
+    updateHeader();
 
-    // Start rotation
-    setTimeout(swapFrames, telesalesTime);
+    // Flip between Beibora dashboard and Banner every 15 seconds
+    let flipState = false;
+    setInterval(() => {
+      flipState = !flipState;
+      flipper.classList.toggle("flip", flipState);
+    }, 15000); // Adjust duration if needed
   </script>
+
 </body>
 </html>
