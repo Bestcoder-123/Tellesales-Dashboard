@@ -1,100 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telesales Dashboard Rotator</title>
+  <title>Pharma Dashboard Flip</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
+      height: 100vh;
       overflow: hidden;
-      height: 100%;
+      background: black;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Flip animation container */
+    .flip-container {
+      perspective: 1000px;
       width: 100%;
-      background-color: black;
+      height: 100%;
+      position: relative;
+    }
+
+    .flipper {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 1s ease-in-out;
+    }
+
+    .flip {
+      transform: rotateY(180deg);
+    }
+
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      top: 0;
+      left: 0;
+    }
+
+    .back {
+      transform: rotateY(180deg);
     }
 
     iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    header {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
-      border: none;
-      opacity: 0;
-      transition: opacity 1.5s ease-in-out;
-    }
-
-    iframe.visible {
-      opacity: 1;
+      width: 100%;
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      padding: 6px 0;
+      text-align: center;
+      font-size: 1em;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+      border-bottom: 2px solid #00ffcc;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
 
-  <!-- Two iframes for smooth fade transition -->
-  <iframe id="frameA" src="Pharma_Telesales_Statistics.html" class="visible"></iframe>
-  <iframe id="frameB" src="Banner.html"></iframe>
+  <div class="flip-container">
+    <div class="flipper" id="flipper">
+      <!-- FRONT: Pharma dashboard -->
+      <div class="front">
+        <iframe src="Pharma_Telesales_Statistics.html"></iframe>
+      </div>
+
+      <!-- BACK: Banner page -->
+      <div class="back">
+        <iframe src="Banner.html"></iframe>
+        <header id="overlayTitle"></header>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const frameA = document.getElementById("frameA");
-    const frameB = document.getElementById("frameB");
+    const flipper = document.getElementById("flipper");
+    const overlayTitle = document.getElementById("overlayTitle");
 
-    // Timing settings
-    const telesalesTime = 1 * 60 * 1000; // 1 minutes
-    const bannerTime = 30 * 1000;        // 30 seconds
-    const fadeDuration = 1500;           // 1.5 seconds fade
-
-    let showingA = true;
-
-    function swapFrames() {
-      if (showingA) {
-        // Switch to banner
-        frameB.src = "Banner.html"; // always reload banner fresh
-        frameB.classList.add("visible");
-        frameA.classList.remove("visible");
-
-        setTimeout(() => {
-          showingA = false;
-          setTimeout(swapFrames, bannerTime); // show banner for 30 sec
-        }, fadeDuration);
-      } else {
-        // Switch back to telesales and reload for updated data
-        frameA.src = "Pharma_Telesales_Statistics.html?t=" + new Date().getTime(); 
-        // the ?t=timestamp ensures browser doesn’t cache the old data
-
-        frameA.classList.add("visible");
-        frameB.classList.remove("visible");
-        
-        setTimeout(() => {
-          showingA = true;
-          setTimeout(swapFrames, telesalesTime); // show telesales for 5 min
-        }, fadeDuration);
-      }
+    // Update the banner header time
+    function updateHeader() {
+      const now = new Date();
+      const formattedTime = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(',', '');
+      overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
- // 🔹 Function to inject extra-large font sizes into the telesales frame
-function enlargeFont() {
-  try {
-    const doc = frameA.contentDocument || frameA.contentWindow.document;
-    const style = doc.createElement('style');
-    style.textContent = `
-      /* Super large fonts for big display screens */
-      body, h1, h2, h3, h4, h5, h6, p, td, th, div, span {
-        font-size: 3em !important;  /* everything 3x normal size */
-      }
-      h1 { font-size: 3em !important; }
-      h2 { font-size: 3em !important; }
-      h3 { font-size: 3em !important; }
-      p, td, th { font-size: 3em !important; }
-    `;
-    doc.head.appendChild(style);
-  } catch (err) {
-    console.warn("Font resize skipped (cross-origin):", err);
-  }
-}
-    // Start rotation after first telesales period
-    setTimeout(swapFrames, telesalesTime);
+    setInterval(updateHeader, 1000);
+    updateHeader();
+
+    // Flip between Pharma dashboard and Banner every 15 seconds
+    let flipState = false;
+    setInterval(() => {
+      flipState = !flipState;
+      flipper.classList.toggle("flip", flipState);
+    }, 15000); // Adjust duration if needed
   </script>
 
 </body>
