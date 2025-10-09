@@ -156,7 +156,32 @@
       localStorage.setItem('pharmaLastFlip', Date.now());
       setTimeout(flipCycle, pharmaDuration);
     }
+
+    // --- 🔄 Auto Reload Dashboard When Data Changes (Option 1) ---
+    const dataURL = "Pharma_Telesales_Data.csv"; // Change to your data file name
+    let lastModified = null;
+
+    async function checkDataUpdate() {
+      try {
+        const response = await fetch(dataURL, { cache: "no-store" });
+        const newModified = response.headers.get("last-modified");
+
+        if (lastModified && newModified && newModified !== lastModified) {
+          console.log("✅ New data detected — reloading dashboard...");
+          pharmaFrame.src = "Pharma_Telesales_Statistics.html?reload=" + new Date().getTime();
+        }
+
+        if (newModified) lastModified = newModified;
+      } catch (err) {
+        console.warn("⚠️ Unable to check for data updates:", err);
+      }
+    }
+
+    // Check every 60 seconds (adjust as needed)
+    setInterval(checkDataUpdate, 60000);
+    checkDataUpdate();
   </script>
 
 </body>
 </html>
+
