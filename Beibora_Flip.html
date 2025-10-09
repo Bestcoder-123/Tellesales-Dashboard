@@ -1,47 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Telesales Dashboard Rotator</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
       width: 100%;
-      overflow: hidden;
+      height: 100%;
       background: black;
-      display: flex;
-      flex-direction: column;
+      overflow: hidden;          /* no parent scrollbars */
     }
 
-    /* Fullscreen flex container fix (from your hint) */
-    .html-fill-container {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      min-width: 0;
-      flex: 1 1 auto;
-    }
-
-    .html-fill-item {
-      flex: 1 1 auto;
-      min-height: 0;
-      min-width: 0;
-    }
-
-    /* Iframes cover the full container area */
     iframe {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       border: none;
-      opacity: 0;
       background: black;
+      opacity: 0;
       transition: opacity 1.5s ease-in-out;
       display: block;
+      pointer-events: auto;      /* let child page handle its own input/scroll */
     }
 
     iframe.visible {
@@ -49,38 +33,35 @@
     }
   </style>
 </head>
-<body class="html-fill-container">
+<body>
 
-  <!-- Two iframes for smooth flip transition -->
-  <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible html-fill-item"></iframe>
-  <iframe id="frameB" src="Banner.html" class="html-fill-item"></iframe>
+  <!-- main telesales dashboard -->
+  <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible"></iframe>
+
+  <!-- banner / second screen -->
+  <iframe id="frameB" src="Banner.html"></iframe>
 
   <script>
     const frameA = document.getElementById("frameA");
     const frameB = document.getElementById("frameB");
 
-    // Durations
-    const telesalesTime = 1 * 60 * 1000; // 1 minute
-    const bannerTime = 30 * 1000;        // 30 seconds
-    const fadeDuration = 1500;           // 1.5 seconds fade
-
+    const telesalesTime = 1 * 60 * 1000;  // 1 minute
+    const bannerTime = 30 * 1000;         // 30 seconds
+    const fadeDuration = 1500;
     let showingA = true;
 
-    // Auto-adjust for Fully Kiosk (real viewport)
-    function fixViewport() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    // keep fullscreen sizing accurate for Smart TVs / kiosk browsers
+    function adjustSize() {
       [frameA, frameB].forEach(f => {
-        f.style.width = `${window.innerWidth}px`;
-        f.style.height = `${window.innerHeight}px`;
+        f.style.width  = window.innerWidth  + "px";
+        f.style.height = window.innerHeight + "px";
       });
     }
+    window.addEventListener("resize", adjustSize);
+    window.addEventListener("load", adjustSize);
+    setInterval(adjustSize, 2000);
 
-    window.addEventListener("resize", fixViewport);
-    window.addEventListener("load", fixViewport);
-    setInterval(fixViewport, 2000); // keep it fresh in kiosk mode
-
-    // Flip logic
+    // simple flip logic – only changes visibility and reloads banner/telesales
     function swapFrames() {
       if (showingA) {
         frameB.src = "Banner.html?t=" + Date.now();
@@ -92,6 +73,7 @@
           setTimeout(swapFrames, bannerTime);
         }, fadeDuration);
       } else {
+        // reload telesales so its data refreshes; all internal scripts rerun
         frameA.src = "Beibora_Telesales_Statistics.html?t=" + Date.now();
         frameA.classList.add("visible");
         frameB.classList.remove("visible");
@@ -103,33 +85,7 @@
       }
     }
 
-    // Enlarge telesales page fonts for distant readability
-    function enlargeFont() {
-      try {
-        const doc = frameA.contentDocument || frameA.contentWindow.document;
-        if (!doc) return;
-        if (doc.getElementById("fontBoost")) return; // prevent duplicates
-
-        const style = doc.createElement("style");
-        style.id = "fontBoost";
-        style.textContent = `
-          html, body { height: 100%; margin: 0; padding: 0; }
-          body, h1, h2, h3, h4, h5, h6, p, td, th, div, span {
-            font-size: clamp(22px, 2.5vw + 1vh, 60px) !important;
-            line-height: 1.1 !important;
-          }
-          table { width: 100% !important; }
-        `;
-        doc.head.appendChild(style);
-      } catch (err) {
-        console.warn("Font resize skipped (cross-origin):", err);
-      }
-    }
-
-    // Keep trying font injection every 5s to handle reloads
-    setInterval(enlargeFont, 5000);
-
-    // Start after first telesales display
+    // start rotation
     setTimeout(swapFrames, telesalesTime);
   </script>
 
