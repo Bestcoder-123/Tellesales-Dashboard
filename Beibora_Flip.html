@@ -13,7 +13,6 @@
       font-family: Arial, sans-serif;
     }
 
-    /* Flip animation container */
     .flip-container {
       perspective: 1000px;
       width: 100%;
@@ -74,12 +73,12 @@
     <div class="flipper" id="flipper">
       <!-- FRONT: Beibora dashboard -->
       <div class="front">
-        <iframe id="beiboraFrame" src="Beibora_Telesales_Statistics.html"></iframe>
+        <iframe id="beiboraFrame"></iframe>
       </div>
 
       <!-- BACK: Banner page -->
       <div class="back">
-        <iframe src="Banner.html"></iframe>
+        <iframe id="bannerFrame"></iframe>
         <header id="overlayTitle"></header>
       </div>
     </div>
@@ -89,6 +88,11 @@
     const flipper = document.getElementById("flipper");
     const overlayTitle = document.getElementById("overlayTitle");
     const beiboraFrame = document.getElementById("beiboraFrame");
+    const bannerFrame = document.getElementById("bannerFrame");
+
+    // 🧠 Always load latest versions (no cached data)
+    beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
+    bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
     // Function to update banner header time
     function updateHeader() {
@@ -104,13 +108,12 @@
       overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
-    // Update header time every second
     setInterval(updateHeader, 1000);
     updateHeader();
 
     // --- Flip Timing (Persistent) ---
     const beiboraDuration = 300000; // 5 minutes
-    const bannerDuration = 15000;   // 15 seconds
+    const bannerDuration = 15000;  // 15 seconds
     let showingBanner = false;
 
     function flipCycle() {
@@ -119,10 +122,6 @@
         flipper.classList.remove("flip");
         showingBanner = false;
         localStorage.setItem('lastFlip', Date.now());
-
-        // 🔁 Force reload of the Beibora data each time it flips back
-        beiboraFrame.src = "Beibora_Telesales_Statistics.html?reload=" + new Date().getTime();
-
         setTimeout(flipCycle, beiboraDuration);
       } else {
         // Switch to Banner
@@ -160,4 +159,3 @@
 
 </body>
 </html>
-
