@@ -89,7 +89,7 @@
     const flipper = document.getElementById("flipper");
     const overlayTitle = document.getElementById("overlayTitle");
 
-    // Update the banner header time
+    // Function to update banner header time
     function updateHeader() {
       const now = new Date();
       const formattedTime = now.toLocaleString('en-GB', {
@@ -103,15 +103,31 @@
       overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
+    // Update header time every second
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // Flip between Pharma dashboard and Banner every 5 Minutes
-    let flipState = false;
-    setInterval(() => {
-      flipState = !flipState;
-      flipper.classList.toggle("flip", flipState);
-    }, 300000); // Adjust duration if needed
+    // --- Flip Timing ---
+    const pharmaDuration = 300000; // 5 minutes
+    const bannerDuration = 15000;   // 15 seconds
+    let showingBanner = false;
+
+    function flipCycle() {
+      if (showingBanner) {
+        // Switch to Pharma dashboard
+        flipper.classList.remove("flip");
+        showingBanner = false;
+        setTimeout(flipCycle, pharmaDuration);
+      } else {
+        // Switch to Banner
+        flipper.classList.add("flip");
+        showingBanner = true;
+        setTimeout(flipCycle, bannerDuration);
+      }
+    }
+
+    // Start with Pharma showing, flip to Banner after 5 mins
+    setTimeout(flipCycle, pharmaDuration);
   </script>
 
 </body>
