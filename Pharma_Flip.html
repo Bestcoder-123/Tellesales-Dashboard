@@ -106,12 +106,12 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // Flip between Pharma dashboard and Banner every 15 seconds
+    // Flip between Pharma dashboard and Banner every 5 Minutes
     let flipState = false;
     setInterval(() => {
       flipState = !flipState;
       flipper.classList.toggle("flip", flipState);
-    }, 15000); // Adjust duration if needed
+    }, 300000); // Adjust duration if needed
   </script>
 
 </body>
