@@ -108,9 +108,9 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing (Persistent with localStorage) ---
+    // --- Flip Timing (Persistent) ---
     const pharmaDuration = 300000; // 5 minutes
-    const bannerDuration = 15000;  // 15 seconds
+    const bannerDuration = 15000;   // 15 seconds
     let showingBanner = false;
 
     function flipCycle() {
@@ -118,9 +118,9 @@
         // Switch to Pharma dashboard
         flipper.classList.remove("flip");
         showingBanner = false;
-        localStorage.setItem('pharmaLastFlip', Date.now());
+        localStorage.setItem('lastFlip', Date.now());
 
-        // 🔁 Force reload of Pharma dashboard each time it flips back
+        // 🔁 Force reload of the Pharma data each time it flips back
         pharmaFrame.src = "Pharma_Telesales_Statistics.html?reload=" + new Date().getTime();
 
         setTimeout(flipCycle, pharmaDuration);
@@ -128,20 +128,20 @@
         // Switch to Banner
         flipper.classList.add("flip");
         showingBanner = true;
-        localStorage.setItem('pharmaLastFlip', Date.now());
+        localStorage.setItem('lastFlip', Date.now());
         setTimeout(flipCycle, bannerDuration);
       }
     }
 
-    // --- Resume timing across refresh ---
-    const lastFlip = localStorage.getItem('pharmaLastFlip');
+    // Resume timing across refresh
+    const lastFlip = localStorage.getItem('lastFlip');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
       const totalCycle = pharmaDuration + bannerDuration;
       const modTime = elapsed % totalCycle;
 
       if (modTime < pharmaDuration) {
-        // Still within Pharma display period
+        // Still in Pharma phase
         flipper.classList.remove("flip");
         showingBanner = false;
         setTimeout(flipCycle, pharmaDuration - modTime);
@@ -153,35 +153,10 @@
       }
     } else {
       // First load: start with Pharma for 5 minutes
-      localStorage.setItem('pharmaLastFlip', Date.now());
+      localStorage.setItem('lastFlip', Date.now());
       setTimeout(flipCycle, pharmaDuration);
     }
-
-    // --- 🔄 Auto Reload Dashboard When Data Changes (Option 1) ---
-    const dataURL = "Pharma_Telesales_Data.csv"; // Change to your data file name
-    let lastModified = null;
-
-    async function checkDataUpdate() {
-      try {
-        const response = await fetch(dataURL, { cache: "no-store" });
-        const newModified = response.headers.get("last-modified");
-
-        if (lastModified && newModified && newModified !== lastModified) {
-          console.log("✅ New data detected — reloading dashboard...");
-          pharmaFrame.src = "Pharma_Telesales_Statistics.html?reload=" + new Date().getTime();
-        }
-
-        if (newModified) lastModified = newModified;
-      } catch (err) {
-        console.warn("⚠️ Unable to check for data updates:", err);
-      }
-    }
-
-    // Check every 60 seconds (adjust as needed)
-    setInterval(checkDataUpdate, 60000);
-    checkDataUpdate();
   </script>
 
 </body>
 </html>
-
