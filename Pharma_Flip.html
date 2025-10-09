@@ -74,7 +74,7 @@
     <div class="flipper" id="flipper">
       <!-- FRONT: Pharma dashboard -->
       <div class="front">
-        <iframe src="Pharma_Telesales_Statistics.html"></iframe>
+        <iframe id="pharmaFrame" src="Pharma_Telesales_Statistics.html"></iframe>
       </div>
 
       <!-- BACK: Banner page -->
@@ -88,6 +88,7 @@
   <script>
     const flipper = document.getElementById("flipper");
     const overlayTitle = document.getElementById("overlayTitle");
+    const pharmaFrame = document.getElementById("pharmaFrame");
 
     // Function to update banner header time
     function updateHeader() {
@@ -118,6 +119,10 @@
         flipper.classList.remove("flip");
         showingBanner = false;
         localStorage.setItem('pharmaLastFlip', Date.now());
+
+        // 🔁 Force reload of Pharma dashboard each time it flips back
+        pharmaFrame.src = "Pharma_Telesales_Statistics.html?reload=" + new Date().getTime();
+
         setTimeout(flipCycle, pharmaDuration);
       } else {
         // Switch to Banner
