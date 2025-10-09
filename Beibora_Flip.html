@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Telesales Dashboard Rotator (Kiosk-ready)</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Telesales Dashboard Rotator</title>
   <style>
-    :root { --vh: 1vh; }
-
     html, body {
       margin: 0;
       padding: 0;
@@ -14,147 +12,126 @@
       width: 100%;
       overflow: hidden;
       background: black;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* iframe pinned to the true viewport with multiple fallbacks */
+    /* Fullscreen flex container fix (from your hint) */
+    .html-fill-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .html-fill-item {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    /* Iframes cover the full container area */
     iframe {
       position: fixed;
-      inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
+      inset: 0;
       width: 100vw;
-      /* primary: use the --vh-based calc (works around mobile/embedded UI chrome) */
-      height: calc(var(--vh, 1vh) * 100);
-      min-height: 100dvh;       /* newer browsers */
-      min-height: 100vh;        /* fallback */
+      height: 100vh;
       border: none;
-      margin: 0;
-      padding: 0;
-      background: black;
-      display: block;
       opacity: 0;
-      transition: opacity 1.2s ease-in-out;
+      background: black;
+      transition: opacity 1.5s ease-in-out;
+      display: block;
     }
 
-    iframe.visible { opacity: 1; }
-
-    /* Keep any default body text size controlled by the iframe page itself.
-       If that page is same-origin we will attempt to inject a big font-size. */
+    iframe.visible {
+      opacity: 1;
+    }
   </style>
 </head>
-<body>
+<body class="html-fill-container">
 
-  <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
-  <iframe id="frameB" src="Banner.html" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+  <!-- Two iframes for smooth flip transition -->
+  <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible html-fill-item"></iframe>
+  <iframe id="frameB" src="Banner.html" class="html-fill-item"></iframe>
 
   <script>
-    const frameA = document.getElementById('frameA');
-    const frameB = document.getElementById('frameB');
+    const frameA = document.getElementById("frameA");
+    const frameB = document.getElementById("frameB");
 
-    const TELESALES_MS = 1 * 60 * 1000; // 1 minute (adjust as you like)
-    const BANNER_MS = 30 * 1000;        // 30 seconds
-    const FADE_MS = 1200;
+    // Durations
+    const telesalesTime = 1 * 60 * 1000; // 1 minute
+    const bannerTime = 30 * 1000;        // 30 seconds
+    const fadeDuration = 1500;           // 1.5 seconds fade
 
     let showingA = true;
-    let swapTimer = null;
 
-    /* Set --vh custom property for CSS to solve viewport unit bugs in embedded browsers.
-       Also set explicit pixel height/width fallback for iframes using screen/window values. */
-    function updateViewportVars() {
-      // 1vh fallback
+    // Auto-adjust for Fully Kiosk (real viewport)
+    function fixViewport() {
       const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-      // strong pixel fallback for iframes (helps some kiosk browsers)
-      const pxH = Math.max(window.innerHeight || 0, window.screen.availHeight || 0, window.screen.height || 0, document.documentElement.clientHeight || 0);
-      const pxW = Math.max(window.innerWidth || 0, window.screen.availWidth || 0, window.screen.width || 0, document.documentElement.clientWidth || 0);
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
       [frameA, frameB].forEach(f => {
-        if (f && f.style) {
-          f.style.height = pxH + 'px';
-          f.style.width = pxW + 'px';
-        }
+        f.style.width = `${window.innerWidth}px`;
+        f.style.height = `${window.innerHeight}px`;
       });
     }
 
-    // Try to inject large readable fonts into the telesales page (only on same-origin).
-    function tryInjectFontSizing() {
-      try {
-        const doc = frameA.contentDocument || frameA.contentWindow.document;
-        if (!doc) return;
-        // avoid reinserting
-        if (doc.getElementById('__kiosk_font_inject')) return;
-        const style = doc.createElement('style');
-        style.id = '__kiosk_font_inject';
-        // safe, responsive font sizing — adjust clamp range as needed
-        style.textContent = `
-          html, body { height:100%; margin:0; padding:0; box-sizing:border-box; }
-          :root { --kiosk-font: clamp(20px, 3.5vw + 1vh, 72px); }
-          body, h1, h2, h3, p, td, th, div, span { font-size: var(--kiosk-font) !important; line-height: 1.05 !important; }
-          table { width:100% !important; border-collapse: collapse !important; }
-          * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
-        `;
-        doc.head.appendChild(style);
-      } catch (err) {
-        // cross-origin or unavailable — this is non-fatal
-        // console.warn('Font injection skipped (cross-origin or blocked).', err);
-      }
-    }
+    window.addEventListener("resize", fixViewport);
+    window.addEventListener("load", fixViewport);
+    setInterval(fixViewport, 2000); // keep it fresh in kiosk mode
 
+    // Flip logic
     function swapFrames() {
-      clearTimeout(swapTimer);
-
       if (showingA) {
-        // show banner
-        // force reload banner so any dynamic content refreshes
-        frameB.src = 'Banner.html?t=' + Date.now();
-        frameB.classList.add('visible');
-        frameA.classList.remove('visible');
+        frameB.src = "Banner.html?t=" + Date.now();
+        frameB.classList.add("visible");
+        frameA.classList.remove("visible");
 
-        // give transition time then schedule next
         setTimeout(() => {
           showingA = false;
-          swapTimer = setTimeout(swapFrames, BANNER_MS);
-        }, FADE_MS);
+          setTimeout(swapFrames, bannerTime);
+        }, fadeDuration);
       } else {
-        // show telesales (reload to get new data)
-        frameA.src = 'Beibora_Telesales_Statistics.html?t=' + Date.now();
-        frameA.classList.add('visible');
-        frameB.classList.remove('visible');
+        frameA.src = "Beibora_Telesales_Statistics.html?t=" + Date.now();
+        frameA.classList.add("visible");
+        frameB.classList.remove("visible");
 
         setTimeout(() => {
           showingA = true;
-          swapTimer = setTimeout(swapFrames, TELESALES_MS);
-        }, FADE_MS);
+          setTimeout(swapFrames, telesalesTime);
+        }, fadeDuration);
       }
     }
 
-    // call often early — kiosk UIs may resize after a short delay (navbars, overlays, etc.)
-    updateViewportVars();
-    tryInjectFontSizing(); // attempt once
+    // Enlarge telesales page fonts for distant readability
+    function enlargeFont() {
+      try {
+        const doc = frameA.contentDocument || frameA.contentWindow.document;
+        if (!doc) return;
+        if (doc.getElementById("fontBoost")) return; // prevent duplicates
 
-    // repeated calls to handle late UI changes on TV / kiosk
-    window.addEventListener('load', () => {
-      updateViewportVars();
-      setTimeout(updateViewportVars, 300);   // after small reflow
-      setTimeout(updateViewportVars, 1000);  // after possible UI hide/show
-      // On some devices we need a repeated interval to catch changes
-      setInterval(updateViewportVars, 2000);
-      // try injecting fonts a few times (in case iframe replaces DOM on load)
-      setTimeout(tryInjectFontSizing, 500);
-      setInterval(tryInjectFontSizing, 2000);
-    });
+        const style = doc.createElement("style");
+        style.id = "fontBoost";
+        style.textContent = `
+          html, body { height: 100%; margin: 0; padding: 0; }
+          body, h1, h2, h3, h4, h5, h6, p, td, th, div, span {
+            font-size: clamp(22px, 2.5vw + 1vh, 60px) !important;
+            line-height: 1.1 !important;
+          }
+          table { width: 100% !important; }
+        `;
+        doc.head.appendChild(style);
+      } catch (err) {
+        console.warn("Font resize skipped (cross-origin):", err);
+      }
+    }
 
-    window.addEventListener('resize', () => {
-      updateViewportVars();
-      tryInjectFontSizing();
-    });
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => { updateViewportVars(); tryInjectFontSizing(); }, 250);
-    });
+    // Keep trying font injection every 5s to handle reloads
+    setInterval(enlargeFont, 5000);
 
-    // start rotation after initial telesales duration (so the page has had time to render)
-    swapTimer = setTimeout(swapFrames, TELESALES_MS);
-
-    // helpful: when an iframe load completes, try font injection (same-origin only)
-    frameA.addEventListener('load', tryInjectFontSizing);
+    // Start after first telesales display
+    setTimeout(swapFrames, telesalesTime);
   </script>
+
 </body>
 </html>
