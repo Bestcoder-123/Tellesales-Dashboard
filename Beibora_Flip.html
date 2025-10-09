@@ -35,7 +35,10 @@
 </head>
 <body>
 
+  <!-- Main telesales dashboard -->
   <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible"></iframe>
+
+  <!-- Banner / announcement screen -->
   <iframe id="frameB" src="Banner.html"></iframe>
 
   <script>
@@ -47,7 +50,6 @@
     const fadeDuration = 1500;
     let showingA = true;
 
-    // Adjust fullscreen on TV
     function adjustSize() {
       [frameA, frameB].forEach(f => {
         f.style.width  = window.innerWidth  + "px";
@@ -58,13 +60,12 @@
     window.addEventListener("load", adjustSize);
     setInterval(adjustSize, 2000);
 
-    // Swap logic
+    // Flip logic
     function swapFrames() {
       if (showingA) {
         frameB.src = "Banner.html?t=" + Date.now();
         frameB.classList.add("visible");
         frameA.classList.remove("visible");
-
         setTimeout(() => {
           showingA = false;
           setTimeout(swapFrames, bannerTime);
@@ -73,7 +74,6 @@
         frameA.src = "Beibora_Telesales_Statistics.html?t=" + Date.now();
         frameA.classList.add("visible");
         frameB.classList.remove("visible");
-
         setTimeout(() => {
           showingA = true;
           setTimeout(swapFrames, telesalesTime);
@@ -81,52 +81,14 @@
       }
     }
 
-    // 🔹 Font & table enlargement + smooth scroll
-    function enhanceDisplay() {
+    // 🔹 Tell Beibora page to start scrolling (works when same folder / same origin)
+    frameA.addEventListener("load", () => {
       try {
-        const doc = frameA.contentDocument || frameA.contentWindow.document;
-        if (!doc) return;
-
-        if (!doc.getElementById("enhancer")) {
-          const style = doc.createElement("style");
-          style.id = "enhancer";
-          style.textContent = `
-            html, body {
-              font-size: clamp(22px, 2.8vw + 0.5vh, 64px) !important;
-              line-height: 1.3 !important;
-              overflow-y: auto !important;
-              scroll-behavior: smooth;
-            }
-            table, td, th {
-              font-size: inherit !important;
-              line-height: 1.3em !important;
-            }
-            table.dataTable tbody tr {
-              height: 4.2em !important; /* increase row height a bit */
-            }
-          `;
-          doc.head.appendChild(style);
-        }
-
-        // Auto-scroll effect
-        const body = doc.querySelector("body");
-        if (body && !body.dataset.autoScrollStarted) {
-          body.dataset.autoScrollStarted = "true";
-          let scrollDir = 1;
-          setInterval(() => {
-            const maxScroll = body.scrollHeight - body.clientHeight;
-            if (body.scrollTop >= maxScroll - 5) scrollDir = -1;
-            else if (body.scrollTop <= 0) scrollDir = 1;
-            body.scrollTop += scrollDir * 1; // adjust 1–3 for speed
-          }, 100); // scroll interval (ms)
-        }
-      } catch (err) {
-        console.warn("Enhancement skipped (cross-origin):", err);
+        frameA.contentWindow.postMessage("startScroll", "*");
+      } catch (e) {
+        console.warn("Scroll message skipped:", e);
       }
-    }
-
-    // Apply periodically (for reloads)
-    setInterval(enhanceDisplay, 3000);
+    });
 
     // Start rotation
     setTimeout(swapFrames, telesalesTime);
