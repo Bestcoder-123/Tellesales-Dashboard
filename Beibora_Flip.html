@@ -11,7 +11,7 @@
       width: 100%;
       height: 100%;
       background: black;
-      overflow: hidden;          /* no parent scrollbars */
+      overflow: hidden;  /* keep parent fixed */
     }
 
     iframe {
@@ -25,7 +25,7 @@
       opacity: 0;
       transition: opacity 1.5s ease-in-out;
       display: block;
-      pointer-events: auto;      /* let child page handle its own input/scroll */
+      pointer-events: auto; /* allow iframe content control */
     }
 
     iframe.visible {
@@ -35,10 +35,7 @@
 </head>
 <body>
 
-  <!-- main telesales dashboard -->
   <iframe id="frameA" src="Beibora_Telesales_Statistics.html" class="visible"></iframe>
-
-  <!-- banner / second screen -->
   <iframe id="frameB" src="Banner.html"></iframe>
 
   <script>
@@ -50,7 +47,7 @@
     const fadeDuration = 1500;
     let showingA = true;
 
-    // keep fullscreen sizing accurate for Smart TVs / kiosk browsers
+    // Adjust fullscreen on Smart TV
     function adjustSize() {
       [frameA, frameB].forEach(f => {
         f.style.width  = window.innerWidth  + "px";
@@ -61,7 +58,7 @@
     window.addEventListener("load", adjustSize);
     setInterval(adjustSize, 2000);
 
-    // simple flip logic – only changes visibility and reloads banner/telesales
+    // Flip logic
     function swapFrames() {
       if (showingA) {
         frameB.src = "Banner.html?t=" + Date.now();
@@ -73,7 +70,6 @@
           setTimeout(swapFrames, bannerTime);
         }, fadeDuration);
       } else {
-        // reload telesales so its data refreshes; all internal scripts rerun
         frameA.src = "Beibora_Telesales_Statistics.html?t=" + Date.now();
         frameA.classList.add("visible");
         frameB.classList.remove("visible");
@@ -85,7 +81,36 @@
       }
     }
 
-    // start rotation
+    // 🔹 Enlarge font slightly inside telesales iframe
+    function enlargeFont() {
+      try {
+        const doc = frameA.contentDocument || frameA.contentWindow.document;
+        if (!doc) return;
+
+        // avoid adding duplicate style tags
+        if (doc.getElementById("fontBoost")) return;
+
+        const style = doc.createElement("style");
+        style.id = "fontBoost";
+        style.textContent = `
+          html, body {
+            font-size: 1.3em !important; /* ⬆ increase base font size */
+            line-height: 1.2 !important;
+          }
+          h1, h2, h3, p, td, th, span, div {
+            font-size: 1.3em !important;
+          }
+        `;
+        doc.head.appendChild(style);
+      } catch (err) {
+        console.warn("Font resize skipped (cross-origin):", err);
+      }
+    }
+
+    // Apply font boost regularly (to catch reloads)
+    setInterval(enlargeFont, 4000);
+
+    // Start rotation
     setTimeout(swapFrames, telesalesTime);
   </script>
 
