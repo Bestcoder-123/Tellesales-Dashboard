@@ -66,23 +66,192 @@
       border-bottom: 2px solid #00ffcc;
       z-index: 2;
     }
+
+    /* ========== Modal styles for password ========== */
+    .pw-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .pw-modal {
+      background: linear-gradient(180deg, #041616 0%, #003735 100%);
+      padding: 24px;
+      border-radius: 12px;
+      width: 380px;
+      max-width: calc(100% - 32px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+      color: #00ffd1;
+      text-align: center;
+      border: 2px solid rgba(0,255,204,0.08);
+      font-family: Arial, sans-serif;
+    }
+
+    .pw-modal h2 {
+      margin: 0 0 12px 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.6px;
+    }
+
+    .pw-modal p {
+      margin: 0 0 16px 0;
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .pw-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(0,255,204,0.12);
+      background: rgba(255,255,255,0.02);
+      color: #e6fff9;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .pw-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .pw-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: rgba(0,255,204,0.08);
+      color: #00ffd1;
+      transition: transform .08s ease;
+    }
+
+    .pw-btn:active { transform: translateY(1px); }
+    .pw-btn.cancel { background: rgba(255,80,80,0.08); color: #ff8a8a; }
+
+    .pw-error {
+      color: #ff8080;
+      font-size: 0.9rem;
+      height: 1.1rem;
+      margin-top: 8px;
+      opacity: 0.95;
+    }
   </style>
 
-  <!-- 🔒 Password Protection (Resets when Chrome/Fully restarts) -->
+  <!-- 🔒 Password Protection (Resets when Chrome/Fully restarts)
+       Replaced browser prompt with a modal that uses a password input -->
   <script>
+    // NOTE: This is client-side protection only (like before).
+    // For real security, authenticate on a server.
     const correctPassword = "Beibora@2025"; // change password here
-    const authenticated = sessionStorage.getItem("auth_beibora");
+    const storageKey = "auth_beibora";
 
-    if (!authenticated) {
-      const password = prompt("Enter password to access Beibora Dashboard:");
-      if (password !== correctPassword) {
-        alert("Incorrect password. Access denied.");
-        window.location.href = "about:blank";
-        throw new Error("Unauthorized access");
-      } else {
-        sessionStorage.setItem("auth_beibora", "true"); // stored until browser closes
+    function createPasswordModal(onSuccess, onCancel) {
+      // Overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'pw-modal-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+
+      // Modal box
+      const modal = document.createElement('div');
+      modal.className = 'pw-modal';
+
+      modal.innerHTML = `
+        <h2>Enter password to access Beibora Dashboard</h2>
+        <p>Type your password below — characters are hidden for privacy.</p>
+        <input id="pwInput" class="pw-input" type="password" autocomplete="current-password" placeholder="Password" />
+        <div class="pw-actions">
+          <button id="pwSubmit" class="pw-btn">Enter</button>
+          <button id="pwCancel" class="pw-btn cancel">Cancel</button>
+        </div>
+        <div id="pwError" class="pw-error" aria-live="polite"></div>
+      `;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      const input = document.getElementById('pwInput');
+      const submit = document.getElementById('pwSubmit');
+      const cancel = document.getElementById('pwCancel');
+      const error = document.getElementById('pwError');
+
+      // Focus the input
+      setTimeout(() => input.focus(), 50);
+
+      function cleanUp() {
+        // Remove modal from DOM
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
       }
+
+      function handleSuccess() {
+        cleanUp();
+        onSuccess && onSuccess();
+      }
+
+      function handleCancel() {
+        cleanUp();
+        onCancel && onCancel();
+      }
+
+      submit.addEventListener('click', () => {
+        const val = input.value || '';
+        if (val === correctPassword) {
+          sessionStorage.setItem(storageKey, 'true');
+          handleSuccess();
+        } else {
+          // Simple error feedback
+          error.textContent = 'Incorrect password. Try again.';
+          input.value = '';
+          input.focus();
+        }
+      });
+
+      cancel.addEventListener('click', handleCancel);
+
+      // Submit on Enter, cancel on Escape
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          submit.click();
+        } else if (e.key === 'Escape') {
+          cancel.click();
+        }
+      });
+
+      // Prevent tabbing out of the modal (basic trap)
+      // Keep focus inside while modal exists
+      document.addEventListener('focus', function trapFocus(e) {
+        if (!overlay.contains(e.target)) {
+          e.stopPropagation();
+          input.focus();
+        }
+      }, true);
     }
+
+    // Check authentication and show modal if needed
+    (function checkAuth() {
+      const authenticated = sessionStorage.getItem(storageKey);
+      if (!authenticated) {
+        // Show modal and deny access if canceled or incorrect
+        createPasswordModal(
+          () => { /* success: do nothing, page continues loading */ },
+          () => {
+            alert("Access denied.");
+            window.location.href = "about:blank";
+            // throw to stop any further script execution if needed
+            throw new Error("Unauthorized access");
+          }
+        );
+      }
+    })();
   </script>
 </head>
 
