@@ -97,14 +97,21 @@
     // Update banner header clock live
     function updateHeader() {
       const now = new Date();
-      const formattedTime = now.toLocaleString('en-GB', {
+      const formattedDate = now.toLocaleString('en-GB', {
         day: '2-digit',
-        month: 'short',
+        month: 'long', // Full month name
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
+
+      // Convert month name to uppercase
+      const formattedTime = formattedDate.replace(
+        /\b([A-Za-z]+)\b/,
+        (match) => match.toUpperCase()
+      );
+
       overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
@@ -163,6 +170,3 @@
 
 </body>
 </html>
-
-
-
