@@ -57,7 +57,25 @@
       z-index: 3;
     }
   </style>
+
+  <!-- 🔒 Simple Password Protection -->
+  <script>
+    const correctPassword = "Pharma@2025"; // <-- change password here
+    const entered = sessionStorage.getItem("authenticated_pharma");
+
+    if (!entered) {
+      const password = prompt("Enter password to access Pharma Dashboard:");
+      if (password !== correctPassword) {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "about:blank"; // redirect away
+        throw new Error("Unauthorized access"); // stop script
+      } else {
+        sessionStorage.setItem("authenticated_pharma", "true");
+      }
+    }
+  </script>
 </head>
+
 <body>
 
   <!-- Pharma dashboard -->
@@ -87,14 +105,13 @@
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
         day: '2-digit',
-        month: 'long', // Full month name
+        month: 'long',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
 
-      // Make the month uppercase
       const formattedTime = formattedDate.replace(
         /\b([A-Za-z]+)\b/,
         (match) => match.toUpperCase()
@@ -113,48 +130,43 @@
 
     function switchScreens() {
       if (showingBanner) {
-        // Back to Pharma
         bannerScreen.classList.remove("active");
         pharmaScreen.classList.add("active");
         showingBanner = false;
-        localStorage.setItem('lastFlip', Date.now());
+        localStorage.setItem('lastFlip_pharma', Date.now());
         setTimeout(switchScreens, pharmaDuration);
       } else {
-        // To Banner
         pharmaScreen.classList.remove("active");
         bannerScreen.classList.add("active");
         showingBanner = true;
-        localStorage.setItem('lastFlip', Date.now());
+        localStorage.setItem('lastFlip_pharma', Date.now());
         setTimeout(switchScreens, bannerDuration);
       }
     }
 
     // --- Persist current phase across refresh ---
-    const lastFlip = localStorage.getItem('lastFlip');
+    const lastFlip = localStorage.getItem('lastFlip_pharma');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
       const totalCycle = pharmaDuration + bannerDuration;
       const modTime = elapsed % totalCycle;
 
       if (modTime < pharmaDuration) {
-        // Still in Pharma
         pharmaScreen.classList.add("active");
         bannerScreen.classList.remove("active");
         showingBanner = false;
         setTimeout(switchScreens, pharmaDuration - modTime);
       } else {
-        // Show Banner
         pharmaScreen.classList.remove("active");
         bannerScreen.classList.add("active");
         showingBanner = true;
         setTimeout(switchScreens, totalCycle - modTime);
       }
     } else {
-      // First load
       pharmaScreen.classList.add("active");
       bannerScreen.classList.remove("active");
       showingBanner = false;
-      localStorage.setItem('lastFlip', Date.now());
+      localStorage.setItem('lastFlip_pharma', Date.now());
       setTimeout(switchScreens, pharmaDuration);
     }
   </script>
