@@ -23,9 +23,9 @@
       left: 0;
       opacity: 0;
       z-index: 0;
-      transition: opacity 1s ease-in-out, transform 5s ease-in-out;
+      transition: opacity 1s ease-in-out, transform 8s ease-in-out;
 
-      /* ✅ Force GPU acceleration for Fully Kiosk */
+      /* ✅ GPU acceleration for Fully Kiosk */
       transform-style: preserve-3d;
       backface-visibility: hidden;
       perspective: 1000px;
@@ -41,8 +41,7 @@
       z-index: 1;
     }
 
-    /* --- Updated Transition: flip rotation --- */
-    .flip-180 { transform: rotateY(180deg); }
+    /* --- 360° rotation animation --- */
     .flip-360 { transform: rotateY(360deg); }
 
     /* Overlay for banner */
@@ -117,15 +116,14 @@
     let rotationTimer;
     let clockInterval;
 
-    function loadDashboard(i, flipType = 'flip-180') {
+    function loadDashboard(i) {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      frame.className = flipType;
-      void frame.offsetWidth; // force reflow
+      frame.className = "flip-360"; // ✅ Always use 360° rotation
+      void frame.offsetWidth; // force reflow for animation
       frame.classList.add("active");
     }
 
     function startLiveClock() {
-      // clear existing clock
       clearInterval(clockInterval);
 
       function updateClock() {
@@ -138,12 +136,11 @@
           minute: '2-digit',
           second: '2-digit'
         }).replace(',', '');
-
         overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
       }
 
-      updateClock(); // run immediately
-      clockInterval = setInterval(updateClock, 1000); // update every 1 second
+      updateClock();
+      clockInterval = setInterval(updateClock, 1000);
     }
 
     function rotateDashboard() {
@@ -159,30 +156,22 @@
       // Keep overlay for 10 seconds
       setTimeout(() => {
         overlay.style.opacity = 0;
-        clearInterval(clockInterval); // stop clock
+        clearInterval(clockInterval);
         setTimeout(() => {
           overlay.style.display = "none";
           index = (index + 1) % dashboards.length;
-
-          // Alternate flip types: 180 then 360
-          const flipType = (index % 2 === 0) ? 'flip-180' : 'flip-360';
-          loadDashboard(index, flipType);
-
-          // Schedule next rotation AFTER dashboard duration
+          loadDashboard(index);
           clearTimeout(rotationTimer);
           rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
-
         }, 1000);
       }, 10000);
     }
 
     // ✅ Always start with Pharma
     index = 0;
-    loadDashboard(index, 'flip-180');
+    loadDashboard(index);
     rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
   </script>
 
 </body>
 </html>
-
-
