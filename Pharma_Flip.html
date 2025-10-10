@@ -58,10 +58,10 @@
     }
   </style>
 
-  <!-- 🔒 Password Protection (Remembers until restart) -->
+  <!-- 🔒 Password Protection (Resets when browser closes) -->
   <script>
-    const correctPassword = "Pharma@2025"; // password
-    const authenticated = localStorage.getItem("auth_pharma");
+    const correctPassword = "Pharma@2025"; // change password here
+    const authenticated = sessionStorage.getItem("auth_pharma");
 
     if (!authenticated) {
       const password = prompt("Enter password to access Pharma Dashboard:");
@@ -70,7 +70,7 @@
         window.location.href = "about:blank";
         throw new Error("Unauthorized access");
       } else {
-        localStorage.setItem("auth_pharma", "true"); // store until kiosk restart
+        sessionStorage.setItem("auth_pharma", "true"); // valid until Chrome/Fully closes
       }
     }
   </script>
