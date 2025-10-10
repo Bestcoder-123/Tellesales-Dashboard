@@ -11,6 +11,7 @@
       overflow: hidden;
       background: black;
       font-family: Arial, sans-serif;
+      perspective: 1200px; /* enable 3D rotation depth */
     }
 
     .screen {
@@ -20,14 +21,16 @@
       top: 0;
       left: 0;
       opacity: 0;
-      transform: scale(1) rotateY(0deg);
-      transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+      transform: rotateY(180deg);
+      transform-origin: center;
+      transition: opacity 1.5s ease-in-out, transform 2s ease-in-out;
       background: black;
+      backface-visibility: hidden;
     }
 
     .active {
       opacity: 1;
-      transform: scale(1) rotateY(0deg);
+      transform: rotateY(0deg);
       z-index: 2;
     }
 
@@ -75,11 +78,11 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🧠 Load fresh content
+    // 🧠 Load fresh versions
     pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // ⏰ Live updating header time
+    // ⏰ Live updating clock
     function updateHeader() {
       const now = new Date();
       const formattedTime = now.toLocaleString('en-GB', {
@@ -96,9 +99,9 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip timing ---
-    const pharmaDuration = 300000; // 5 minutes
-    const bannerDuration = 15000;  // 15 seconds
+    // --- Flip Timing ---
+    const pharmaDuration = 60000; // 1 minute
+    const bannerDuration = 10000;  // 10 seconds
     let showingBanner = false;
 
     function switchScreens() {
@@ -119,7 +122,7 @@
       }
     }
 
-    // --- Persist current phase after refresh ---
+    // --- Persist current phase across refresh ---
     const lastFlip = localStorage.getItem('lastFlip');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
