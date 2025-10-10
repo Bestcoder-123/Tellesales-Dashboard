@@ -14,7 +14,7 @@
     }
 
     .flip-container {
-      perspective: 1500px; /* 3D depth */
+      perspective: 1500px;
       width: 100%;
       height: 100%;
       position: relative;
@@ -24,7 +24,7 @@
       width: 100%;
       height: 100%;
       transform-style: preserve-3d;
-      transition: transform 4s ease-in-out; /* smoother and slower rotation */
+      transition: transform 4s ease-in-out;
     }
 
     .flip {
@@ -48,6 +48,7 @@
       width: 100%;
       height: 100%;
       border: none;
+      background: black;
     }
 
     header {
@@ -67,10 +68,10 @@
     }
   </style>
 
-  <!-- 🔒 Password Protection (Remembers until restart) -->
+  <!-- 🔒 Password Protection (Resets when Chrome/Fully restarts) -->
   <script>
-    const correctPassword = "Beibora@2025"; // password
-    const authenticated = localStorage.getItem("auth_beibora");
+    const correctPassword = "Beibora@2025"; // change password here
+    const authenticated = sessionStorage.getItem("auth_beibora");
 
     if (!authenticated) {
       const password = prompt("Enter password to access Beibora Dashboard:");
@@ -79,7 +80,7 @@
         window.location.href = "about:blank";
         throw new Error("Unauthorized access");
       } else {
-        localStorage.setItem("auth_beibora", "true"); // store until kiosk restart
+        sessionStorage.setItem("auth_beibora", "true"); // stored until browser closes
       }
     }
   </script>
@@ -108,11 +109,11 @@
     const beiboraFrame = document.getElementById("beiboraFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // Always load fresh versions
+    // 🧠 Load fresh versions of dashboards
     beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // Update banner header clock live
+    // ⏰ Live updating banner header clock
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -145,19 +146,20 @@
       if (showingBanner) {
         flipper.classList.remove("flip");
         showingBanner = false;
-        localStorage.setItem('lastFlip', Date.now());
+        localStorage.setItem('lastFlip_beibora', Date.now());
         clearTimeout(flipTimer);
         flipTimer = setTimeout(flipCycle, beiboraDuration);
       } else {
         flipper.classList.add("flip");
         showingBanner = true;
-        localStorage.setItem('lastFlip', Date.now());
+        localStorage.setItem('lastFlip_beibora', Date.now());
         clearTimeout(flipTimer);
         flipTimer = setTimeout(flipCycle, bannerDuration);
       }
     }
 
-    const lastFlip = localStorage.getItem('lastFlip');
+    // --- Persist flip timing across refresh ---
+    const lastFlip = localStorage.getItem('lastFlip_beibora');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
       const totalCycle = beiboraDuration + bannerDuration;
@@ -173,7 +175,7 @@
         flipTimer = setTimeout(flipCycle, totalCycle - modTime);
       }
     } else {
-      localStorage.setItem('lastFlip', Date.now());
+      localStorage.setItem('lastFlip_beibora', Date.now());
       flipTimer = setTimeout(flipCycle, beiboraDuration);
     }
   </script>
