@@ -14,17 +14,19 @@
     }
 
     .flip-container {
-      perspective: 1000px;
+      perspective: 1200px;
       width: 100%;
       height: 100%;
       position: relative;
+      background: black;
     }
 
     .flipper {
       width: 100%;
       height: 100%;
       transform-style: preserve-3d;
-      transition: transform 1s ease-in-out;
+      transition: transform 2.5s ease-in-out; /* slower & smoother */
+      will-change: transform;
     }
 
     .flip {
@@ -36,8 +38,11 @@
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       top: 0;
       left: 0;
+      background: black; /* prevents black flash */
+      transform: translateZ(0); /* force GPU rendering */
     }
 
     .back {
@@ -48,6 +53,8 @@
       width: 100%;
       height: 100%;
       border: none;
+      background: black;
+      transform: translateZ(0);
     }
 
     header {
@@ -90,11 +97,11 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🧠 Always load latest versions (no cached data)
+    // 🧠 Load fresh data each time (bypass cache)
     pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // Function to update banner header time
+    // ⏰ Live clock update for header
     function updateHeader() {
       const now = new Date();
       const formattedTime = now.toLocaleString('en-GB', {
@@ -111,28 +118,30 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing (Persistent) ---
+    // --- Flip cycle configuration ---
     const pharmaDuration = 300000; // 5 minutes
     const bannerDuration = 15000;  // 15 seconds
     let showingBanner = false;
 
     function flipCycle() {
       if (showingBanner) {
-        // Switch to Pharma dashboard
+        // Switch back to Pharma dashboard
         flipper.classList.remove("flip");
         showingBanner = false;
         localStorage.setItem('lastFlip', Date.now());
         setTimeout(flipCycle, pharmaDuration);
       } else {
         // Switch to Banner
-        flipper.classList.add("flip");
+        setTimeout(() => { // small delay ensures smoother GPU transition
+          flipper.classList.add("flip");
+        }, 100);
         showingBanner = true;
         localStorage.setItem('lastFlip', Date.now());
         setTimeout(flipCycle, bannerDuration);
       }
     }
 
-    // Resume timing across refresh
+    // --- Maintain correct view after refresh ---
     const lastFlip = localStorage.getItem('lastFlip');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
@@ -152,6 +161,8 @@
       }
     } else {
       // First load: start with Pharma for 5 minutes
+      flipper.classList.remove("flip");
+      showingBanner = false;
       localStorage.setItem('lastFlip', Date.now());
       setTimeout(flipCycle, pharmaDuration);
     }
@@ -159,4 +170,3 @@
 
 </body>
 </html>
-
