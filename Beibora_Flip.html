@@ -14,7 +14,7 @@
     }
 
     .flip-container {
-      perspective: 1000px;
+      perspective: 1500px; /* 3D depth */
       width: 100%;
       height: 100%;
       position: relative;
@@ -24,7 +24,7 @@
       width: 100%;
       height: 100%;
       transform-style: preserve-3d;
-      transition: transform 1s ease-in-out;
+      transition: transform 2s ease-in-out; /* smoother and slower rotation */
     }
 
     .flip {
@@ -90,11 +90,11 @@
     const beiboraFrame = document.getElementById("beiboraFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🧠 Always load latest versions (no cached data)
+    // Always load fresh versions
     beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // Function to update banner header time
+    // Update banner header clock live
     function updateHeader() {
       const now = new Date();
       const formattedTime = now.toLocaleString('en-GB', {
@@ -108,31 +108,35 @@
       overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
+    // Start live clock
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing (Persistent) ---
+    // --- Flip Timing ---
     const beiboraDuration = 180000; // 3 minutes
-    const bannerDuration = 10000;  // 10 seconds
+    const bannerDuration = 10000;   // 10 seconds
     let showingBanner = false;
+    let flipTimer;
 
     function flipCycle() {
       if (showingBanner) {
-        // Switch to Beibora dashboard
+        // Switch to Beibora
         flipper.classList.remove("flip");
         showingBanner = false;
         localStorage.setItem('lastFlip', Date.now());
-        setTimeout(flipCycle, beiboraDuration);
+        clearTimeout(flipTimer);
+        flipTimer = setTimeout(flipCycle, beiboraDuration);
       } else {
         // Switch to Banner
         flipper.classList.add("flip");
         showingBanner = true;
         localStorage.setItem('lastFlip', Date.now());
-        setTimeout(flipCycle, bannerDuration);
+        clearTimeout(flipTimer);
+        flipTimer = setTimeout(flipCycle, bannerDuration);
       }
     }
 
-    // Resume timing across refresh
+    // --- Restore phase after refresh ---
     const lastFlip = localStorage.getItem('lastFlip');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
@@ -140,23 +144,22 @@
       const modTime = elapsed % totalCycle;
 
       if (modTime < beiboraDuration) {
-        // Still in Beibora phase
+        // Beibora phase
         flipper.classList.remove("flip");
         showingBanner = false;
-        setTimeout(flipCycle, beiboraDuration - modTime);
+        flipTimer = setTimeout(flipCycle, beiboraDuration - modTime);
       } else {
-        // Should be showing Banner
+        // Banner phase
         flipper.classList.add("flip");
         showingBanner = true;
-        setTimeout(flipCycle, totalCycle - modTime);
+        flipTimer = setTimeout(flipCycle, totalCycle - modTime);
       }
     } else {
-      // First load: start with Beibora for 5 minutes
+      // First start: show Beibora first
       localStorage.setItem('lastFlip', Date.now());
-      setTimeout(flipCycle, beiboraDuration);
+      flipTimer = setTimeout(flipCycle, beiboraDuration);
     }
   </script>
 
 </body>
 </html>
-
