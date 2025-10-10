@@ -23,8 +23,6 @@
       left: 0;
       opacity: 0;
       z-index: 0;
-
-      /* Transition (slower rotation 5s) */
       transition: opacity 1s ease-in-out, transform 5s ease-in-out;
 
       /* ✅ Force GPU acceleration for Fully Kiosk */
@@ -117,30 +115,42 @@
     const overlay = document.getElementById("imageOverlay");
     const overlayTitle = document.getElementById("overlayTitle");
     let rotationTimer;
+    let clockInterval;
 
     function loadDashboard(i, flipType = 'flip-180') {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-
-      frame.className = flipType; // Apply rotation type
+      frame.className = flipType;
       void frame.offsetWidth; // force reflow
       frame.classList.add("active");
+    }
+
+    function startLiveClock() {
+      // clear existing clock
+      clearInterval(clockInterval);
+
+      function updateClock() {
+        const now = new Date();
+        const formattedTime = now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(',', '');
+
+        overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+      }
+
+      updateClock(); // run immediately
+      clockInterval = setInterval(updateClock, 1000); // update every 1 second
     }
 
     function rotateDashboard() {
       frame.classList.remove("active");
 
-      // Update header with current time
-      const now = new Date();
-      const formattedTime = now.toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      }).replace(',', '');
-      
-      overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+      // Start live clock
+      startLiveClock();
 
       // Show overlay banner
       overlay.style.display = "flex";
@@ -149,13 +159,13 @@
       // Keep overlay for 10 seconds
       setTimeout(() => {
         overlay.style.opacity = 0;
+        clearInterval(clockInterval); // stop clock
         setTimeout(() => {
           overlay.style.display = "none";
           index = (index + 1) % dashboards.length;
 
           // Alternate flip types: 180 then 360
           const flipType = (index % 2 === 0) ? 'flip-180' : 'flip-360';
-
           loadDashboard(index, flipType);
 
           // Schedule next rotation AFTER dashboard duration
@@ -166,7 +176,7 @@
       }, 10000);
     }
 
-    // ✅ Always start with Pharma, even after refresh
+    // ✅ Always start with Pharma
     index = 0;
     loadDashboard(index, 'flip-180');
     rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
@@ -174,3 +184,4 @@
 
 </body>
 </html>
+
