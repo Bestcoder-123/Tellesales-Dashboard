@@ -25,12 +25,14 @@
       transform: rotateY(180deg);
       transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
       backface-visibility: hidden;
+      display: none; /* 🔒 Hidden by default */
     }
 
     .flippable.active {
       opacity: 1;
       transform: rotateY(0deg);
       z-index: 2;
+      display: block;
     }
 
     iframe {
@@ -83,7 +85,7 @@
       to { transform: scale(1.05); }
     }
 
-    /* 🔐 Secure password overlay styling */
+    /* 🔐 Secure password overlay */
     #passwordOverlay {
       position: fixed;
       top: 0;
@@ -129,122 +131,123 @@
     }
   </style>
 
-  <!-- 🔒 Hidden Password Input (Session-based Authentication) -->
   <script>
     const correctPassword = "PharmaBeibora@2025";
     const authenticated = sessionStorage.getItem("auth_pharma_beibora");
 
-    if (!authenticated) {
-      document.write(`
-        <div id="passwordOverlay">
-          <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
-          <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
-          <button onclick="verifyPassword()">Unlock</button>
-        </div>
-      `);
+    // Show password overlay if not authenticated
+    window.addEventListener("DOMContentLoaded", () => {
+      if (!authenticated) {
+        document.body.innerHTML = `
+          <div id="passwordOverlay">
+            <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
+            <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
+            <button onclick="verifyPassword()">Unlock</button>
+          </div>
+        `;
+      } else {
+        initializeDashboard();
+      }
+    });
 
-      function verifyPassword() {
-        const password = document.getElementById("passwordInput").value;
-        if (password === correctPassword) {
-          sessionStorage.setItem("auth_pharma_beibora", "true");
-          document.getElementById("passwordOverlay").remove();
+    // Password check
+    function verifyPassword() {
+      const password = document.getElementById("passwordInput").value;
+      if (password === correctPassword) {
+        sessionStorage.setItem("auth_pharma_beibora", "true");
+        document.getElementById("passwordOverlay").remove();
+        initializeDashboard();
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "about:blank";
+      }
+    }
+
+    // Initialize and show dashboard after login
+    function initializeDashboard() {
+      document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
+
+      const dashboards = [
+        { url: "Pharma_Telesales_Statistics.html", duration: 120000 },
+        { url: "Beibora_Telesales_Statistics.html", duration: 60000 }
+      ];
+
+      const frame = document.getElementById("dashboardFrame");
+      const overlay = document.getElementById("imageOverlay");
+      const overlayTitle = document.getElementById("overlayTitle");
+
+      let index = 0;
+      let showingBanner = false;
+      let rotationTimer;
+      let timeUpdater;
+
+      function getFormattedTime() {
+        const now = new Date();
+        return now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(',', '');
+      }
+
+      function startLiveClock() {
+        if (timeUpdater) clearInterval(timeUpdater);
+        timeUpdater = setInterval(() => {
+          overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+        }, 1000);
+      }
+
+      function loadDashboard(i) {
+        frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+      }
+
+      function flipTransition(showBannerNext) {
+        frame.classList.remove("active");
+        overlay.classList.remove("active");
+
+        setTimeout(() => {
+          if (showBannerNext) {
+            startLiveClock();
+            overlay.classList.add("active");
+          } else {
+            index = (index + 1) % dashboards.length;
+            loadDashboard(index);
+            frame.classList.add("active");
+          }
+        }, 1000);
+      }
+
+      function rotate() {
+        if (!showingBanner) {
+          flipTransition(true);
+          showingBanner = true;
+          clearTimeout(rotationTimer);
+          rotationTimer = setTimeout(rotate, 10000);
         } else {
-          alert("Incorrect password. Access denied.");
-          window.location.href = "about:blank";
+          flipTransition(false);
+          showingBanner = false;
+          clearTimeout(rotationTimer);
+          rotationTimer = setTimeout(rotate, dashboards[index].duration);
         }
       }
+
+      // Start
+      loadDashboard(index);
+      frame.classList.add("active");
+      rotationTimer = setTimeout(rotate, dashboards[index].duration);
     }
   </script>
 </head>
-<body>
 
-  <!-- Pharma / Beibora dashboard container -->
+<body>
   <iframe id="dashboardFrame" class="flippable"></iframe>
 
-  <!-- Logo and title banner -->
   <div id="imageOverlay" class="flippable">
     <img src="https://bestcoder-123.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
     <header id="overlayTitle"></header>
   </div>
-
-  <script>
-    const dashboards = [
-      { url: "Pharma_Telesales_Statistics.html", duration: 120000 }, // 2 mins
-      { url: "Beibora_Telesales_Statistics.html", duration: 60000 }  // 1 min
-    ];
-
-    const frame = document.getElementById("dashboardFrame");
-    const overlay = document.getElementById("imageOverlay");
-    const overlayTitle = document.getElementById("overlayTitle");
-
-    let index = 0;
-    let showingBanner = false;
-    let rotationTimer;
-    let timeUpdater;
-
-    // Format time display
-    function getFormattedTime() {
-      const now = new Date();
-      return now.toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      }).replace(',', '');
-    }
-
-    // Update banner clock live
-    function startLiveClock() {
-      if (timeUpdater) clearInterval(timeUpdater);
-      timeUpdater = setInterval(() => {
-        overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
-      }, 1000);
-    }
-
-    // Load dashboard
-    function loadDashboard(i) {
-      frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-    }
-
-    // Flip transition between dashboard and banner
-    function flipTransition(showBannerNext) {
-      frame.classList.remove("active");
-      overlay.classList.remove("active");
-
-      setTimeout(() => {
-        if (showBannerNext) {
-          startLiveClock();
-          overlay.classList.add("active");
-        } else {
-          index = (index + 1) % dashboards.length;
-          loadDashboard(index);
-          frame.classList.add("active");
-        }
-      }, 1000);
-    }
-
-    // Control rotation cycle
-    function rotate() {
-      if (!showingBanner) {
-        flipTransition(true);
-        showingBanner = true;
-        clearTimeout(rotationTimer);
-        rotationTimer = setTimeout(rotate, 10000); // Banner duration
-      } else {
-        flipTransition(false);
-        showingBanner = false;
-        clearTimeout(rotationTimer);
-        rotationTimer = setTimeout(rotate, dashboards[index].duration);
-      }
-    }
-
-    // Initialize
-    loadDashboard(index);
-    frame.classList.add("active");
-    rotationTimer = setTimeout(rotate, dashboards[index].duration);
-  </script>
-
 </body>
 </html>
