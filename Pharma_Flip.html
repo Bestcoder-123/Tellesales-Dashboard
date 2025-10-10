@@ -58,19 +58,19 @@
     }
   </style>
 
-  <!-- 🔒 Simple Password Protection -->
+  <!-- 🔒 Password Protection (Remembers until restart) -->
   <script>
-    const correctPassword = "Pharma@2025"; // <-- change password here
-    const entered = sessionStorage.getItem("authenticated_pharma");
+    const correctPassword = "Pharma@2025"; // password
+    const authenticated = localStorage.getItem("auth_pharma");
 
-    if (!entered) {
+    if (!authenticated) {
       const password = prompt("Enter password to access Pharma Dashboard:");
       if (password !== correctPassword) {
         alert("Incorrect password. Access denied.");
-        window.location.href = "about:blank"; // redirect away
-        throw new Error("Unauthorized access"); // stop script
+        window.location.href = "about:blank";
+        throw new Error("Unauthorized access");
       } else {
-        sessionStorage.setItem("authenticated_pharma", "true");
+        localStorage.setItem("auth_pharma", "true"); // store until kiosk restart
       }
     }
   </script>
