@@ -67,19 +67,19 @@
     }
   </style>
 
-  <!-- 🔒 Simple Password Protection -->
+  <!-- 🔒 Password Protection (Remembers until restart) -->
   <script>
-    const correctPassword = "Beibora@2025"; // <-- change this password as you like
-    const entered = sessionStorage.getItem("authenticated");
+    const correctPassword = "Beibora@2025"; // password
+    const authenticated = localStorage.getItem("auth_beibora");
 
-    if (!entered) {
-      const password = prompt("Enter password to access this dashboard:");
+    if (!authenticated) {
+      const password = prompt("Enter password to access Beibora Dashboard:");
       if (password !== correctPassword) {
         alert("Incorrect password. Access denied.");
-        window.location.href = "about:blank"; // Redirect away if wrong
-        throw new Error("Unauthorized access"); // Stop further JS execution
+        window.location.href = "about:blank";
+        throw new Error("Unauthorized access");
       } else {
-        sessionStorage.setItem("authenticated", "true"); // Allow until tab closed
+        localStorage.setItem("auth_beibora", "true"); // store until kiosk restart
       }
     }
   </script>
