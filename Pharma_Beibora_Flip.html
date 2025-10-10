@@ -11,46 +11,41 @@
       overflow: hidden;
       background: black;
       font-family: Arial, sans-serif;
-      perspective: 1500px; /* enables deeper 3D look */
+      perspective: 1500px; /* Adds depth for 3D rotation */
     }
 
-    /* Dashboard frame */
-    iframe {
-      width: 100%;
-      height: calc(100vh - 10px);
-      border: none;
+    /* Shared 3D flip base style */
+    .flippable {
       position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      z-index: 0;
-      transform-origin: center;
-      transform: rotateY(180deg); /* start fully flipped */
-      transition: opacity 2s ease-in-out, transform 4s ease-in-out;
-      backface-visibility: hidden;
-    }
-
-    iframe.active {
-      opacity: 1;
-      z-index: 1;
-      transform: rotateY(0deg); /* rotate into view */
-    }
-
-    /* Overlay for banner */
-    #imageOverlay {
-      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: black;
-      display: none;
+      opacity: 0;
+      transform-origin: center;
+      transform: rotateY(180deg);
+      transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
+      backface-visibility: hidden;
+    }
+
+    .flippable.active {
+      opacity: 1;
+      transform: rotateY(0deg);
+      z-index: 2;
+    }
+
+    iframe {
+      border: none;
+    }
+
+    /* Overlay (acts like a dashboard too) */
+    #imageOverlay {
+      display: flex;
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      z-index: 10;
-      opacity: 0;
-      transition: opacity 2s ease-in-out;
+      z-index: 1;
+      background: black;
       color: white;
     }
 
@@ -67,7 +62,7 @@
       font-weight: bold;
       color: #00ffcc;
       text-shadow: 1px 1px 4px black;
-      z-index: 2;
+      z-index: 3;
       border-bottom: 2px solid #00ffcc;
     }
 
@@ -79,12 +74,11 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      z-index: 1;
       opacity: 0.85;
+      z-index: 2;
       animation: slowZoom 20s ease-in-out infinite alternate;
     }
 
-    /* Background motion effect */
     @keyframes slowZoom {
       from { transform: scale(1); }
       to { transform: scale(1.05); }
@@ -93,29 +87,33 @@
 </head>
 <body>
 
-  <!-- Dashboard container -->
-  <iframe id="dashboardFrame"></iframe>
+  <!-- Pharma / Beibora dashboard container -->
+  <iframe id="dashboardFrame" class="flippable"></iframe>
 
-  <!-- Image + title overlay -->
-  <div id="imageOverlay">
+  <!-- Logo and title banner -->
+  <div id="imageOverlay" class="flippable">
     <img src="https://bestcoder-123.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
     <header id="overlayTitle"></header>
   </div>
 
   <script>
-    // Dashboard list
+    // Dashboards (Pharma & Beibora)
     const dashboards = [
       { url: "Pharma_Telesales_Statistics.html", duration: 60000 },
       { url: "Beibora_Telesales_Statistics.html", duration: 60000 }
     ];
 
-    let index = 0; // Start with Pharma
+    // Elements
     const frame = document.getElementById("dashboardFrame");
     const overlay = document.getElementById("imageOverlay");
     const overlayTitle = document.getElementById("overlayTitle");
-    let rotationTimer, timeUpdater;
 
-    // --- Time formatting ---
+    let index = 0; // Start with Pharma
+    let showingBanner = false;
+    let rotationTimer;
+    let timeUpdater;
+
+    // Format time nicely
     function getFormattedTime() {
       const now = new Date();
       return now.toLocaleString('en-GB', {
@@ -128,62 +126,65 @@
       }).replace(',', '');
     }
 
-    // --- Live clock on banner ---
+    // Update banner clock live
     function startLiveClock() {
       if (timeUpdater) clearInterval(timeUpdater);
       timeUpdater = setInterval(() => {
-        overlayTitle.textContent =
-          `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+        overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
       }, 1000);
     }
 
-    // --- Load specific dashboard ---
+    // Load dashboard
     function loadDashboard(i) {
-      overlay.style.display = "none";
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      frame.className = "";
-      void frame.offsetWidth;
-      frame.classList.add("active");
     }
 
-    // --- Show banner between dashboards ---
-    function showBanner(nextStepCallback) {
-      startLiveClock();
-      overlay.style.display = "flex";
-      requestAnimationFrame(() => { overlay.style.opacity = 1; });
-
-      // Banner stays for 10s
-      setTimeout(() => {
-        overlay.style.opacity = 0;
-        setTimeout(() => {
-          overlay.style.display = "none";
-          if (nextStepCallback) nextStepCallback();
-        }, 2000);
-      }, 10000);
-    }
-
-    // --- Rotation logic (Pharma → Banner → Beibora → Banner → Loop) ---
-    function rotateDashboard() {
+    // Flip between dashboard and banner
+    function flipTransition(showBannerNext) {
+      // Step 1: Remove active from both
       frame.classList.remove("active");
+      overlay.classList.remove("active");
 
-      // Determine next dashboard
-      const nextIndex = (index + 1) % dashboards.length;
-
-      // Step 1: show banner
-      showBanner(() => {
-        // Step 2: switch to next dashboard with rotation
-        index = nextIndex;
-        loadDashboard(index);
-
-        // Step 3: schedule next rotation
-        clearTimeout(rotationTimer);
-        rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
-      });
+      // Step 2: Wait a bit for rotation out
+      setTimeout(() => {
+        if (showBannerNext) {
+          // Show banner
+          startLiveClock();
+          overlay.classList.add("active");
+        } else {
+          // Load next dashboard and show it
+          index = (index + 1) % dashboards.length;
+          loadDashboard(index);
+          frame.classList.add("active");
+        }
+      }, 1000); // halfway through flip timing
     }
 
-    // Initialize
+    // Control the overall rotation flow
+    function rotate() {
+      if (!showingBanner) {
+        // From dashboard → banner
+        flipTransition(true);
+        showingBanner = true;
+
+        // Stay on banner for 10 seconds
+        clearTimeout(rotationTimer);
+        rotationTimer = setTimeout(rotate, 10000);
+      } else {
+        // From banner → next dashboard
+        flipTransition(false);
+        showingBanner = false;
+
+        // Stay on dashboard for 60 seconds
+        clearTimeout(rotationTimer);
+        rotationTimer = setTimeout(rotate, dashboards[index].duration);
+      }
+    }
+
+    // --- INITIALIZATION ---
     loadDashboard(index);
-    rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
+    frame.classList.add("active"); // Start with Pharma visible
+    rotationTimer = setTimeout(rotate, dashboards[index].duration);
   </script>
 
 </body>
