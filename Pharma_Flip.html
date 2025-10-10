@@ -11,7 +11,7 @@
       overflow: hidden;
       background: black;
       font-family: Arial, sans-serif;
-      perspective: 1200px;
+      perspective: 1200px; /* enable 3D rotation depth */
     }
 
     .screen {
@@ -26,16 +26,12 @@
       transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
       background: black;
       backface-visibility: hidden;
-      display: none; /* 🔒 Hidden until password success */
-      visibility: hidden; /* Prevent flash of content */
     }
 
     .active {
       opacity: 1;
       transform: rotateY(0deg);
       z-index: 2;
-      display: block;
-      visibility: visible;
     }
 
     iframe {
@@ -43,7 +39,6 @@
       height: 100%;
       border: none;
       background: black;
-      visibility: hidden; /* 🔒 Hide iframe until password OK */
     }
 
     header {
@@ -61,255 +56,120 @@
       border-bottom: 2px solid #00ffcc;
       z-index: 3;
     }
-
-    /* ===== Password Modal Styles ===== */
-    .pw-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.95);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .pw-modal {
-      background: linear-gradient(180deg, #041616 0%, #003735 100%);
-      padding: 24px;
-      border-radius: 12px;
-      width: 380px;
-      max-width: calc(100% - 32px);
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
-      color: #00ffd1;
-      text-align: center;
-      border: 2px solid rgba(0, 255, 204, 0.08);
-    }
-
-    .pw-modal h2 {
-      margin: 0 0 12px 0;
-      font-size: 1.1rem;
-      letter-spacing: 0.6px;
-    }
-
-    .pw-modal p {
-      margin: 0 0 16px 0;
-      font-size: 0.9rem;
-      opacity: 0.85;
-    }
-
-    .pw-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px 12px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid rgba(0, 255, 204, 0.12);
-      background: rgba(255, 255, 255, 0.02);
-      color: #e6fff9;
-      outline: none;
-      margin-bottom: 12px;
-    }
-
-    .pw-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    .pw-btn {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      background: rgba(0, 255, 204, 0.08);
-      color: #00ffd1;
-      transition: transform 0.08s ease;
-    }
-
-    .pw-btn:active { transform: translateY(1px); }
-    .pw-btn.cancel { background: rgba(255, 80, 80, 0.08); color: #ff8a8a; }
-
-    .pw-error {
-      color: #ff8080;
-      font-size: 0.9rem;
-      height: 1.1rem;
-      margin-top: 8px;
-      opacity: 0.95;
-    }
   </style>
 
+  <!-- 🔒 Password Protection (Remembers until restart) -->
   <script>
-    const correctPassword = "Pharma@2025";
-    const storageKey = "auth_pharma";
+    const correctPassword = "Pharma@2025"; // password
+    const authenticated = localStorage.getItem("auth_pharma");
 
-    function createPasswordModal(onSuccess, onCancel) {
-      const overlay = document.createElement("div");
-      overlay.className = "pw-modal-overlay";
-      overlay.innerHTML = `
-        <div class="pw-modal">
-          <h2>Enter password to access Pharma Dashboard</h2>
-          <p>Your input is hidden for privacy.</p>
-          <input id="pwInput" class="pw-input" type="password" placeholder="Password" />
-          <div class="pw-actions">
-            <button id="pwSubmit" class="pw-btn">Enter</button>
-            <button id="pwCancel" class="pw-btn cancel">Cancel</button>
-          </div>
-          <div id="pwError" class="pw-error"></div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-
-      const input = overlay.querySelector("#pwInput");
-      const submit = overlay.querySelector("#pwSubmit");
-      const cancel = overlay.querySelector("#pwCancel");
-      const error = overlay.querySelector("#pwError");
-
-      input.focus();
-
-      submit.onclick = () => {
-        if (input.value === correctPassword) {
-          sessionStorage.setItem(storageKey, "true");
-          overlay.remove();
-          onSuccess && onSuccess();
-        } else {
-          error.textContent = "Incorrect password. Try again.";
-          input.value = "";
-          input.focus();
-        }
-      };
-
-      cancel.onclick = () => {
-        overlay.remove();
-        onCancel && onCancel();
-      };
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") submit.click();
-        if (e.key === "Escape") cancel.click();
-      });
-    }
-
-    async function authenticate() {
-      const authenticated = sessionStorage.getItem(storageKey);
-      if (!authenticated) {
-        return new Promise((resolve, reject) => {
-          createPasswordModal(resolve, () => {
-            alert("Access denied.");
-            window.location.href = "about:blank";
-            reject();
-          });
-        });
-      }
-      return Promise.resolve();
-    }
-
-    window.addEventListener("DOMContentLoaded", async () => {
-      await authenticate();
-      // ✅ Reveal dashboard only after successful authentication
-      document.querySelectorAll(".screen").forEach(el => {
-        el.style.display = "block";
-        el.style.visibility = "visible";
-      });
-      document.querySelectorAll("iframe").forEach(el => {
-        el.style.visibility = "visible";
-      });
-      initializeDashboard();
-    });
-
-    function initializeDashboard() {
-      const pharmaScreen = document.getElementById("pharmaScreen");
-      const bannerScreen = document.getElementById("bannerScreen");
-      const overlayTitle = document.getElementById("overlayTitle");
-      const pharmaFrame = document.getElementById("pharmaFrame");
-      const bannerFrame = document.getElementById("bannerFrame");
-
-      // ✅ Load only after auth success
-      pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
-      bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
-
-      function updateHeader() {
-        const now = new Date();
-        const formattedDate = now.toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        }).replace(",", "");
-
-        const formattedTime = formattedDate.replace(
-          /\b([A-Za-z]+)\b/,
-          (match) => match.toUpperCase()
-        );
-
-        overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
-      }
-
-      setInterval(updateHeader, 1000);
-      updateHeader();
-
-      const pharmaDuration = 120000; // 2 minutes
-      const bannerDuration = 10000;  // 10 seconds
-      let showingBanner = false;
-
-      function switchScreens() {
-        if (showingBanner) {
-          bannerScreen.classList.remove("active");
-          pharmaScreen.classList.add("active");
-          showingBanner = false;
-          localStorage.setItem("lastFlip_pharma", Date.now());
-          setTimeout(switchScreens, pharmaDuration);
-        } else {
-          pharmaScreen.classList.remove("active");
-          bannerScreen.classList.add("active");
-          showingBanner = true;
-          localStorage.setItem("lastFlip_pharma", Date.now());
-          setTimeout(switchScreens, bannerDuration);
-        }
-      }
-
-      const lastFlip = localStorage.getItem("lastFlip_pharma");
-      if (lastFlip) {
-        const elapsed = Date.now() - lastFlip;
-        const totalCycle = pharmaDuration + bannerDuration;
-        const modTime = elapsed % totalCycle;
-
-        if (modTime < pharmaDuration) {
-          pharmaScreen.classList.add("active");
-          bannerScreen.classList.remove("active");
-          showingBanner = false;
-          setTimeout(switchScreens, pharmaDuration - modTime);
-        } else {
-          pharmaScreen.classList.remove("active");
-          bannerScreen.classList.add("active");
-          showingBanner = true;
-          setTimeout(switchScreens, totalCycle - modTime);
-        }
+    if (!authenticated) {
+      const password = prompt("Enter password to access Pharma Dashboard:");
+      if (password !== correctPassword) {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "about:blank";
+        throw new Error("Unauthorized access");
       } else {
-        pharmaScreen.classList.add("active");
-        bannerScreen.classList.remove("active");
-        showingBanner = false;
-        localStorage.setItem("lastFlip_pharma", Date.now());
-        setTimeout(switchScreens, pharmaDuration);
+        localStorage.setItem("auth_pharma", "true"); // store until kiosk restart
       }
     }
   </script>
 </head>
 
 <body>
-  <!-- Pharma dashboard (hidden until auth) -->
-  <div class="screen" id="pharmaScreen">
+
+  <!-- Pharma dashboard -->
+  <div class="screen active" id="pharmaScreen">
     <iframe id="pharmaFrame"></iframe>
   </div>
 
-  <!-- Banner screen (hidden until auth) -->
+  <!-- Banner screen -->
   <div class="screen" id="bannerScreen">
     <iframe id="bannerFrame"></iframe>
     <header id="overlayTitle"></header>
   </div>
+
+  <script>
+    const pharmaScreen = document.getElementById("pharmaScreen");
+    const bannerScreen = document.getElementById("bannerScreen");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const pharmaFrame = document.getElementById("pharmaFrame");
+    const bannerFrame = document.getElementById("bannerFrame");
+
+    // 🧠 Load fresh versions
+    pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
+    bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
+
+    // ⏰ Live updating clock
+    function updateHeader() {
+      const now = new Date();
+      const formattedDate = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(',', '');
+
+      const formattedTime = formattedDate.replace(
+        /\b([A-Za-z]+)\b/,
+        (match) => match.toUpperCase()
+      );
+
+      overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+    }
+
+    setInterval(updateHeader, 1000);
+    updateHeader();
+
+    // --- Flip Timing ---
+    const pharmaDuration = 120000; // 2 minutes
+    const bannerDuration = 10000;  // 10 seconds
+    let showingBanner = false;
+
+    function switchScreens() {
+      if (showingBanner) {
+        bannerScreen.classList.remove("active");
+        pharmaScreen.classList.add("active");
+        showingBanner = false;
+        localStorage.setItem('lastFlip_pharma', Date.now());
+        setTimeout(switchScreens, pharmaDuration);
+      } else {
+        pharmaScreen.classList.remove("active");
+        bannerScreen.classList.add("active");
+        showingBanner = true;
+        localStorage.setItem('lastFlip_pharma', Date.now());
+        setTimeout(switchScreens, bannerDuration);
+      }
+    }
+
+    // --- Persist current phase across refresh ---
+    const lastFlip = localStorage.getItem('lastFlip_pharma');
+    if (lastFlip) {
+      const elapsed = Date.now() - lastFlip;
+      const totalCycle = pharmaDuration + bannerDuration;
+      const modTime = elapsed % totalCycle;
+
+      if (modTime < pharmaDuration) {
+        pharmaScreen.classList.add("active");
+        bannerScreen.classList.remove("active");
+        showingBanner = false;
+        setTimeout(switchScreens, pharmaDuration - modTime);
+      } else {
+        pharmaScreen.classList.remove("active");
+        bannerScreen.classList.add("active");
+        showingBanner = true;
+        setTimeout(switchScreens, totalCycle - modTime);
+      }
+    } else {
+      pharmaScreen.classList.add("active");
+      bannerScreen.classList.remove("active");
+      showingBanner = false;
+      localStorage.setItem('lastFlip_pharma', Date.now());
+      setTimeout(switchScreens, pharmaDuration);
+    }
+  </script>
+
 </body>
 </html>
-
