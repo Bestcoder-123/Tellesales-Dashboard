@@ -11,7 +11,7 @@
       overflow: hidden;
       background: black;
       font-family: Arial, sans-serif;
-      perspective: 1200px; /* enable 3D rotation depth */
+      perspective: 1200px;
     }
 
     .screen {
@@ -26,12 +26,14 @@
       transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
       background: black;
       backface-visibility: hidden;
+      display: none; /* 👈 hidden until password success */
     }
 
     .active {
       opacity: 1;
       transform: rotateY(0deg);
       z-index: 2;
+      display: block;
     }
 
     iframe {
@@ -61,7 +63,7 @@
     .pw-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -136,9 +138,9 @@
     }
   </style>
 
-  <!-- 🔒 Password Protection (Hidden input version) -->
+  <!-- 🔒 Password Protection -->
   <script>
-    const correctPassword = "Pharma@2025"; // change password here
+    const correctPassword = "Pharma@2025";
     const storageKey = "auth_pharma";
 
     function createPasswordModal(onSuccess, onCancel) {
@@ -158,10 +160,10 @@
       `;
       document.body.appendChild(overlay);
 
-      const input = document.getElementById("pwInput");
-      const submit = document.getElementById("pwSubmit");
-      const cancel = document.getElementById("pwCancel");
-      const error = document.getElementById("pwError");
+      const input = overlay.querySelector("#pwInput");
+      const submit = overlay.querySelector("#pwSubmit");
+      const cancel = overlay.querySelector("#pwCancel");
+      const error = overlay.querySelector("#pwError");
 
       input.focus();
 
@@ -188,19 +190,25 @@
       });
     }
 
-    (function checkAuth() {
+    async function authenticate() {
       const authenticated = sessionStorage.getItem(storageKey);
       if (!authenticated) {
-        createPasswordModal(
-          () => {},
-          () => {
+        return new Promise((resolve, reject) => {
+          createPasswordModal(resolve, () => {
             alert("Access denied.");
             window.location.href = "about:blank";
-            throw new Error("Unauthorized access");
-          }
-        );
+            reject();
+          });
+        });
       }
-    })();
+      return Promise.resolve();
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await authenticate();
+      // ✅ Reveal dashboard after successful authentication
+      document.querySelectorAll(".screen").forEach(el => el.style.display = "block");
+    });
   </script>
 </head>
 
@@ -224,11 +232,9 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🧠 Load fresh versions
     pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // ⏰ Live updating clock
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString("en-GB", {
@@ -251,7 +257,6 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing ---
     const pharmaDuration = 120000; // 2 minutes
     const bannerDuration = 10000;  // 10 seconds
     let showingBanner = false;
@@ -272,7 +277,6 @@
       }
     }
 
-    // --- Persist current phase across refresh ---
     const lastFlip = localStorage.getItem("lastFlip_pharma");
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
