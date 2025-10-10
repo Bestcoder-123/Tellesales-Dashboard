@@ -84,6 +84,23 @@
       to { transform: scale(1.05); }
     }
   </style>
+
+  <!-- 🔒 Simple Password Protection -->
+  <script>
+    const correctPassword = "PharmaBeibora@2025"; // <-- change this password
+    const entered = sessionStorage.getItem("authenticated_pb");
+
+    if (!entered) {
+      const password = prompt("Enter password to access Pharma/Beibora Dashboard:");
+      if (password !== correctPassword) {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "about:blank"; // redirect away
+        throw new Error("Unauthorized access"); // stop further JS
+      } else {
+        sessionStorage.setItem("authenticated_pb", "true"); // allow until tab closed
+      }
+    }
+  </script>
 </head>
 <body>
 
@@ -175,7 +192,7 @@
         flipTransition(false);
         showingBanner = false;
 
-        // Stay on dashboard for 60 seconds
+        // Stay on dashboard for its duration
         clearTimeout(rotationTimer);
         rotationTimer = setTimeout(rotate, dashboards[index].duration);
       }
@@ -189,5 +206,4 @@
 
 </body>
 </html>
-
 
