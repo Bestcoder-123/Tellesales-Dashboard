@@ -100,12 +100,13 @@
   </div>
 
   <script>
+    // Always start with Pharma first
     const dashboards = [
-      { url: "Beibora_Telesales_Statistics.html", duration: 5000 }, 
-      { url: "Pharma_Telesales_Statistics.html", duration: 5000 }
+      { url: "Pharma_Telesales_Statistics.html", duration: 5000 },
+      { url: "Beibora_Telesales_Statistics.html", duration: 5000 }
     ];
 
-    let index = 0;
+    let index = 0; // Start with Pharma
     const frame = document.getElementById("dashboardFrame");
     const overlay = document.getElementById("imageOverlay");
     const overlayTitle = document.getElementById("overlayTitle");
