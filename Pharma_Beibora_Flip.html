@@ -26,7 +26,7 @@
       z-index: 0;
       transform-origin: center right;
       transform: rotateY(90deg);
-      transition: opacity 2s ease-in-out, transform 5s ease-in-out; /* slower rotation */
+      transition: opacity 2s ease-in-out, transform 4s ease-in-out;
       backface-visibility: hidden;
     }
 
@@ -50,7 +50,7 @@
       justify-content: flex-start;
       z-index: 10;
       opacity: 0;
-      transition: opacity 1.5s ease-in-out; /* slower fade for banner */
+      transition: opacity 1.5s ease-in-out;
       color: white;
     }
 
@@ -81,6 +81,12 @@
       object-fit: cover;
       z-index: 1;
       opacity: 0.8;
+      animation: slowZoom 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes slowZoom {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
     }
   </style>
 </head>
@@ -96,9 +102,10 @@
   </div>
 
   <script>
+    // Define dashboards
     const dashboards = [
       { url: "Pharma_Telesales_Statistics.html", duration: 60000 }, // Show for 1 min
-      { url: "Beibora_Telesales_Statistics.html", duration: 60000 } // Show for 1 min
+      { url: "Beibora_Telesales_Statistics.html", duration: 60000 }  // Show for 1 min
     ];
 
     let index = 0; // Always start with Pharma
@@ -106,20 +113,12 @@
     const overlay = document.getElementById("imageOverlay");
     const overlayTitle = document.getElementById("overlayTitle");
     let rotationTimer;
+    let timeUpdater;
 
-    function loadDashboard(i) {
-      frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      frame.className = "";
-      void frame.offsetWidth; // Force reflow for animation
-      frame.classList.add("active");
-    }
-
-    function rotateDashboard() {
-      frame.classList.remove("active");
-
-      // Update header with current time
+    // Get formatted current time
+    function getFormattedTime() {
       const now = new Date();
-      const formattedTime = now.toLocaleString('en-GB', {
+      return now.toLocaleString('en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -127,38 +126,64 @@
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
-      
-      overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+    }
 
-      // Show overlay banner
+    // Start updating banner time live
+    function startLiveClock() {
+      if (timeUpdater) clearInterval(timeUpdater);
+      timeUpdater = setInterval(() => {
+        overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+      }, 1000);
+    }
+
+    // Load a specific dashboard
+    function loadDashboard(i) {
+      overlay.style.display = "none";
+      frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+      frame.className = "";
+      void frame.offsetWidth; // Reflow to reset animation
+      frame.classList.add("active");
+    }
+
+    // Show overlay banner between dashboards
+    function showBanner(nextStepCallback) {
+      startLiveClock();
       overlay.style.display = "flex";
       requestAnimationFrame(() => { overlay.style.opacity = 1; });
 
-      // Keep overlay for 10 seconds
+      // Keep banner for 10 seconds
       setTimeout(() => {
         overlay.style.opacity = 0;
         setTimeout(() => {
           overlay.style.display = "none";
-
-          // Move to next dashboard
-          index = (index + 1) % dashboards.length;
-
-          loadDashboard(index);
-
-          // Schedule next rotation AFTER dashboard duration
-          clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
-
-        }, 1500); // smoother fade-out delay
+          if (nextStepCallback) nextStepCallback();
+        }, 1500);
       }, 10000);
     }
 
-    // Initialize
+    // Full rotation logic (Pharma → Banner → Beibora → Banner → loop)
+    function rotateDashboard() {
+      frame.classList.remove("active");
+
+      // Determine current dashboard and next
+      const nextIndex = (index + 1) % dashboards.length;
+
+      // Step 1: show banner between dashboards
+      showBanner(() => {
+        // Step 2: switch to next dashboard
+        index = nextIndex;
+        loadDashboard(index);
+
+        // Step 3: schedule next flip (after dashboard duration)
+        clearTimeout(rotationTimer);
+        rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
+      });
+    }
+
+    // Initialize display
     loadDashboard(index);
     rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
   </script>
 
 </body>
 </html>
-
-
