@@ -23,9 +23,19 @@
       left: 0;
       opacity: 0;
       z-index: 0;
-      transition: opacity 1s ease-in-out, transform 5s ease-in-out; /* ⏳ Slower rotation */
+
+      /* Transition (slower rotation 5s) */
+      transition: opacity 1s ease-in-out, transform 5s ease-in-out;
+
+      /* ✅ Force GPU acceleration for Fully Kiosk */
       transform-style: preserve-3d;
       backface-visibility: hidden;
+      perspective: 1000px;
+      will-change: transform;
+      -webkit-transform-style: preserve-3d;
+      -webkit-backface-visibility: hidden;
+      -webkit-perspective: 1000;
+      -webkit-transform: translateZ(0);
     }
 
     iframe.active {
@@ -33,12 +43,9 @@
       z-index: 1;
     }
 
-    /* --- Flip animations --- */
+    /* --- Updated Transition: flip rotation --- */
     .flip-180 { transform: rotateY(180deg); }
-    .flip-180.active { transform: rotateY(0deg); }
-
     .flip-360 { transform: rotateY(360deg); }
-    .flip-360.active { transform: rotateY(0deg); }
 
     /* Overlay for banner */
     #imageOverlay {
@@ -58,7 +65,7 @@
       color: white;
     }
 
-    /* Banner header with styled background */
+    /* Banner header */
     #imageOverlay header {
       position: absolute;
       top: 0;
@@ -100,25 +107,22 @@
   </div>
 
   <script>
-    // Always start with Pharma first
     const dashboards = [
-      { url: "Pharma_Telesales_Statistics.html", duration: 5000 },
+      { url: "Pharma_Telesales_Statistics.html", duration: 5000 },  // ✅ Always start with Pharma
       { url: "Beibora_Telesales_Statistics.html", duration: 5000 }
     ];
 
-    let index = 0; // Start with Pharma
+    let index = 0;
     const frame = document.getElementById("dashboardFrame");
     const overlay = document.getElementById("imageOverlay");
     const overlayTitle = document.getElementById("overlayTitle");
     let rotationTimer;
 
-    function loadDashboard(i) {
+    function loadDashboard(i, flipType = 'flip-180') {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
 
-      // Alternate between 180° and 360° flip
-      const flipClass = (i % 2 === 0) ? "flip-180" : "flip-360";
-      frame.className = flipClass;
-      void frame.offsetWidth; // force reflow for animation
+      frame.className = flipType; // Apply rotation type
+      void frame.offsetWidth; // force reflow
       frame.classList.add("active");
     }
 
@@ -149,7 +153,10 @@
           overlay.style.display = "none";
           index = (index + 1) % dashboards.length;
 
-          loadDashboard(index);
+          // Alternate flip types: 180 then 360
+          const flipType = (index % 2 === 0) ? 'flip-180' : 'flip-360';
+
+          loadDashboard(index, flipType);
 
           // Schedule next rotation AFTER dashboard duration
           clearTimeout(rotationTimer);
@@ -159,11 +166,11 @@
       }, 10000);
     }
 
-    // Initialize
-    loadDashboard(index);
+    // ✅ Always start with Pharma, even after refresh
+    index = 0;
+    loadDashboard(index, 'flip-180');
     rotationTimer = setTimeout(rotateDashboard, dashboards[index].duration);
   </script>
 
 </body>
 </html>
-
