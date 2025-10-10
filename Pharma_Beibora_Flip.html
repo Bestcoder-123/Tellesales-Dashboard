@@ -33,9 +33,12 @@
       z-index: 1;
     }
 
-    /* --- Updated Transition: flip (180° rotation) --- */
-    .slide-up { transform: rotateY(180deg); }
-    .slide-up.active { transform: rotateY(0deg); }
+    /* --- Flip animations --- */
+    .flip-180 { transform: rotateY(180deg); }
+    .flip-180.active { transform: rotateY(0deg); }
+
+    .flip-360 { transform: rotateY(360deg); }
+    .flip-360.active { transform: rotateY(0deg); }
 
     /* Overlay for banner */
     #imageOverlay {
@@ -110,7 +113,10 @@
 
     function loadDashboard(i) {
       frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      frame.className = "slide-up";
+
+      // Alternate between 180° and 360° flip
+      const flipClass = (i % 2 === 0) ? "flip-180" : "flip-360";
+      frame.className = flipClass;
       void frame.offsetWidth; // force reflow for animation
       frame.classList.add("active");
     }
