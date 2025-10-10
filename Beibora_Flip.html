@@ -27,9 +27,7 @@
       transition: transform 4s ease-in-out;
     }
 
-    .flip {
-      transform: rotateY(180deg);
-    }
+    .flip { transform: rotateY(180deg); }
 
     .front, .back {
       position: absolute;
@@ -40,9 +38,7 @@
       left: 0;
     }
 
-    .back {
-      transform: rotateY(180deg);
-    }
+    .back { transform: rotateY(180deg); }
 
     iframe {
       width: 100%;
@@ -67,161 +63,114 @@
       z-index: 2;
     }
 
-    /* ================= Password Modal ================= */
-    .pw-modal-overlay {
+    /* Simulated prompt */
+    .prompt-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.75);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
     }
 
-    .pw-modal {
-      background: linear-gradient(180deg, #041616 0%, #003735 100%);
-      padding: 24px;
-      border-radius: 12px;
-      width: 380px;
-      max-width: calc(100% - 32px);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.8);
-      color: #00ffd1;
+    .prompt-box {
+      background: #111;
+      border: 2px solid #00ffcc;
+      border-radius: 8px;
+      padding: 20px;
+      width: 320px;
       text-align: center;
-      border: 2px solid rgba(0,255,204,0.1);
-      font-family: Arial, sans-serif;
+      color: #00ffcc;
+      box-shadow: 0 0 30px rgba(0,255,204,0.2);
     }
 
-    .pw-modal h2 {
-      margin: 0 0 12px 0;
-      font-size: 1.1rem;
-      letter-spacing: 0.6px;
+    .prompt-box p {
+      font-size: 1rem;
+      margin-bottom: 10px;
     }
 
-    .pw-modal p {
-      margin: 0 0 16px 0;
-      font-size: 0.9rem;
-      opacity: 0.85;
-    }
-
-    .pw-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px 12px;
+    .prompt-input {
+      width: 90%;
+      padding: 8px;
       font-size: 1rem;
       border-radius: 6px;
-      border: 1px solid rgba(0,255,204,0.12);
-      background: rgba(255,255,255,0.02);
-      color: #e6fff9;
+      border: 1px solid #00ffcc;
+      background: black;
+      color: #00ffcc;
+      text-align: center;
       outline: none;
-      margin-bottom: 12px;
     }
 
-    .pw-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    .pw-btn {
-      padding: 8px 14px;
-      border-radius: 8px;
+    .prompt-btn {
+      margin-top: 12px;
+      padding: 6px 14px;
       border: none;
+      background: #003333;
+      color: #00ffcc;
+      border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      background: rgba(0,255,204,0.08);
-      color: #00ffd1;
-      transition: transform .08s ease;
     }
 
-    .pw-btn:active { transform: translateY(1px); }
-    .pw-btn.cancel { background: rgba(255,80,80,0.08); color: #ff8a8a; }
-
-    .pw-error {
-      color: #ff8080;
-      font-size: 0.9rem;
-      height: 1.1rem;
-      margin-top: 8px;
-      opacity: 0.95;
+    .prompt-btn:hover {
+      background: #004d4d;
     }
+
   </style>
 
-  <!-- 🔒 Password Protection (Forces Re-Auth After Browser Close) -->
   <script>
-    const correctPassword = "Beibora@2025"; // change password here
+    const correctPassword = "Beibora@2025";
     const storageKey = "auth_beibora";
 
-    function createPasswordModal(onSuccess, onCancel) {
-      const overlay = document.createElement('div');
-      overlay.className = 'pw-modal-overlay';
+    function passwordPrompt(message) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.className = "prompt-overlay";
 
-      const modal = document.createElement('div');
-      modal.className = 'pw-modal';
-      modal.innerHTML = `
-        <h2>Enter password to access Beibora Dashboard</h2>
-        <p>Type your password below — characters are hidden for privacy.</p>
-        <input id="pwInput" class="pw-input" type="password" placeholder="Password" />
-        <div class="pw-actions">
-          <button id="pwSubmit" class="pw-btn">Enter</button>
-          <button id="pwCancel" class="pw-btn cancel">Cancel</button>
-        </div>
-        <div id="pwError" class="pw-error"></div>
-      `;
-      overlay.appendChild(modal);
-      document.body.appendChild(overlay);
+        const box = document.createElement("div");
+        box.className = "prompt-box";
+        box.innerHTML = `
+          <p>${message}</p>
+          <input type="password" class="prompt-input" id="pwInput" placeholder="Enter password" />
+          <br>
+          <button class="prompt-btn" id="pwOk">OK</button>
+        `;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
 
-      const input = document.getElementById('pwInput');
-      const submit = document.getElementById('pwSubmit');
-      const cancel = document.getElementById('pwCancel');
-      const error = document.getElementById('pwError');
+        const input = box.querySelector("#pwInput");
+        const btn = box.querySelector("#pwOk");
 
-      input.focus();
+        input.focus();
 
-      function cleanUp() { overlay.remove(); }
+        btn.onclick = () => {
+          const value = input.value.trim();
+          overlay.remove();
+          resolve(value);
+        };
 
-      submit.onclick = () => {
-        const val = input.value.trim();
-        if (val === correctPassword) {
-          sessionStorage.setItem(storageKey, 'true');
-          cleanUp();
-          onSuccess && onSuccess();
-        } else {
-          error.textContent = "Incorrect password. Try again.";
-          input.value = "";
-          input.focus();
-        }
-      };
-
-      cancel.onclick = () => {
-        cleanUp();
-        onCancel && onCancel();
-      };
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") submit.click();
-        if (e.key === "Escape") cancel.click();
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") btn.click();
+        });
       });
     }
 
-    // ✅ Clear session on real browser close (forces re-login next time)
-    window.addEventListener("unload", () => {
-      sessionStorage.removeItem(storageKey);
-    });
-
-    // 🔍 Check authentication
-    (function checkAuth() {
+    async function authenticate() {
       const authenticated = sessionStorage.getItem(storageKey);
       if (!authenticated) {
-        createPasswordModal(
-          () => {}, // success
-          () => {
-            alert("Access denied.");
-            window.location.href = "about:blank";
-            throw new Error("Unauthorized access");
-          }
-        );
+        const password = await passwordPrompt("Enter password to access Beibora Dashboard:");
+        if (password !== correctPassword) {
+          alert("Incorrect password. Access denied.");
+          window.location.href = "about:blank";
+          throw new Error("Unauthorized");
+        } else {
+          sessionStorage.setItem(storageKey, "true");
+        }
       }
-    })();
+    }
+
+    window.addEventListener("DOMContentLoaded", authenticate);
+    window.addEventListener("unload", () => sessionStorage.removeItem(storageKey));
   </script>
 </head>
 
@@ -229,12 +178,9 @@
 
   <div class="flip-container">
     <div class="flipper" id="flipper">
-      <!-- FRONT: Dashboard -->
       <div class="front">
         <iframe id="beiboraFrame"></iframe>
       </div>
-
-      <!-- BACK: Banner -->
       <div class="back">
         <iframe id="bannerFrame"></iframe>
         <header id="overlayTitle"></header>
@@ -248,14 +194,12 @@
     const beiboraFrame = document.getElementById("beiboraFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // Load dashboards
     beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // Header clock
     function updateHeader() {
       const now = new Date();
-      const formattedDate = now.toLocaleString('en-GB', {
+      const formatted = now.toLocaleString('en-GB', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -263,37 +207,23 @@
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
-
-      const formattedTime = formattedDate.replace(/\b([A-Za-z]+)\b/, match => match.toUpperCase());
-      overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+      overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formatted.toUpperCase()} | # OPERATION NIGHT HAMMER`;
     }
-
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // Flip timing
-    const beiboraDuration = 60000; // 1 minute
-    const bannerDuration = 10000;  // 10 seconds
+    const beiboraDuration = 60000;
+    const bannerDuration = 10000;
     let showingBanner = false;
-    let flipTimer;
 
     function flipCycle() {
-      if (showingBanner) {
-        flipper.classList.remove("flip");
-        showingBanner = false;
-        clearTimeout(flipTimer);
-        flipTimer = setTimeout(flipCycle, beiboraDuration);
-      } else {
-        flipper.classList.add("flip");
-        showingBanner = true;
-        clearTimeout(flipTimer);
-        flipTimer = setTimeout(flipCycle, bannerDuration);
-      }
+      flipper.classList.toggle("flip");
+      showingBanner = !showingBanner;
+      setTimeout(flipCycle, showingBanner ? bannerDuration : beiboraDuration);
     }
 
-    flipTimer = setTimeout(flipCycle, beiboraDuration);
+    setTimeout(flipCycle, beiboraDuration);
   </script>
 
 </body>
 </html>
-
