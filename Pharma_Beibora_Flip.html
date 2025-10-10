@@ -85,19 +85,28 @@
     }
   </style>
 
-  <!-- 🔒 Simple Password Protection -->
+  <!-- 🔒 Password Protection (Remembers until Fully restarts) -->
   <script>
-    const correctPassword = "PharmaBeibora@2025"; // <-- change this password
-    const entered = sessionStorage.getItem("authenticated_pb");
+    const correctPassword = "PharmaBeibora@2025"; // <-- your password
+    const authData = JSON.parse(localStorage.getItem("authenticated_pb_data"));
 
-    if (!entered) {
+    const now = Date.now();
+    const maxSessionAge = 24 * 60 * 60 * 1000; // 24 hours validity
+
+    let authenticated = false;
+
+    if (authData && authData.timestamp && (now - authData.timestamp < maxSessionAge)) {
+      authenticated = true; // still valid
+    }
+
+    if (!authenticated) {
       const password = prompt("Enter password to access Pharma/Beibora Dashboard:");
       if (password !== correctPassword) {
         alert("Incorrect password. Access denied.");
-        window.location.href = "about:blank"; // redirect away
-        throw new Error("Unauthorized access"); // stop further JS
+        window.location.href = "about:blank";
+        throw new Error("Unauthorized access");
       } else {
-        sessionStorage.setItem("authenticated_pb", "true"); // allow until tab closed
+        localStorage.setItem("authenticated_pb_data", JSON.stringify({ timestamp: now }));
       }
     }
   </script>
@@ -158,41 +167,31 @@
 
     // Flip between dashboard and banner
     function flipTransition(showBannerNext) {
-      // Step 1: Remove active from both
       frame.classList.remove("active");
       overlay.classList.remove("active");
 
-      // Step 2: Wait a bit for rotation out
       setTimeout(() => {
         if (showBannerNext) {
-          // Show banner
           startLiveClock();
           overlay.classList.add("active");
         } else {
-          // Load next dashboard and show it
           index = (index + 1) % dashboards.length;
           loadDashboard(index);
           frame.classList.add("active");
         }
-      }, 1000); // halfway through flip timing
+      }, 1000);
     }
 
-    // Control the overall rotation flow
+    // Control the rotation flow
     function rotate() {
       if (!showingBanner) {
-        // From dashboard → banner
         flipTransition(true);
         showingBanner = true;
-
-        // Stay on banner for 10 seconds
         clearTimeout(rotationTimer);
         rotationTimer = setTimeout(rotate, 10000);
       } else {
-        // From banner → next dashboard
         flipTransition(false);
         showingBanner = false;
-
-        // Stay on dashboard for its duration
         clearTimeout(rotationTimer);
         rotationTimer = setTimeout(rotate, dashboards[index].duration);
       }
@@ -200,10 +199,9 @@
 
     // --- INITIALIZATION ---
     loadDashboard(index);
-    frame.classList.add("active"); // Start with Pharma visible
+    frame.classList.add("active");
     rotationTimer = setTimeout(rotate, dashboards[index].duration);
   </script>
 
 </body>
 </html>
-
