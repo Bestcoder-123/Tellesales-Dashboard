@@ -67,7 +67,7 @@
       z-index: 2;
     }
 
-    /* ========== Modal styles for password ========== */
+    /* ================= Password Modal ================= */
     .pw-modal-overlay {
       position: fixed;
       inset: 0;
@@ -146,7 +146,7 @@
     }
   </style>
 
-  <!-- 🔒 Password Protection (Reset after browser close or refresh) -->
+  <!-- 🔒 Password Protection (Forces Re-Auth After Browser Close) -->
   <script>
     const correctPassword = "Beibora@2025"; // change password here
     const storageKey = "auth_beibora";
@@ -203,17 +203,17 @@
       });
     }
 
-    // 🧠 Force re-prompt after browser close by clearing sessionStorage on unload
-    window.addEventListener("beforeunload", () => {
+    // ✅ Clear session on real browser close (forces re-login next time)
+    window.addEventListener("unload", () => {
       sessionStorage.removeItem(storageKey);
     });
 
-    // 🔍 Check if password was entered this session
+    // 🔍 Check authentication
     (function checkAuth() {
       const authenticated = sessionStorage.getItem(storageKey);
       if (!authenticated) {
         createPasswordModal(
-          () => {}, // success: continue loading page
+          () => {}, // success
           () => {
             alert("Access denied.");
             window.location.href = "about:blank";
@@ -229,12 +229,12 @@
 
   <div class="flip-container">
     <div class="flipper" id="flipper">
-      <!-- FRONT: Beibora dashboard -->
+      <!-- FRONT: Dashboard -->
       <div class="front">
         <iframe id="beiboraFrame"></iframe>
       </div>
 
-      <!-- BACK: Banner page -->
+      <!-- BACK: Banner -->
       <div class="back">
         <iframe id="bannerFrame"></iframe>
         <header id="overlayTitle"></header>
@@ -248,11 +248,11 @@
     const beiboraFrame = document.getElementById("beiboraFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🧠 Load fresh versions of dashboards
+    // Load dashboards
     beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // 🕓 Live updating banner header clock
+    // Header clock
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -264,18 +264,14 @@
         second: '2-digit'
       }).replace(',', '');
 
-      const formattedTime = formattedDate.replace(
-        /\b([A-Za-z]+)\b/,
-        (match) => match.toUpperCase()
-      );
-
+      const formattedTime = formattedDate.replace(/\b([A-Za-z]+)\b/, match => match.toUpperCase());
       overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing ---
+    // Flip timing
     const beiboraDuration = 60000; // 1 minute
     const bannerDuration = 10000;  // 10 seconds
     let showingBanner = false;
@@ -300,3 +296,4 @@
 
 </body>
 </html>
+
