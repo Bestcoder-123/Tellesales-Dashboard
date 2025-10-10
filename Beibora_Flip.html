@@ -18,6 +18,7 @@
       width: 100%;
       height: 100%;
       position: relative;
+      display: none; /* 👈 hidden until password success */
     }
 
     .flipper {
@@ -67,7 +68,7 @@
     .prompt-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.85);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -112,9 +113,7 @@
       cursor: pointer;
     }
 
-    .prompt-btn:hover {
-      background: #004d4d;
-    }
+    .prompt-btn:hover { background: #004d4d; }
 
   </style>
 
@@ -167,6 +166,8 @@
           sessionStorage.setItem(storageKey, "true");
         }
       }
+      // ✅ Reveal dashboard after success
+      document.querySelector(".flip-container").style.display = "block";
     }
 
     window.addEventListener("DOMContentLoaded", authenticate);
@@ -176,6 +177,7 @@
 
 <body>
 
+  <!-- Hidden until password success -->
   <div class="flip-container">
     <div class="flipper" id="flipper">
       <div class="front">
