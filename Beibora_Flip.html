@@ -71,7 +71,7 @@
     .pw-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -87,7 +87,7 @@
       box-shadow: 0 8px 40px rgba(0,0,0,0.8);
       color: #00ffd1;
       text-align: center;
-      border: 2px solid rgba(0,255,204,0.08);
+      border: 2px solid rgba(0,255,204,0.1);
       font-family: Arial, sans-serif;
     }
 
@@ -146,36 +146,27 @@
     }
   </style>
 
-  <!-- 🔒 Password Protection (Resets when Chrome/Fully restarts)
-       Replaced browser prompt with a modal that uses a password input -->
+  <!-- 🔒 Password Protection (Reset after browser close or refresh) -->
   <script>
-    // NOTE: This is client-side protection only (like before).
-    // For real security, authenticate on a server.
     const correctPassword = "Beibora@2025"; // change password here
     const storageKey = "auth_beibora";
 
     function createPasswordModal(onSuccess, onCancel) {
-      // Overlay
       const overlay = document.createElement('div');
       overlay.className = 'pw-modal-overlay';
-      overlay.setAttribute('role', 'dialog');
-      overlay.setAttribute('aria-modal', 'true');
 
-      // Modal box
       const modal = document.createElement('div');
       modal.className = 'pw-modal';
-
       modal.innerHTML = `
         <h2>Enter password to access Beibora Dashboard</h2>
         <p>Type your password below — characters are hidden for privacy.</p>
-        <input id="pwInput" class="pw-input" type="password" autocomplete="current-password" placeholder="Password" />
+        <input id="pwInput" class="pw-input" type="password" placeholder="Password" />
         <div class="pw-actions">
           <button id="pwSubmit" class="pw-btn">Enter</button>
           <button id="pwCancel" class="pw-btn cancel">Cancel</button>
         </div>
-        <div id="pwError" class="pw-error" aria-live="polite"></div>
+        <div id="pwError" class="pw-error"></div>
       `;
-
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
 
@@ -184,69 +175,48 @@
       const cancel = document.getElementById('pwCancel');
       const error = document.getElementById('pwError');
 
-      // Focus the input
-      setTimeout(() => input.focus(), 50);
+      input.focus();
 
-      function cleanUp() {
-        // Remove modal from DOM
-        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-      }
+      function cleanUp() { overlay.remove(); }
 
-      function handleSuccess() {
-        cleanUp();
-        onSuccess && onSuccess();
-      }
-
-      function handleCancel() {
-        cleanUp();
-        onCancel && onCancel();
-      }
-
-      submit.addEventListener('click', () => {
-        const val = input.value || '';
+      submit.onclick = () => {
+        const val = input.value.trim();
         if (val === correctPassword) {
           sessionStorage.setItem(storageKey, 'true');
-          handleSuccess();
+          cleanUp();
+          onSuccess && onSuccess();
         } else {
-          // Simple error feedback
-          error.textContent = 'Incorrect password. Try again.';
-          input.value = '';
+          error.textContent = "Incorrect password. Try again.";
+          input.value = "";
           input.focus();
         }
+      };
+
+      cancel.onclick = () => {
+        cleanUp();
+        onCancel && onCancel();
+      };
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") submit.click();
+        if (e.key === "Escape") cancel.click();
       });
-
-      cancel.addEventListener('click', handleCancel);
-
-      // Submit on Enter, cancel on Escape
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          submit.click();
-        } else if (e.key === 'Escape') {
-          cancel.click();
-        }
-      });
-
-      // Prevent tabbing out of the modal (basic trap)
-      // Keep focus inside while modal exists
-      document.addEventListener('focus', function trapFocus(e) {
-        if (!overlay.contains(e.target)) {
-          e.stopPropagation();
-          input.focus();
-        }
-      }, true);
     }
 
-    // Check authentication and show modal if needed
+    // 🧠 Force re-prompt after browser close by clearing sessionStorage on unload
+    window.addEventListener("beforeunload", () => {
+      sessionStorage.removeItem(storageKey);
+    });
+
+    // 🔍 Check if password was entered this session
     (function checkAuth() {
       const authenticated = sessionStorage.getItem(storageKey);
       if (!authenticated) {
-        // Show modal and deny access if canceled or incorrect
         createPasswordModal(
-          () => { /* success: do nothing, page continues loading */ },
+          () => {}, // success: continue loading page
           () => {
             alert("Access denied.");
             window.location.href = "about:blank";
-            // throw to stop any further script execution if needed
             throw new Error("Unauthorized access");
           }
         );
@@ -282,7 +252,7 @@
     beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
-    // ⏰ Live updating banner header clock
+    // 🕓 Live updating banner header clock
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -315,38 +285,17 @@
       if (showingBanner) {
         flipper.classList.remove("flip");
         showingBanner = false;
-        localStorage.setItem('lastFlip_beibora', Date.now());
         clearTimeout(flipTimer);
         flipTimer = setTimeout(flipCycle, beiboraDuration);
       } else {
         flipper.classList.add("flip");
         showingBanner = true;
-        localStorage.setItem('lastFlip_beibora', Date.now());
         clearTimeout(flipTimer);
         flipTimer = setTimeout(flipCycle, bannerDuration);
       }
     }
 
-    // --- Persist flip timing across refresh ---
-    const lastFlip = localStorage.getItem('lastFlip_beibora');
-    if (lastFlip) {
-      const elapsed = Date.now() - lastFlip;
-      const totalCycle = beiboraDuration + bannerDuration;
-      const modTime = elapsed % totalCycle;
-
-      if (modTime < beiboraDuration) {
-        flipper.classList.remove("flip");
-        showingBanner = false;
-        flipTimer = setTimeout(flipCycle, beiboraDuration - modTime);
-      } else {
-        flipper.classList.add("flip");
-        showingBanner = true;
-        flipTimer = setTimeout(flipCycle, totalCycle - modTime);
-      }
-    } else {
-      localStorage.setItem('lastFlip_beibora', Date.now());
-      flipTimer = setTimeout(flipCycle, beiboraDuration);
-    }
+    flipTimer = setTimeout(flipCycle, beiboraDuration);
   </script>
 
 </body>
