@@ -24,6 +24,8 @@
       opacity: 0;
       z-index: 0;
       transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
     }
 
     iframe.active {
@@ -31,9 +33,9 @@
       z-index: 1;
     }
 
-    /* --- Updated Transition: slide-up --- */
-    .slide-up { transform: translateY(100%); }
-    .slide-up.active { transform: translateY(0); }
+    /* --- Updated Transition: flip (180° rotation) --- */
+    .slide-up { transform: rotateY(180deg); }
+    .slide-up.active { transform: rotateY(0deg); }
 
     /* Overlay for banner */
     #imageOverlay {
@@ -157,6 +159,3 @@
 
 </body>
 </html>
-
-
-
