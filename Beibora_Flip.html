@@ -66,7 +66,25 @@
       z-index: 2;
     }
   </style>
+
+  <!-- 🔒 Simple Password Protection -->
+  <script>
+    const correctPassword = "Beibora@2025"; // <-- change this password as you like
+    const entered = sessionStorage.getItem("authenticated");
+
+    if (!entered) {
+      const password = prompt("Enter password to access this dashboard:");
+      if (password !== correctPassword) {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "about:blank"; // Redirect away if wrong
+        throw new Error("Unauthorized access"); // Stop further JS execution
+      } else {
+        sessionStorage.setItem("authenticated", "true"); // Allow until tab closed
+      }
+    }
+  </script>
 </head>
+
 <body>
 
   <div class="flip-container">
@@ -99,14 +117,13 @@
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
         day: '2-digit',
-        month: 'long', // Full month name
+        month: 'long',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
 
-      // Convert month name to uppercase
       const formattedTime = formattedDate.replace(
         /\b([A-Za-z]+)\b/,
         (match) => match.toUpperCase()
@@ -115,26 +132,23 @@
       overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
 
-    // Start live clock
     setInterval(updateHeader, 1000);
     updateHeader();
 
     // --- Flip Timing ---
     const beiboraDuration = 60000; // 1 minute
-    const bannerDuration = 10000;   // 10 seconds
+    const bannerDuration = 10000;  // 10 seconds
     let showingBanner = false;
     let flipTimer;
 
     function flipCycle() {
       if (showingBanner) {
-        // Switch to Beibora
         flipper.classList.remove("flip");
         showingBanner = false;
         localStorage.setItem('lastFlip', Date.now());
         clearTimeout(flipTimer);
         flipTimer = setTimeout(flipCycle, beiboraDuration);
       } else {
-        // Switch to Banner
         flipper.classList.add("flip");
         showingBanner = true;
         localStorage.setItem('lastFlip', Date.now());
@@ -143,7 +157,6 @@
       }
     }
 
-    // --- Restore phase after refresh ---
     const lastFlip = localStorage.getItem('lastFlip');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
@@ -151,18 +164,15 @@
       const modTime = elapsed % totalCycle;
 
       if (modTime < beiboraDuration) {
-        // Beibora phase
         flipper.classList.remove("flip");
         showingBanner = false;
         flipTimer = setTimeout(flipCycle, beiboraDuration - modTime);
       } else {
-        // Banner phase
         flipper.classList.add("flip");
         showingBanner = true;
         flipTimer = setTimeout(flipCycle, totalCycle - modTime);
       }
     } else {
-      // First start: show Beibora first
       localStorage.setItem('lastFlip', Date.now());
       flipTimer = setTimeout(flipCycle, beiboraDuration);
     }
