@@ -133,11 +133,19 @@
 
   <script>
     const correctPassword = "PharmaBeibora@2025";
-    const authenticated = sessionStorage.getItem("auth_pharma_beibora");
+    const AUTH_KEY = "auth_pharma_beibora";
+
+    // ✅ Use localStorage for persistent device-level security
+    // and window.name for tab-specific sessions.
+    function isAuthenticated() {
+      if (!localStorage.getItem(AUTH_KEY)) return false; // browser/device restart resets auth
+      if (window.name !== AUTH_KEY) return false; // new tab => no password access
+      return true;
+    }
 
     // Show password overlay if not authenticated
     window.addEventListener("DOMContentLoaded", () => {
-      if (!authenticated) {
+      if (!isAuthenticated()) {
         document.body.innerHTML = `
           <div id="passwordOverlay">
             <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
@@ -154,7 +162,8 @@
     function verifyPassword() {
       const password = document.getElementById("passwordInput").value;
       if (password === correctPassword) {
-        sessionStorage.setItem("auth_pharma_beibora", "true");
+        localStorage.setItem(AUTH_KEY, "true"); // persist until Chrome or device restarts
+        window.name = AUTH_KEY; // keeps access during same tab refresh
         document.getElementById("passwordOverlay").remove();
         initializeDashboard();
       } else {
