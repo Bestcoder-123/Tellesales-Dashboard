@@ -84,116 +84,15 @@
       from { transform: scale(1); }
       to { transform: scale(1.05); }
     }
-
-    /* 🔐 Secure password overlay */
-    #passwordOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: #00ffcc;
-      font-family: Arial, sans-serif;
-      z-index: 9999;
-    }
-
-    #passwordOverlay input {
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 8px;
-      border: 2px solid #00ffcc;
-      outline: none;
-      background: black;
-      color: #00ffcc;
-      text-align: center;
-      margin-top: 10px;
-      width: 250px;
-    }
-
-    #passwordOverlay button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: #00ffcc;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: black;
-      font-weight: bold;
-    }
-
-    #passwordOverlay button:hover {
-      background: #00cca3;
-    }
   </style>
 
   <script>
-    const correctPassword = "PharmaBeibora@2025";
-    const AUTH_KEY = "auth_pharma_beibora";
-
-    function isAuthenticated() {
-      if (!localStorage.getItem(AUTH_KEY)) return false;
-      if (window.name !== AUTH_KEY) return false;
-      return true;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      if (!isAuthenticated()) {
-        showPasswordOverlay();
-      } else {
-        initializeDashboard();
-      }
-    });
-
-    function showPasswordOverlay() {
-      const overlay = document.createElement("div");
-      overlay.id = "passwordOverlay";
-      overlay.innerHTML = `
-        <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
-        <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
-        <button id="unlockBtn">Unlock</button>
-      `;
-      document.body.appendChild(overlay);
-
-      document.getElementById("unlockBtn").addEventListener("click", verifyPassword);
-      document.getElementById("passwordInput").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") verifyPassword();
-      });
-    }
-
-    function verifyPassword() {
-      const password = document.getElementById("passwordInput").value;
-      if (password === correctPassword) {
-        localStorage.setItem(AUTH_KEY, "true");
-        window.name = AUTH_KEY;
-        const overlay = document.getElementById("passwordOverlay");
-        overlay.style.opacity = "0";
-        overlay.style.transition = "opacity 1s ease-in-out";
-
-        // ✅ Wait a bit to remove overlay, then start dashboard
-        setTimeout(() => {
-          overlay.remove();
-          // Guarantee DOM is ready before initialization
-          requestAnimationFrame(() => {
-            initializeDashboard();
-          });
-        }, 800);
-      } else {
-        alert("Incorrect password. Access denied.");
-        window.location.href = "about:blank";
-      }
-    }
+    document.addEventListener("DOMContentLoaded", initializeDashboard);
 
     function initializeDashboard() {
       const frame = document.getElementById("dashboardFrame");
       const overlay = document.getElementById("imageOverlay");
       const overlayTitle = document.getElementById("overlayTitle");
-
-      if (!frame || !overlay) return; // prevent null error
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
@@ -260,6 +159,7 @@
         }
       }
 
+      // Start
       loadDashboard(index);
       frame.classList.add("active");
       rotationTimer = setTimeout(rotate, dashboards[index].duration);
@@ -276,4 +176,3 @@
   </div>
 </body>
 </html>
-
