@@ -25,7 +25,7 @@
       transform: rotateY(180deg);
       transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
       backface-visibility: hidden;
-      display: none; /* 🔒 Hidden by default */
+      display: none;
     }
 
     .flippable.active {
@@ -135,44 +135,45 @@
     const correctPassword = "PharmaBeibora@2025";
     const AUTH_KEY = "auth_pharma_beibora";
 
-    // ✅ Use localStorage for persistent device-level security
-    // and window.name for tab-specific sessions.
     function isAuthenticated() {
-      if (!localStorage.getItem(AUTH_KEY)) return false; // browser/device restart resets auth
-      if (window.name !== AUTH_KEY) return false; // new tab => no password access
+      if (!localStorage.getItem(AUTH_KEY)) return false;
+      if (window.name !== AUTH_KEY) return false;
       return true;
     }
 
-    // Show password overlay if not authenticated
     window.addEventListener("DOMContentLoaded", () => {
       if (!isAuthenticated()) {
-        document.body.innerHTML = `
-          <div id="passwordOverlay">
-            <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
-            <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
-            <button onclick="verifyPassword()">Unlock</button>
-          </div>
-        `;
+        showPasswordOverlay();
       } else {
         initializeDashboard();
       }
     });
 
-    // Password check
+    function showPasswordOverlay() {
+      const overlay = document.createElement("div");
+      overlay.id = "passwordOverlay";
+      overlay.innerHTML = `
+        <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
+        <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
+        <button onclick="verifyPassword()">Unlock</button>
+      `;
+      document.body.appendChild(overlay);
+    }
+
     function verifyPassword() {
       const password = document.getElementById("passwordInput").value;
       if (password === correctPassword) {
-        localStorage.setItem(AUTH_KEY, "true"); // persist until Chrome or device restarts
-        window.name = AUTH_KEY; // keeps access during same tab refresh
-        document.getElementById("passwordOverlay").remove();
-        initializeDashboard();
+        localStorage.setItem(AUTH_KEY, "true");
+        window.name = AUTH_KEY;
+        const overlay = document.getElementById("passwordOverlay");
+        overlay.remove();
+        initializeDashboard(); // ✅ Start immediately, no black screen
       } else {
         alert("Incorrect password. Access denied.");
         window.location.href = "about:blank";
       }
     }
 
-    // Initialize and show dashboard after login
     function initializeDashboard() {
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
@@ -243,7 +244,6 @@
         }
       }
 
-      // Start
       loadDashboard(index);
       frame.classList.add("active");
       rotationTimer = setTimeout(rotate, dashboards[index].duration);
