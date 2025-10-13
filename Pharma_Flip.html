@@ -136,7 +136,7 @@
     }
   </style>
 
-  <!-- 🔒 Password Protection (Forces Re-Auth After Browser Close) -->
+  <!-- 🔒 Password Protection (Session-only auth) -->
   <script>
     const correctPassword = "Pharma@2025"; // change password here
     const storageKey = "auth_pharma";
@@ -164,7 +164,6 @@
       const submit = document.getElementById('pwSubmit');
       const cancel = document.getElementById('pwCancel');
       const error = document.getElementById('pwError');
-
       input.focus();
 
       function cleanUp() { overlay.remove(); }
@@ -193,17 +192,19 @@
       });
     }
 
-    // ✅ Clear session on real browser close (forces re-login next time)
-    window.addEventListener("unload", () => {
-      sessionStorage.removeItem(storageKey);
+    // ✅ Clear session only when browser fully closes (not refresh)
+    window.addEventListener("beforeunload", (event) => {
+      if (!performance.getEntriesByType("navigation")[0].type.includes("reload")) {
+        sessionStorage.removeItem(storageKey);
+      }
     });
 
-    // 🔍 Check authentication
+    // 🔍 Authentication check
     (function checkAuth() {
       const authenticated = sessionStorage.getItem(storageKey);
       if (!authenticated) {
         createPasswordModal(
-          () => {}, // success
+          () => {},
           () => {
             alert("Access denied.");
             window.location.href = "about:blank";
@@ -250,7 +251,6 @@
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
-
       const formattedTime = formattedDate.replace(/\b([A-Za-z]+)\b/, match => match.toUpperCase());
       overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
     }
