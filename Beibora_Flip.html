@@ -64,7 +64,7 @@
       z-index: 2;
     }
 
-    /* Password prompt overlay */
+    /* Password Prompt Overlay */
     .prompt-overlay {
       position: fixed;
       inset: 0;
@@ -119,16 +119,22 @@
   <script>
     const correctPassword = "Beibora@2025";
     const storageKey = "auth_beibora";
+    const expiryHours = 12; // password validity duration
 
-    // Detect if this is a refresh
-    function isPageReload() {
-      if (performance.getEntriesByType("navigation")[0]) {
-        return performance.getEntriesByType("navigation")[0].type === "reload";
+    function getAuthData() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey));
+      } catch {
+        return null;
       }
-      return performance.navigation.type === 1; // fallback for older browsers
     }
 
-    // Create password overlay prompt
+    function isPageReload() {
+      const nav = performance.getEntriesByType("navigation")[0];
+      if (nav) return nav.type === "reload";
+      return performance.navigation.type === 1; // fallback
+    }
+
     function passwordPrompt(message) {
       return new Promise((resolve) => {
         const overlay = document.createElement("div");
@@ -162,30 +168,35 @@
     }
 
     async function authenticate() {
-      const hasAuth = localStorage.getItem(storageKey);
+      const auth = getAuthData();
       const reloaded = isPageReload();
+      const now = Date.now();
 
-      // Only ask password if no stored auth and not a refresh
-      if (!hasAuth && !reloaded) {
+      let needsPassword = false;
+
+      if (!auth) {
+        needsPassword = true; // first-time load
+      } else if ((now - auth.timestamp) > expiryHours * 60 * 60 * 1000) {
+        needsPassword = true; // expired
+        localStorage.removeItem(storageKey);
+      } else if (!reloaded && !auth) {
+        needsPassword = true;
+      }
+
+      if (needsPassword) {
         const password = await passwordPrompt("Enter password to access Beibora Dashboard:");
         if (password !== correctPassword) {
           alert("Incorrect password. Access denied.");
           window.location.href = "about:blank";
           throw new Error("Unauthorized");
-        } else {
-          localStorage.setItem(storageKey, "true");
         }
+        localStorage.setItem(storageKey, JSON.stringify({ timestamp: now }));
       }
 
-      // Show dashboard
       document.querySelector(".flip-container").style.display = "block";
     }
 
-    // Authenticate when page loads
     window.addEventListener("DOMContentLoaded", authenticate);
-
-    // When kiosk or system restarts, localStorage persists.
-    // If you want to reset after some time (e.g., 24h), we can add expiry later if needed.
   </script>
 </head>
 
@@ -228,8 +239,8 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    const beiboraDuration = 60000; // main screen 60s
-    const bannerDuration = 10000;  // banner 10s
+    const beiboraDuration = 60000;
+    const bannerDuration = 10000;
     let showingBanner = false;
 
     function flipCycle() {
