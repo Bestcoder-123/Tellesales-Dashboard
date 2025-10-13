@@ -18,7 +18,7 @@
       width: 100%;
       height: 100%;
       position: relative;
-      display: none; /* 👈 hidden until password success */
+      display: none; /* Hidden until password success */
     }
 
     .flipper {
@@ -64,7 +64,7 @@
       z-index: 2;
     }
 
-    /* Simulated prompt */
+    /* Password prompt overlay */
     .prompt-overlay {
       position: fixed;
       inset: 0;
@@ -114,13 +114,21 @@
     }
 
     .prompt-btn:hover { background: #004d4d; }
-
   </style>
 
   <script>
     const correctPassword = "Beibora@2025";
     const storageKey = "auth_beibora";
 
+    // Detect if this is a refresh
+    function isPageReload() {
+      if (performance.getEntriesByType("navigation")[0]) {
+        return performance.getEntriesByType("navigation")[0].type === "reload";
+      }
+      return performance.navigation.type === 1; // fallback for older browsers
+    }
+
+    // Create password overlay prompt
     function passwordPrompt(message) {
       return new Promise((resolve) => {
         const overlay = document.createElement("div");
@@ -139,7 +147,6 @@
 
         const input = box.querySelector("#pwInput");
         const btn = box.querySelector("#pwOk");
-
         input.focus();
 
         btn.onclick = () => {
@@ -155,28 +162,34 @@
     }
 
     async function authenticate() {
-      const authenticated = sessionStorage.getItem(storageKey);
-      if (!authenticated) {
+      const hasAuth = localStorage.getItem(storageKey);
+      const reloaded = isPageReload();
+
+      // Only ask password if no stored auth and not a refresh
+      if (!hasAuth && !reloaded) {
         const password = await passwordPrompt("Enter password to access Beibora Dashboard:");
         if (password !== correctPassword) {
           alert("Incorrect password. Access denied.");
           window.location.href = "about:blank";
           throw new Error("Unauthorized");
         } else {
-          sessionStorage.setItem(storageKey, "true");
+          localStorage.setItem(storageKey, "true");
         }
       }
-      // ✅ Reveal dashboard after success
+
+      // Show dashboard
       document.querySelector(".flip-container").style.display = "block";
     }
 
+    // Authenticate when page loads
     window.addEventListener("DOMContentLoaded", authenticate);
-    window.addEventListener("unload", () => sessionStorage.removeItem(storageKey));
+
+    // When kiosk or system restarts, localStorage persists.
+    // If you want to reset after some time (e.g., 24h), we can add expiry later if needed.
   </script>
 </head>
 
 <body>
-
   <!-- Hidden until password success -->
   <div class="flip-container">
     <div class="flipper" id="flipper">
@@ -211,11 +224,12 @@
       }).replace(',', '');
       overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${formatted.toUpperCase()} | # OPERATION NIGHT HAMMER`;
     }
+
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    const beiboraDuration = 60000;
-    const bannerDuration = 10000;
+    const beiboraDuration = 60000; // main screen 60s
+    const bannerDuration = 10000;  // banner 10s
     let showingBanner = false;
 
     function flipCycle() {
@@ -226,6 +240,5 @@
 
     setTimeout(flipCycle, beiboraDuration);
   </script>
-
 </body>
 </html>
