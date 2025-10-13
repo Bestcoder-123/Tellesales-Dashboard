@@ -141,7 +141,7 @@
       return true;
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       if (!isAuthenticated()) {
         showPasswordOverlay();
       } else {
@@ -155,9 +155,14 @@
       overlay.innerHTML = `
         <h2>🔒 Enter Password to Access Pharma/Beibora Dashboard</h2>
         <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
-        <button onclick="verifyPassword()">Unlock</button>
+        <button id="unlockBtn">Unlock</button>
       `;
       document.body.appendChild(overlay);
+
+      document.getElementById("unlockBtn").addEventListener("click", verifyPassword);
+      document.getElementById("passwordInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") verifyPassword();
+      });
     }
 
     function verifyPassword() {
@@ -166,8 +171,17 @@
         localStorage.setItem(AUTH_KEY, "true");
         window.name = AUTH_KEY;
         const overlay = document.getElementById("passwordOverlay");
-        overlay.remove();
-        initializeDashboard(); // ✅ Start immediately, no black screen
+        overlay.style.opacity = "0";
+        overlay.style.transition = "opacity 1s ease-in-out";
+
+        // ✅ Wait a bit to remove overlay, then start dashboard
+        setTimeout(() => {
+          overlay.remove();
+          // Guarantee DOM is ready before initialization
+          requestAnimationFrame(() => {
+            initializeDashboard();
+          });
+        }, 800);
       } else {
         alert("Incorrect password. Access denied.");
         window.location.href = "about:blank";
@@ -175,16 +189,18 @@
     }
 
     function initializeDashboard() {
+      const frame = document.getElementById("dashboardFrame");
+      const overlay = document.getElementById("imageOverlay");
+      const overlayTitle = document.getElementById("overlayTitle");
+
+      if (!frame || !overlay) return; // prevent null error
+
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 120000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 60000 }
       ];
-
-      const frame = document.getElementById("dashboardFrame");
-      const overlay = document.getElementById("imageOverlay");
-      const overlayTitle = document.getElementById("overlayTitle");
 
       let index = 0;
       let showingBanner = false;
