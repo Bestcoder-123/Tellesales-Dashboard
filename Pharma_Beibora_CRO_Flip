@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Pharma_Beibora_Flip</title>
+  <title>Pharma_Beibora_CRO_Flip</title>
   <style>
     html, body {
       margin: 0;
@@ -96,12 +96,12 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // Updated sequence of dashboards
+      // ✅ Correct and existing dashboard sequence (all in repo root)
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
-        { url: "Beibora_CRO_Statistics.html", duration: 20000 },
-        { url: "Pharma_CRO_Statistics.html", duration: 20000 }
+        { url: "Pharma_CRO_Statistics.html", duration: 20000 },
+        { url: "Beibora_CRO_Statistics.html", duration: 20000 }
       ];
 
       let index = 0;
@@ -124,7 +124,7 @@
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
         timeUpdater = setInterval(() => {
-          overlayTitle.textContent = `PHARMA_BEIBORA_CRO SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+          overlayTitle.textContent = `PHARMA / BEIBORA PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
@@ -150,19 +150,19 @@
 
       function rotate() {
         if (!showingBanner) {
-          flipTransition(true); // show banner next
+          flipTransition(true);
           showingBanner = true;
           clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotate, 10000); // banner duration = 10s
+          rotationTimer = setTimeout(rotate, 10000); // Banner for 10s
         } else {
-          flipTransition(false); // show next dashboard
+          flipTransition(false);
           showingBanner = false;
           clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotate, dashboards[index].duration); // each dashboard = 20s
+          rotationTimer = setTimeout(rotate, dashboards[index].duration); // Dashboard 20s each
         }
       }
 
-      // Start with first dashboard
+      // Start
       loadDashboard(index);
       frame.classList.add("active");
       rotationTimer = setTimeout(rotate, dashboards[index].duration);
@@ -174,7 +174,7 @@
   <iframe id="dashboardFrame" class="flippable"></iframe>
 
   <div id="imageOverlay" class="flippable">
-    <img src="https://bestcoder-123.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
+    <img src="Logo_Title.jpg" alt="Telesales Performance">
     <header id="overlayTitle"></header>
   </div>
 </body>
