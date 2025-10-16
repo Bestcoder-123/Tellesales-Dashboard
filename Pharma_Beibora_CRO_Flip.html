@@ -96,7 +96,7 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Correct and existing dashboard sequence (all in repo root)
+      // ✅ Dashboard sequence
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
@@ -105,7 +105,6 @@
       ];
 
       let index = 0;
-      let showingBanner = false;
       let rotationTimer;
       let timeUpdater;
 
@@ -124,7 +123,8 @@
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
         timeUpdater = setInterval(() => {
-          overlayTitle.textContent = `PHARMA / BEIBORA PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+          overlayTitle.textContent =
+            `PHARMA_BEIBORA_CRO SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
@@ -132,40 +132,48 @@
         frame.src = dashboards[i].url + "?v=" + new Date().getTime();
       }
 
-      function flipTransition(showBannerNext) {
-        frame.classList.remove("active");
+      function flipToDashboard(i) {
         overlay.classList.remove("active");
-
+        frame.classList.remove("active");
         setTimeout(() => {
-          if (showBannerNext) {
-            startLiveClock();
-            overlay.classList.add("active");
-          } else {
-            index = (index + 1) % dashboards.length;
-            loadDashboard(index);
-            frame.classList.add("active");
-          }
+          loadDashboard(i);
+          frame.classList.add("active");
+        }, 1000);
+      }
+
+      function flipToBanner() {
+        frame.classList.remove("active");
+        setTimeout(() => {
+          startLiveClock();
+          overlay.classList.add("active");
         }, 1000);
       }
 
       function rotate() {
-        if (!showingBanner) {
-          flipTransition(true);
-          showingBanner = true;
-          clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotate, 10000); // Banner for 10s
+        if (index < dashboards.length) {
+          // Show dashboards one by one
+          flipToDashboard(index);
+          rotationTimer = setTimeout(() => {
+            index++;
+            rotate();
+          }, dashboards[index].duration);
         } else {
-          flipTransition(false);
-          showingBanner = false;
-          clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotate, dashboards[index].duration); // Dashboard 20s each
+          // After 4 dashboards, show banner
+          flipToBanner();
+          rotationTimer = setTimeout(() => {
+            index = 0; // reset and repeat cycle
+            rotate();
+          }, 10000); // banner duration = 10s
         }
       }
 
-      // Start
+      // Start rotation
       loadDashboard(index);
       frame.classList.add("active");
-      rotationTimer = setTimeout(rotate, dashboards[index].duration);
+      rotationTimer = setTimeout(() => {
+        index++;
+        rotate();
+      }, dashboards[index].duration);
     }
   </script>
 </head>
