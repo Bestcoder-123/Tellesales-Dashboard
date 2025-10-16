@@ -96,7 +96,7 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Dashboard sequence
+      // ✅ Order you requested
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
@@ -124,7 +124,7 @@
         if (timeUpdater) clearInterval(timeUpdater);
         timeUpdater = setInterval(() => {
           overlayTitle.textContent =
-            `PHARMA_BEIBORA_CRO SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+            `PHARMA / BEIBORA PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
@@ -132,7 +132,7 @@
         frame.src = dashboards[i].url + "?v=" + new Date().getTime();
       }
 
-      function flipToDashboard(i) {
+      function showDashboard(i) {
         overlay.classList.remove("active");
         frame.classList.remove("active");
         setTimeout(() => {
@@ -141,7 +141,7 @@
         }, 1000);
       }
 
-      function flipToBanner() {
+      function showBanner() {
         frame.classList.remove("active");
         setTimeout(() => {
           startLiveClock();
@@ -151,25 +151,24 @@
 
       function rotate() {
         if (index < dashboards.length) {
-          // Show dashboards one by one
-          flipToDashboard(index);
+          // Show dashboards in order
+          showDashboard(index);
           rotationTimer = setTimeout(() => {
             index++;
             rotate();
           }, dashboards[index].duration);
         } else {
-          // After 4 dashboards, show banner
-          flipToBanner();
+          // After 4 dashboards → show banner
+          showBanner();
           rotationTimer = setTimeout(() => {
-            index = 0; // reset and repeat cycle
+            index = 0; // reset and loop again
             rotate();
           }, 10000); // banner duration = 10s
         }
       }
 
-      // Start rotation
-      loadDashboard(index);
-      frame.classList.add("active");
+      // Start the loop
+      showDashboard(index);
       rotationTimer = setTimeout(() => {
         index++;
         rotate();
