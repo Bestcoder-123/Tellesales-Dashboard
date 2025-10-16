@@ -22,15 +22,17 @@
       height: 100%;
       opacity: 0;
       transform-origin: center;
-      transform: rotateY(180deg);
-      transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
+      transform: rotateY(15deg) scale(1.02);
+      transition:
+        opacity 2s ease-in-out,
+        transform 2s ease-in-out;
       backface-visibility: hidden;
       display: none;
     }
 
     .flippable.active {
       opacity: 1;
-      transform: rotateY(0deg);
+      transform: rotateY(0deg) scale(1);
       z-index: 2;
       display: block;
     }
@@ -42,6 +44,7 @@
       background: black;
     }
 
+    /* Banner styling */
     #imageOverlay {
       display: flex;
       flex-direction: column;
@@ -96,7 +99,7 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Order you requested
+      // ✅ Order: 4 dashboards → then banner → repeat
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
@@ -134,7 +137,6 @@
 
       function showDashboard(i) {
         overlay.classList.remove("active");
-        frame.classList.remove("active");
         setTimeout(() => {
           loadDashboard(i);
           frame.classList.add("active");
@@ -151,23 +153,23 @@
 
       function rotate() {
         if (index < dashboards.length) {
-          // Show dashboards in order
+          // show dashboards sequentially
           showDashboard(index);
           rotationTimer = setTimeout(() => {
             index++;
             rotate();
           }, dashboards[index].duration);
         } else {
-          // After 4 dashboards → show banner
+          // after 4 dashboards → show banner
           showBanner();
           rotationTimer = setTimeout(() => {
-            index = 0; // reset and loop again
-            rotate();
-          }, 10000); // banner duration = 10s
+            index = 0;
+            rotate(); // restart sequence
+          }, 10000);
         }
       }
 
-      // Start the loop
+      // Start sequence
       showDashboard(index);
       rotationTimer = setTimeout(() => {
         index++;
@@ -186,3 +188,4 @@
   </div>
 </body>
 </html>
+
