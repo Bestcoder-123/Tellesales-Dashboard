@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Pharma_Beibora_Flip</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+      perspective: 1500px;
+    }
+
+    .flippable {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform-origin: center;
+      transform: rotateY(180deg);
+      transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
+      backface-visibility: hidden;
+      display: none;
+    }
+
+    .flippable.active {
+      opacity: 1;
+      transform: rotateY(0deg);
+      z-index: 2;
+      display: block;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+
+    #imageOverlay {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      z-index: 1;
+      background: black;
+      color: white;
+    }
+
+    #imageOverlay header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      padding: 6px 0;
+      text-align: center;
+      font-size: 1em;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+      z-index: 3;
+      border-bottom: 2px solid #00ffcc;
+    }
+
+    #imageOverlay img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      z-index: 2;
+      animation: slowZoom 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes slowZoom {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", initializeDashboard);
+
+    function initializeDashboard() {
+      const frame = document.getElementById("dashboardFrame");
+      const overlay = document.getElementById("imageOverlay");
+      const overlayTitle = document.getElementById("overlayTitle");
+
+      document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
+
+      // Updated sequence of dashboards
+      const dashboards = [
+        { url: "Pharma_Telesales_Statistics.html", duration: 20000 },
+        { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
+        { url: "Pharma_CRO_Statistics.html", duration: 20000 },
+        { url: "Beibora_CRO_Statistics.html", duration: 20000 }
+      ];
+
+      let index = 0;
+      let showingBanner = false;
+      let rotationTimer;
+      let timeUpdater;
+
+      function getFormattedTime() {
+        const now = new Date();
+        return now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(',', '');
+      }
+
+      function startLiveClock() {
+        if (timeUpdater) clearInterval(timeUpdater);
+        timeUpdater = setInterval(() => {
+          overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+        }, 1000);
+      }
+
+      function loadDashboard(i) {
+        frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+      }
+
+      function flipTransition(showBannerNext) {
+        frame.classList.remove("active");
+        overlay.classList.remove("active");
+
+        setTimeout(() => {
+          if (showBannerNext) {
+            startLiveClock();
+            overlay.classList.add("active");
+          } else {
+            index = (index + 1) % dashboards.length;
+            loadDashboard(index);
+            frame.classList.add("active");
+          }
+        }, 1000);
+      }
+
+      function rotate() {
+        if (!showingBanner) {
+          flipTransition(true); // show banner next
+          showingBanner = true;
+          clearTimeout(rotationTimer);
+          rotationTimer = setTimeout(rotate, 10000); // banner duration = 10s
+        } else {
+          flipTransition(false); // show next dashboard
+          showingBanner = false;
+          clearTimeout(rotationTimer);
+          rotationTimer = setTimeout(rotate, dashboards[index].duration); // each dashboard = 20s
+        }
+      }
+
+      // Start with first dashboard
+      loadDashboard(index);
+      frame.classList.add("active");
+      rotationTimer = setTimeout(rotate, dashboards[index].duration);
+    }
+  </script>
+</head>
+
+<body>
+  <iframe id="dashboardFrame" class="flippable"></iframe>
+
+  <div id="imageOverlay" class="flippable">
+    <img src="https://bestcoder-123.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
+    <header id="overlayTitle"></header>
+  </div>
+</body>
+</html>
