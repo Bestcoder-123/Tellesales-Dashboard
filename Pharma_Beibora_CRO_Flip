@@ -100,8 +100,8 @@
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
-        { url: "Pharma_CRO_Statistics.html", duration: 20000 },
-        { url: "Beibora_CRO_Statistics.html", duration: 20000 }
+        { url: "Beibora_CRO_Statistics.html", duration: 20000 },
+        { url: "Pharma_CRO_Statistics.html", duration: 20000 }
       ];
 
       let index = 0;
@@ -124,7 +124,7 @@
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
         timeUpdater = setInterval(() => {
-          overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+          overlayTitle.textContent = `PHARMA_BEIBORA_CRO SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
