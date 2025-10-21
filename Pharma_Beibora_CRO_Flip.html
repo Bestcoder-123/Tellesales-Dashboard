@@ -99,13 +99,15 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
+      // ✅ Order: 4 dashboards → then banner → repeat
       const dashboards = [
-        { url: "Pharma_Telesales_Statistics.html", duration: 60000 },
-        { url: "Beibora_Telesales_Statistics.html", duration: 30000 },
-        { url: "Pharma_CRO_Statistics.html", duration: 60000 },
-        { url: "Beibora_CRO_Statistics.html", duration: 60000 }
+        { url: "Pharma_Telesales_Statistics.html", duration: 180000 },
+        { url: "Beibora_Telesales_Statistics.html", duration: 120000 },
+        { url: "Pharma_CRO_Statistics.html", duration: 240000 },
+        { url: "Beibora_CRO_Statistics.html", duration: 240000 }
       ];
 
+      // ✅ Remember last dashboard index and banner state
       let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
       let isBanner = localStorage.getItem("isBanner") === "true";
       let rotationTimer;
@@ -136,7 +138,6 @@
       }
 
       function showDashboard(i) {
-        isBanner = false;
         localStorage.setItem("isBanner", "false");
         localStorage.setItem("currentDashboardIndex", i);
         overlay.classList.remove("active");
@@ -147,7 +148,6 @@
       }
 
       function showBanner() {
-        isBanner = true;
         localStorage.setItem("isBanner", "true");
         frame.classList.remove("active");
         setTimeout(() => {
@@ -167,12 +167,14 @@
           showBanner();
           rotationTimer = setTimeout(() => {
             index = 0;
+            localStorage.setItem("currentDashboardIndex", index);
+            localStorage.setItem("isBanner", "false");
             rotate();
           }, 30000);
         }
       }
 
-      // Restore last displayed screen
+      // ✅ Resume from last saved state
       if (isBanner) {
         showBanner();
         rotationTimer = setTimeout(() => {
@@ -189,10 +191,10 @@
         }, dashboards[index].duration);
       }
 
-      // Store last known state before leaving/reloading
+      // ✅ Save progress before refresh or close
       window.addEventListener("beforeunload", () => {
         localStorage.setItem("currentDashboardIndex", index);
-        localStorage.setItem("isBanner", isBanner);
+        localStorage.setItem("isBanner", overlay.classList.contains("active"));
       });
     }
   </script>
