@@ -99,7 +99,6 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Order: 4 dashboards → then banner → repeat
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 180000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 120000 },
@@ -107,7 +106,8 @@
         { url: "Beibora_CRO_Statistics.html", duration: 240000 }
       ];
 
-      let index = 0;
+      let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
+      let isBanner = localStorage.getItem("isBanner") === "true";
       let rotationTimer;
       let timeUpdater;
 
@@ -136,6 +136,9 @@
       }
 
       function showDashboard(i) {
+        isBanner = false;
+        localStorage.setItem("isBanner", "false");
+        localStorage.setItem("currentDashboardIndex", i);
         overlay.classList.remove("active");
         setTimeout(() => {
           loadDashboard(i);
@@ -144,6 +147,8 @@
       }
 
       function showBanner() {
+        isBanner = true;
+        localStorage.setItem("isBanner", "true");
         frame.classList.remove("active");
         setTimeout(() => {
           startLiveClock();
@@ -153,28 +158,42 @@
 
       function rotate() {
         if (index < dashboards.length) {
-          // show dashboards sequentially
           showDashboard(index);
           rotationTimer = setTimeout(() => {
             index++;
             rotate();
           }, dashboards[index].duration);
         } else {
-          // after 4 dashboards → show banner
           showBanner();
           rotationTimer = setTimeout(() => {
             index = 0;
-            rotate(); // restart sequence
+            rotate();
           }, 30000);
         }
       }
 
-      // Start sequence
-      showDashboard(index);
-      rotationTimer = setTimeout(() => {
-        index++;
-        rotate();
-      }, dashboards[index].duration);
+      // Restore last displayed screen
+      if (isBanner) {
+        showBanner();
+        rotationTimer = setTimeout(() => {
+          index = 0;
+          localStorage.setItem("currentDashboardIndex", index);
+          localStorage.setItem("isBanner", "false");
+          rotate();
+        }, 30000);
+      } else {
+        showDashboard(index);
+        rotationTimer = setTimeout(() => {
+          index++;
+          rotate();
+        }, dashboards[index].duration);
+      }
+
+      // Store last known state before leaving/reloading
+      window.addEventListener("beforeunload", () => {
+        localStorage.setItem("currentDashboardIndex", index);
+        localStorage.setItem("isBanner", isBanner);
+      });
     }
   </script>
 </head>
@@ -188,4 +207,3 @@
   </div>
 </body>
 </html>
-
