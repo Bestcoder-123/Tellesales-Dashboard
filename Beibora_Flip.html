@@ -18,7 +18,7 @@
       width: 100%;
       height: 100%;
       position: relative;
-      display: block; /* Always visible now */
+      display: block;
     }
 
     .flipper {
@@ -85,6 +85,7 @@
     const beiboraFrame = document.getElementById("beiboraFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
+    // Load dashboards with cache-busting timestamps
     beiboraFrame.src = "Beibora_Telesales_Statistics.html?nocache=" + new Date().getTime();
     bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
 
@@ -115,6 +116,29 @@
     }
 
     setTimeout(flipCycle, beiboraDuration);
+
+    // --- 🔄 Auto refresh mechanism when R script updates data ---
+    let lastCheck = null;
+
+    async function checkForUpdate() {
+      try {
+        const res = await fetch("refresh.json?nocache=" + new Date().getTime());
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Compare timestamps — if changed, reload the dashboard
+        if (lastCheck && data.timestamp !== lastCheck) {
+          console.log("Detected update from R script — refreshing dashboard...");
+          location.reload(true);
+        }
+        lastCheck = data.timestamp;
+      } catch (e) {
+        console.warn("Update check failed:", e);
+      }
+    }
+
+    // Check every 10 seconds for changes
+    setInterval(checkForUpdate, 10000);
   </script>
 </body>
 </html>
