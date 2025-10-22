@@ -44,7 +44,6 @@
       background: black;
     }
 
-    /* Banner styling */
     #imageOverlay {
       display: flex;
       flex-direction: column;
@@ -99,7 +98,6 @@
 
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Order: 6 dashboards → then banner → repeat
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 150000 },
         { url: "Beibora_Telesales_Statistics.html", duration: 60000 },
@@ -109,7 +107,6 @@
         { url: "Beibora_Branch_Performance_Statistics.html", duration: 60000 }
       ];
 
-      // ✅ Remember last dashboard index and banner state
       let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
       let isBanner = localStorage.getItem("isBanner") === "true";
       let rotationTimer;
@@ -176,7 +173,6 @@
         }
       }
 
-      // ✅ Resume from last saved state
       if (isBanner) {
         showBanner();
         rotationTimer = setTimeout(() => {
@@ -193,11 +189,32 @@
         }, dashboards[index].duration);
       }
 
-      // ✅ Save progress before refresh or close
       window.addEventListener("beforeunload", () => {
         localStorage.setItem("currentDashboardIndex", index);
         localStorage.setItem("isBanner", overlay.classList.contains("active"));
       });
+
+      // --- 🔄 AUTO REFRESH MECHANISM (added) ---
+      let lastCheck = null;
+
+      async function checkForUpdate() {
+        try {
+          const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
+          if (!res.ok) return;
+          const data = await res.json();
+
+          if (lastCheck && data.timestamp !== lastCheck) {
+            console.log("Detected update from R script — refreshing dashboard...");
+            location.reload(true);
+          }
+          lastCheck = data.timestamp;
+        } catch (e) {
+          console.warn("Update check failed:", e);
+        }
+      }
+
+      // Check every 10 seconds for updates
+      setInterval(checkForUpdate, 10000);
     }
   </script>
 </head>
