@@ -147,6 +147,28 @@
       localStorage.setItem('lastFlip_pharma', Date.now());
       setTimeout(switchScreens, pharmaDuration);
     }
+
+    // --- 🔄 Auto refresh mechanism when R script updates data ---
+    let lastCheck = null;
+
+    async function checkForUpdate() {
+      try {
+        const res = await fetch("refresh_pharma.json?nocache=" + new Date().getTime());
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (lastCheck && data.timestamp !== lastCheck) {
+          console.log("Detected update from R script — refreshing dashboard...");
+          location.reload(true);
+        }
+        lastCheck = data.timestamp;
+      } catch (e) {
+        console.warn("Update check failed:", e);
+      }
+    }
+
+    // Check every 10 seconds for new data
+    setInterval(checkForUpdate, 10000);
   </script>
 
 </body>
