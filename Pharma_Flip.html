@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Pharma_Dashboard_Flip</title>
+
+  <!-- 🔧 Prevent caching in WallPanel / Android WebView -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
   <style>
     html, body {
       margin: 0;
@@ -77,11 +83,11 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // Load initial iframe content
-    pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
-    bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
+    // 🔧 Always bypass cache for both iframes
+    pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + Date.now();
+    bannerFrame.src = "Banner.html?nocache=" + Date.now();
 
-    // Live updating clock
+    // Dynamic clock header
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -144,18 +150,18 @@
       setTimeout(switchScreens, pharmaDuration);
     }
 
-    // Auto-refresh mechanism for R script updates
+    // 🔧 Auto-refresh mechanism — fully stable for WallPanel
     let lastCheck = null;
 
     async function checkForUpdate() {
       try {
-        const res = await fetch("refresh_pharma.json?nocache=" + new Date().getTime());
+        const res = await fetch("refresh_pharma.json?nocache=" + Date.now(), { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
 
         if (lastCheck && data.timestamp !== lastCheck) {
-          console.log("Detected update from R script — reloading full dashboard...");
-          location.reload(true); // 🔥 Full page reload for instant data refresh in WallPanel
+          console.log("💥 Update detected — full reload triggered.");
+          location.reload(true);
         }
         lastCheck = data.timestamp;
       } catch (e) {
@@ -163,10 +169,9 @@
       }
     }
 
-    // Check for updates every second (near-instant)
+    // Check every 1s for R updates
     setInterval(checkForUpdate, 1000);
   </script>
 
 </body>
 </html>
-
