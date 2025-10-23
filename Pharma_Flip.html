@@ -83,11 +83,19 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🔧 Always bypass cache for both iframes
-    pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + Date.now();
-    bannerFrame.src = "Banner.html?nocache=" + Date.now();
+    // Initial load — always bypass cache
+    function loadPharma() {
+      pharmaFrame.src = "Pharma_Telesales_Statistics.html?v=" + Date.now();
+    }
 
-    // Dynamic clock header
+    function loadBanner() {
+      bannerFrame.src = "Banner.html?v=" + Date.now();
+    }
+
+    loadPharma();
+    loadBanner();
+
+    // 🕒 Dynamic header clock
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -98,33 +106,39 @@
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
-      overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedDate.toUpperCase()} | # OPERATION NIGHT HAMMER`;
+      overlayTitle.textContent =
+        `PHARMA TELESALES PERFORMANCE AS AT ${formattedDate.toUpperCase()} | # OPERATION NIGHT HAMMER`;
     }
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // Flip cycle durations
+    // 🌀 Flip logic
     const pharmaDuration = 120000; // 2 minutes
     const bannerDuration = 10000;  // 10 seconds
     let showingBanner = false;
+    let flipTimer = null;
 
     function switchScreens() {
       if (showingBanner) {
+        // Back to main dashboard — reload fresh data
         bannerScreen.classList.remove("active");
         pharmaScreen.classList.add("active");
         showingBanner = false;
+        loadPharma();
         localStorage.setItem('lastFlip_pharma', Date.now());
-        setTimeout(switchScreens, pharmaDuration);
+        flipTimer = setTimeout(switchScreens, pharmaDuration);
       } else {
+        // Show banner
         pharmaScreen.classList.remove("active");
         bannerScreen.classList.add("active");
         showingBanner = true;
+        loadBanner();
         localStorage.setItem('lastFlip_pharma', Date.now());
-        setTimeout(switchScreens, bannerDuration);
+        flipTimer = setTimeout(switchScreens, bannerDuration);
       }
     }
 
-    // Persist phase across refresh
+    // Restore last phase after reload
     const lastFlip = localStorage.getItem('lastFlip_pharma');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
@@ -135,43 +149,22 @@
         pharmaScreen.classList.add("active");
         bannerScreen.classList.remove("active");
         showingBanner = false;
-        setTimeout(switchScreens, pharmaDuration - modTime);
+        flipTimer = setTimeout(switchScreens, pharmaDuration - modTime);
       } else {
         pharmaScreen.classList.remove("active");
         bannerScreen.classList.add("active");
         showingBanner = true;
-        setTimeout(switchScreens, totalCycle - modTime);
+        flipTimer = setTimeout(switchScreens, totalCycle - modTime);
       }
     } else {
       pharmaScreen.classList.add("active");
       bannerScreen.classList.remove("active");
       showingBanner = false;
       localStorage.setItem('lastFlip_pharma', Date.now());
-      setTimeout(switchScreens, pharmaDuration);
+      flipTimer = setTimeout(switchScreens, pharmaDuration);
     }
-
-    // 🔧 Auto-refresh mechanism — fully stable for WallPanel
-    let lastCheck = null;
-
-    async function checkForUpdate() {
-      try {
-        const res = await fetch("refresh_pharma.json?nocache=" + Date.now(), { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-
-        if (lastCheck && data.timestamp !== lastCheck) {
-          console.log("💥 Update detected — full reload triggered.");
-          location.reload(true);
-        }
-        lastCheck = data.timestamp;
-      } catch (e) {
-        console.warn("Update check failed:", e);
-      }
-    }
-
-    // Check every 1s for R updates
-    setInterval(checkForUpdate, 1000);
   </script>
 
 </body>
 </html>
+
