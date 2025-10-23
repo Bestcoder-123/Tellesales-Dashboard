@@ -61,12 +61,10 @@
 
 <body>
 
-  <!-- Pharma dashboard -->
   <div class="screen active" id="pharmaScreen">
     <iframe id="pharmaFrame"></iframe>
   </div>
 
-  <!-- Banner screen -->
   <div class="screen" id="bannerScreen">
     <iframe id="bannerFrame"></iframe>
     <header id="overlayTitle"></header>
@@ -79,11 +77,15 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // 🧠 Load fresh versions
-    pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
-    bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
+    const screens = [
+      { frame: pharmaFrame, screen: pharmaScreen, duration: 120000 },
+      { frame: bannerFrame, screen: bannerScreen, duration: 10000 }
+    ];
 
-    // ⏰ Live updating clock
+    let index = 0; // currently visible screen
+    let lastCheck = null;
+
+    // --- Live clock ---
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -94,82 +96,52 @@
         minute: '2-digit',
         second: '2-digit'
       }).replace(',', '');
-      const formattedTime = formattedDate.replace(/\b([A-Za-z]+)\b/, match => match.toUpperCase());
-      overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedTime} | # OPERATION NIGHT HAMMER`;
+      overlayTitle.textContent = `PHARMA TELESALES PERFORMANCE AS AT ${formattedDate.toUpperCase()} | # OPERATION NIGHT HAMMER`;
     }
-
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // --- Flip Timing ---
-    const pharmaDuration = 120000; // 2 minutes
-    const bannerDuration = 10000;  // 10 seconds
-    let showingBanner = false;
-
-    function switchScreens() {
-      if (showingBanner) {
-        bannerScreen.classList.remove("active");
-        pharmaScreen.classList.add("active");
-        showingBanner = false;
-        localStorage.setItem('lastFlip_pharma', Date.now());
-        setTimeout(switchScreens, pharmaDuration);
-      } else {
-        pharmaScreen.classList.remove("active");
-        bannerScreen.classList.add("active");
-        showingBanner = true;
-        localStorage.setItem('lastFlip_pharma', Date.now());
-        setTimeout(switchScreens, bannerDuration);
-      }
+    // --- Load iframe dynamically ---
+    function loadScreen(i) {
+      const s = screens[i];
+      s.frame.src = s.frame.src.split('?')[0] + "?nocache=" + new Date().getTime();
+      screens.forEach((scr, idx) => {
+        if(idx === i) scr.screen.classList.add("active");
+        else scr.screen.classList.remove("active");
+      });
     }
 
-    // --- Persist phase across refresh ---
-    const lastFlip = localStorage.getItem('lastFlip_pharma');
-    if (lastFlip) {
-      const elapsed = Date.now() - lastFlip;
-      const totalCycle = pharmaDuration + bannerDuration;
-      const modTime = elapsed % totalCycle;
-
-      if (modTime < pharmaDuration) {
-        pharmaScreen.classList.add("active");
-        bannerScreen.classList.remove("active");
-        showingBanner = false;
-        setTimeout(switchScreens, pharmaDuration - modTime);
-      } else {
-        pharmaScreen.classList.remove("active");
-        bannerScreen.classList.add("active");
-        showingBanner = true;
-        setTimeout(switchScreens, totalCycle - modTime);
-      }
-    } else {
-      pharmaScreen.classList.add("active");
-      bannerScreen.classList.remove("active");
-      showingBanner = false;
-      localStorage.setItem('lastFlip_pharma', Date.now());
-      setTimeout(switchScreens, pharmaDuration);
+    // --- Flip cycle ---
+    function flipCycle() {
+      index = (index + 1) % screens.length;
+      loadScreen(index);
+      setTimeout(flipCycle, screens[index].duration);
     }
 
-    // --- 🔄 Auto refresh mechanism when R script updates data ---
-    let lastCheck = null;
+    // --- Initialize ---
+    loadScreen(index);
+    setTimeout(flipCycle, screens[index].duration);
 
+    // --- Auto-refresh on R script update ---
     async function checkForUpdate() {
       try {
         const res = await fetch("refresh_pharma.json?nocache=" + new Date().getTime());
-        if (!res.ok) return;
+        if(!res.ok) return;
         const data = await res.json();
 
-        if (lastCheck && data.timestamp !== lastCheck) {
-          console.log("Detected update from R script — refreshing dashboard...");
-          location.reload(true);
+        if(lastCheck && data.timestamp !== lastCheck){
+          console.log("Detected update from R script — refreshing current iframe...");
+          loadScreen(index); // reload currently visible screen
         }
         lastCheck = data.timestamp;
-      } catch (e) {
+      } catch(e) {
         console.warn("Update check failed:", e);
       }
     }
 
-    // Check every 10 seconds for new data
-    setInterval(checkForUpdate, 10000);
+    setInterval(checkForUpdate, 10000); // check every 10s
   </script>
 
 </body>
 </html>
+
