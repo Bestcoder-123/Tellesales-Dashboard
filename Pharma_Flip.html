@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Pharma_Dashboard_Flip</title>
 
-  <!-- 🔧 Prevent caching in WallPanel / Android WebView -->
+  <!-- 🔧 Prevent caching -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -83,19 +83,32 @@
     const pharmaFrame = document.getElementById("pharmaFrame");
     const bannerFrame = document.getElementById("bannerFrame");
 
-    // Initial load — always bypass cache
-    function loadPharma() {
-      pharmaFrame.src = "Pharma_Telesales_Statistics.html?v=" + Date.now();
+    const pharmaDuration = 120000; // 2 min
+    const bannerDuration = 10000;  // 10 sec
+    let showingBanner = false;
+    let flipTimer = null;
+
+    // 🧠 Hard reload (WallPanel compatible)
+    function hardReloadFrame(frame, url) {
+      try {
+        const iframeWin = frame.contentWindow;
+        if (iframeWin && iframeWin.location) {
+          iframeWin.location.replace(url);
+        } else {
+          frame.src = url;
+        }
+      } catch {
+        frame.src = url;
+      }
     }
 
-    function loadBanner() {
-      bannerFrame.src = "Banner.html?v=" + Date.now();
-    }
-
+    // Load both on startup
+    function loadPharma() { hardReloadFrame(pharmaFrame, "Pharma_Telesales_Statistics.html"); }
+    function loadBanner() { hardReloadFrame(bannerFrame, "Banner.html"); }
     loadPharma();
     loadBanner();
 
-    // 🕒 Dynamic header clock
+    // 🕒 Dynamic header
     function updateHeader() {
       const now = new Date();
       const formattedDate = now.toLocaleString('en-GB', {
@@ -113,32 +126,27 @@
     updateHeader();
 
     // 🌀 Flip logic
-    const pharmaDuration = 120000; // 2 minutes
-    const bannerDuration = 10000;  // 10 seconds
-    let showingBanner = false;
-    let flipTimer = null;
-
     function switchScreens() {
       if (showingBanner) {
-        // Back to main dashboard — reload fresh data
+        // Switch to dashboard
         bannerScreen.classList.remove("active");
         pharmaScreen.classList.add("active");
         showingBanner = false;
-        loadPharma();
+        hardReloadFrame(pharmaFrame, "Pharma_Telesales_Statistics.html"); // hard refresh data
         localStorage.setItem('lastFlip_pharma', Date.now());
         flipTimer = setTimeout(switchScreens, pharmaDuration);
       } else {
-        // Show banner
+        // Switch to banner
         pharmaScreen.classList.remove("active");
         bannerScreen.classList.add("active");
         showingBanner = true;
-        loadBanner();
+        hardReloadFrame(bannerFrame, "Banner.html"); // hard refresh banner
         localStorage.setItem('lastFlip_pharma', Date.now());
         flipTimer = setTimeout(switchScreens, bannerDuration);
       }
     }
 
-    // Restore last phase after reload
+    // 🔄 Resume last phase after reload
     const lastFlip = localStorage.getItem('lastFlip_pharma');
     if (lastFlip) {
       const elapsed = Date.now() - lastFlip;
@@ -167,4 +175,5 @@
 
 </body>
 </html>
+
 
