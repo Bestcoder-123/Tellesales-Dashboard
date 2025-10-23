@@ -88,13 +88,13 @@
 
     const dashboards = [
       { frame: beiboraFrame, url: "Beibora_Telesales_Statistics.html", duration: 120000 }, // dashboard
-      { frame: bannerFrame, url: "Banner.html", duration: 10000 }                         // banner
+      { frame: bannerFrame, url: "Banner.html", duration: 10000 }                          // banner
     ];
 
-    let index = 0;            
-    let rotationTimer = null; 
+    let index = 0;
+    let rotationTimer = null;
 
-    // Format and update banner header clock
+    // ⏰ Update banner time header
     function getFormattedTime() {
       const now = new Date();
       return now.toLocaleString('en-GB', {
@@ -108,44 +108,52 @@
     }
 
     function updateHeader() {
-      overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime().toUpperCase()} | # OPERATION NIGHT HAMMER`;
+      overlayTitle.textContent =
+        `BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime().toUpperCase()} | # OPERATION NIGHT HAMMER`;
     }
-
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    // Load and cache-bust dashboard or banner
-    function loadDashboardByIndex(i) {
-      const dash = dashboards[i];
-      dash.frame.src = dash.url + "?v=" + new Date().getTime();
+    // 🧠 Force reload function that works in WallPanel
+    function hardReloadFrame(frame, url) {
+      try {
+        const iframeWin = frame.contentWindow;
+        // Force reload if possible
+        if (iframeWin && iframeWin.location) {
+          iframeWin.location.replace(url);
+        } else {
+          // fallback
+          frame.src = url;
+        }
+      } catch {
+        // fallback for security sandbox
+        frame.src = url;
+      }
     }
 
-    // Show a specific index (0 = dashboard, 1 = banner)
+    // Show dashboard or banner
     function showIndex(i) {
       if (rotationTimer) clearTimeout(rotationTimer);
       index = i;
 
       if (index === 0) {
-        // Always reload the dashboard with latest data after banner
+        // 🧠 Always hard-reload dashboard after banner
         flipper.classList.remove("flip");
-        loadDashboardByIndex(0);
+        hardReloadFrame(beiboraFrame, dashboards[0].url);
       } else {
-        // Show banner
+        // Show banner normally
         flipper.classList.add("flip");
-        loadDashboardByIndex(1);
+        hardReloadFrame(bannerFrame, dashboards[1].url);
       }
 
       const nextIndex = (index + 1) % dashboards.length;
       rotationTimer = setTimeout(() => showIndex(nextIndex), dashboards[index].duration);
     }
 
-    // Start the cycle
+    // Start cycle
     function startRotation() {
-      // Preload dashboard & banner
-      loadDashboardByIndex(0);
-      dashboards[1].frame.src = dashboards[1].url + "?v=" + new Date().getTime();
-
-      // Start rotation
+      hardReloadFrame(beiboraFrame, dashboards[0].url);
+      hardReloadFrame(bannerFrame, dashboards[1].url);
       rotationTimer = setTimeout(() => showIndex(1), dashboards[0].duration);
     }
 
@@ -153,4 +161,3 @@
   </script>
 </body>
 </html>
-
