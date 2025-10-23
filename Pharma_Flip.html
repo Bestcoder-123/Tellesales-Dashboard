@@ -154,12 +154,8 @@
         const data = await res.json();
 
         if (lastCheck && data.timestamp !== lastCheck) {
-          console.log("Detected update from R script — refreshing currently visible iframe...");
-          if (showingBanner) {
-            bannerFrame.src = "Banner.html?nocache=" + new Date().getTime();
-          } else {
-            pharmaFrame.src = "Pharma_Telesales_Statistics.html?nocache=" + new Date().getTime();
-          }
+          console.log("Detected update from R script — reloading full dashboard...");
+          location.reload(true); // 🔥 Full page reload for instant data refresh in WallPanel
         }
         lastCheck = data.timestamp;
       } catch (e) {
@@ -167,8 +163,10 @@
       }
     }
 
-    setInterval(checkForUpdate, 1000); // check every second for near-instant update
+    // Check for updates every second (near-instant)
+    setInterval(checkForUpdate, 1000);
   </script>
 
 </body>
 </html>
+
