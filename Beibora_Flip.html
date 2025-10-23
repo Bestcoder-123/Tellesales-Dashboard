@@ -87,13 +87,14 @@
     const bannerFrame = document.getElementById("bannerFrame");
 
     const dashboards = [
-      { frame: beiboraFrame, url: "Beibora_Telesales_Statistics.html", duration: 120000 },
-      { frame: bannerFrame, url: "Banner.html", duration: 10000 }
+      { frame: beiboraFrame, url: "Beibora_Telesales_Statistics.html", duration: 120000 }, // dashboard
+      { frame: bannerFrame, url: "Banner.html", duration: 10000 }                         // banner
     ];
 
-    let index = 0;
-    let lastCheck = null;
+    let index = 0;            
+    let rotationTimer = null; 
 
+    // Format and update banner header clock
     function getFormattedTime() {
       const now = new Date();
       return now.toLocaleString('en-GB', {
@@ -113,46 +114,43 @@
     setInterval(updateHeader, 1000);
     updateHeader();
 
-    function loadDashboard(i) {
+    // Load and cache-bust dashboard or banner
+    function loadDashboardByIndex(i) {
       const dash = dashboards[i];
-      dash.frame.src = dash.url + "?nocache=" + new Date().getTime();
+      dash.frame.src = dash.url + "?v=" + new Date().getTime();
     }
 
-    function flipCycle() {
-      index = (index + 1) % dashboards.length;
-      loadDashboard(index);
+    // Show a specific index (0 = dashboard, 1 = banner)
+    function showIndex(i) {
+      if (rotationTimer) clearTimeout(rotationTimer);
+      index = i;
 
-      if(index === 0){
-        flipper.classList.remove("flip"); // show front
+      if (index === 0) {
+        // Always reload the dashboard with latest data after banner
+        flipper.classList.remove("flip");
+        loadDashboardByIndex(0);
       } else {
-        flipper.classList.add("flip"); // show back
+        // Show banner
+        flipper.classList.add("flip");
+        loadDashboardByIndex(1);
       }
 
-      setTimeout(flipCycle, dashboards[index].duration);
+      const nextIndex = (index + 1) % dashboards.length;
+      rotationTimer = setTimeout(() => showIndex(nextIndex), dashboards[index].duration);
     }
 
-    // Initial load
-    loadDashboard(0);
-    setTimeout(flipCycle, dashboards[0].duration);
+    // Start the cycle
+    function startRotation() {
+      // Preload dashboard & banner
+      loadDashboardByIndex(0);
+      dashboards[1].frame.src = dashboards[1].url + "?v=" + new Date().getTime();
 
-    // Auto refresh when R script updates data
-    async function checkForUpdate() {
-      try {
-        const res = await fetch("refresh.json?nocache=" + new Date().getTime());
-        if (!res.ok) return;
-        const data = await res.json();
-
-        if(lastCheck && data.timestamp !== lastCheck){
-          console.log("Detected update from R script — refreshing current iframe...");
-          loadDashboard(index); // reload current visible iframe only
-        }
-        lastCheck = data.timestamp;
-      } catch(e) {
-        console.warn("Update check failed:", e);
-      }
+      // Start rotation
+      rotationTimer = setTimeout(() => showIndex(1), dashboards[0].duration);
     }
 
-    setInterval(checkForUpdate, 10000); // check every 10s
+    startRotation();
   </script>
 </body>
 </html>
+
