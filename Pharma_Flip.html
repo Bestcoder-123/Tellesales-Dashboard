@@ -124,7 +124,7 @@
         if (timeUpdater) clearInterval(timeUpdater);
         timeUpdater = setInterval(() => {
           overlayTitle.textContent =
-            `PHARMA_FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+            `PHARMA FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
@@ -165,7 +165,7 @@
             localStorage.setItem("currentDashboardIndex", index);
             localStorage.setItem("isBanner", "false");
             rotate();
-          }, 30000);
+          }, 10000);
         }
       }
 
@@ -176,7 +176,7 @@
           localStorage.setItem("currentDashboardIndex", index);
           localStorage.setItem("isBanner", "false");
           rotate();
-        }, 30000);
+        }, 10000);
       } else {
         showDashboard(index);
         rotationTimer = setTimeout(() => {
