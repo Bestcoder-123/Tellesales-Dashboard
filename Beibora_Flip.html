@@ -96,19 +96,22 @@
       const overlay = document.getElementById("imageOverlay");
       const overlayTitle = document.getElementById("overlayTitle");
 
-      // Ensure all .flippable elements start visible
+      // ✅ Ensure both flippable elements start visible for transition
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
+      // ✅ Define dashboards
       const dashboards = [
-        { url: "Beibora_Telesales_Statistics.html", duration: 120000 },
-        { url: "Beibora_CRO_Statistics.html", duration: 150000 }
+        { url: "Beibora_Telesales_Statistics.html", duration: 120000 }, // 2 min
+        { url: "Beibora_CRO_Statistics.html", duration: 150000 }        // 2.5 min
       ];
 
       let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
       let isBanner = localStorage.getItem("isBanner") === "true";
       let rotationTimer;
       let timeUpdater;
+      let lastCheck = null;
 
+      // ✅ Format live clock
       function getFormattedTime() {
         const now = new Date();
         return now.toLocaleString('en-GB', {
@@ -121,19 +124,28 @@
         }).replace(',', '');
       }
 
+      // ✅ Update banner title every second
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
+        overlayTitle.textContent = `BEIBORA_CRO FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         timeUpdater = setInterval(() => {
           overlayTitle.textContent =
-            `BEIBORA FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+            `BEIBORA_CRO FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
+      // ✅ Load a specific dashboard into the iframe
       function loadDashboard(i) {
-        frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+        if (!dashboards[i]) {
+          console.warn("Invalid dashboard index detected:", i);
+          index = 0;
+        }
+        frame.src = dashboards[index].url + "?v=" + new Date().getTime();
       }
 
+      // ✅ Show dashboard view
       function showDashboard(i) {
+        if (!dashboards[i]) i = 0;
         localStorage.setItem("isBanner", "false");
         localStorage.setItem("currentDashboardIndex", i);
         overlay.classList.remove("active");
@@ -143,6 +155,7 @@
         }, 1000);
       }
 
+      // ✅ Show banner view
       function showBanner() {
         localStorage.setItem("isBanner", "true");
         frame.classList.remove("active");
@@ -152,6 +165,7 @@
         }, 1000);
       }
 
+      // ✅ Main rotation logic
       function rotate() {
         if (index < dashboards.length) {
           showDashboard(index);
@@ -166,10 +180,11 @@
             localStorage.setItem("currentDashboardIndex", index);
             localStorage.setItem("isBanner", "false");
             rotate();
-          }, 10000);
+          }, 30000); // Banner visible for 30 seconds
         }
       }
 
+      // ✅ Resume state after reload
       if (isBanner) {
         showBanner();
         rotationTimer = setTimeout(() => {
@@ -179,6 +194,7 @@
           rotate();
         }, 30000);
       } else {
+        if (!dashboards[index]) index = 0;
         showDashboard(index);
         rotationTimer = setTimeout(() => {
           index++;
@@ -186,14 +202,13 @@
         }, dashboards[index].duration);
       }
 
+      // ✅ Save state before close
       window.addEventListener("beforeunload", () => {
         localStorage.setItem("currentDashboardIndex", index);
         localStorage.setItem("isBanner", overlay.classList.contains("active"));
       });
 
-      // --- 🔄 SAFE AUTO REFRESH (local friendly) ---
-      let lastCheck = null;
-
+      // ✅ Safe auto-refresh (local + web friendly)
       async function checkForUpdate() {
         try {
           const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
@@ -209,14 +224,15 @@
         }
       }
 
-      // Only run update check if served over HTTP/HTTPS (not file://)
+      // Only check for updates if running via http/https
       if (location.protocol.startsWith("http")) {
         setInterval(checkForUpdate, 10000);
       }
 
-      // Fallback: show banner immediately if nothing else loads
+      // ✅ Fallback: show banner if no dashboard loaded
       setTimeout(() => {
         if (!frame.src) {
+          console.warn("Fallback triggered — showing banner.");
           overlay.classList.add("active");
           startLiveClock();
         }
@@ -229,7 +245,7 @@
   <iframe id="dashboardFrame" class="flippable"></iframe>
 
   <div id="imageOverlay" class="flippable">
-    <img src="Logo_Title.jpg" alt="Telesales Performance">
+    <img src="Logo_Title.jpg" alt="Beibora Logo">
     <header id="overlayTitle"></header>
   </div>
 </body>
