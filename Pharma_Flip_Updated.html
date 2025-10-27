@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Pharma_Dashboard_Flip_Updated</title>
+  <title>Pharma_Dashboard_Flip</title>
   <style>
     html, body {
       margin: 0;
@@ -49,7 +49,6 @@
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      z-index: 1;
       background: black;
       color: white;
     }
@@ -87,6 +86,16 @@
       to { transform: scale(1.05); }
     }
   </style>
+</head>
+
+<body>
+  <!-- Set iframe visible by default -->
+  <iframe id="dashboardFrame" class="flippable active"></iframe>
+
+  <div id="imageOverlay" class="flippable">
+    <img src="Logo_Title.jpg" alt="Telesales Performance">
+    <header id="overlayTitle"></header>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", initializeDashboard);
@@ -96,18 +105,20 @@
       const overlay = document.getElementById("imageOverlay");
       const overlayTitle = document.getElementById("overlayTitle");
 
+      // Make all flippable elements displayable (required for animations)
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Use full relative path for GitHub Pages
       const dashboards = [
-        { url: "https://bestcoder-123.github.io/Tellesales-Dashboard/Pharma_Telesales_Statistics.html", duration: 150000 }
+        { url: "Pharma_Telesales_Statistics.html", duration: 150000 }
       ];
 
       let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
       let isBanner = localStorage.getItem("isBanner") === "true";
       let rotationTimer;
       let timeUpdater;
+      let lastCheck = null;
 
+      // === Live Clock ===
       function getFormattedTime() {
         const now = new Date();
         return now.toLocaleString('en-GB', {
@@ -122,37 +133,35 @@
 
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
+        overlayTitle.textContent = `PHARMA_FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         timeUpdater = setInterval(() => {
           overlayTitle.textContent =
-            `PHARMA_FLIP_UPDATED SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+            `PHARMA_FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
+      // === Dashboard Loader ===
       function loadDashboard(i) {
-        if (!dashboards[i]) return;
         frame.src = dashboards[i].url + "?v=" + new Date().getTime();
       }
 
       function showDashboard(i) {
+        overlay.classList.remove("active");
+        frame.classList.add("active");
+        loadDashboard(i);
         localStorage.setItem("isBanner", "false");
         localStorage.setItem("currentDashboardIndex", i);
-        overlay.classList.remove("active");
-        setTimeout(() => {
-          loadDashboard(i);
-          frame.classList.add("active");
-        }, 1000);
       }
 
       function showBanner() {
-        localStorage.setItem("isBanner", "true");
         frame.classList.remove("active");
-        setTimeout(() => {
-          startLiveClock();
-          overlay.classList.add("active");
-        }, 1000);
+        overlay.classList.add("active");
+        startLiveClock();
+        localStorage.setItem("isBanner", "true");
       }
 
       function rotate() {
+        clearTimeout(rotationTimer);
         if (index < dashboards.length) {
           showDashboard(index);
           rotationTimer = setTimeout(() => {
@@ -163,19 +172,16 @@
           showBanner();
           rotationTimer = setTimeout(() => {
             index = 0;
-            localStorage.setItem("currentDashboardIndex", index);
-            localStorage.setItem("isBanner", "false");
             rotate();
           }, 30000);
         }
       }
 
+      // === Initial State ===
       if (isBanner) {
         showBanner();
         rotationTimer = setTimeout(() => {
           index = 0;
-          localStorage.setItem("currentDashboardIndex", index);
-          localStorage.setItem("isBanner", "false");
           rotate();
         }, 30000);
       } else {
@@ -186,20 +192,25 @@
         }, dashboards[index].duration);
       }
 
+      // === Save State on Unload ===
       window.addEventListener("beforeunload", () => {
         localStorage.setItem("currentDashboardIndex", index);
         localStorage.setItem("isBanner", overlay.classList.contains("active"));
       });
 
-      // --- 🔄 AUTO REFRESH MECHANISM ---
-      let lastCheck = null;
+      // === Fallback: If iframe fails to load, show message ===
+      frame.addEventListener("error", () => {
+        frame.style.display = "block";
+        frame.style.opacity = "1";
+        frame.srcdoc = "<h2 style='color:white;text-align:center;margin-top:40vh;'>⚠️ Dashboard file not found. Please ensure 'Pharma_Telesales_Statistics.html' exists.</h2>";
+      });
 
+      // === Auto Refresh Check ===
       async function checkForUpdate() {
         try {
           const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
           if (!res.ok) return;
           const data = await res.json();
-
           if (lastCheck && data.timestamp !== lastCheck) {
             console.log("Detected update — refreshing dashboard...");
             location.reload(true);
@@ -210,17 +221,9 @@
         }
       }
 
+      // Check every 10 seconds
       setInterval(checkForUpdate, 10000);
     }
   </script>
-</head>
-
-<body>
-  <iframe id="dashboardFrame" class="flippable"></iframe>
-
-  <div id="imageOverlay" class="flippable">
-    <img src="Logo_Title.jpg" alt="Telesales Performance">
-    <header id="overlayTitle"></header>
-  </div>
 </body>
 </html>
