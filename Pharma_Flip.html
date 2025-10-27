@@ -99,8 +99,8 @@
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
       const dashboards = [
-        { url: "Pharma_Telesales_Statistics.html", duration: 20000 }
-        { url: "Pharma_CRO_Statistics.html", duration: 20000 }
+        { url: "Pharma_Telesales_Statistics.html", duration: 120000 }
+        { url: "Pharma_CRO_Statistics.html", duration: 150000 }
       ];
 
       let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
@@ -165,7 +165,7 @@
             localStorage.setItem("currentDashboardIndex", index);
             localStorage.setItem("isBanner", "false");
             rotate();
-          }, 10000);
+          }, 30000);
         }
       }
 
@@ -176,7 +176,7 @@
           localStorage.setItem("currentDashboardIndex", index);
           localStorage.setItem("isBanner", "false");
           rotate();
-        }, 10000);
+        }, 30000);
       } else {
         showDashboard(index);
         rotationTimer = setTimeout(() => {
