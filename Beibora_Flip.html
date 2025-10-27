@@ -99,7 +99,7 @@
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
       const dashboards = [
-        { url: "Beibora_Telesales_Statistics.html", duration: 20000 }
+        { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_CRO_Statistics.html", duration: 20000 }
       ];
 
@@ -165,7 +165,7 @@
             localStorage.setItem("currentDashboardIndex", index);
             localStorage.setItem("isBanner", "false");
             rotate();
-          }, 30000);
+          }, 10000);
         }
       }
 
@@ -224,4 +224,5 @@
   </div>
 </body>
 </html>
+
 
