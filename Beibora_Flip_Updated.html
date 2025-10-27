@@ -93,23 +93,23 @@
       const banner = document.getElementById("banner");
       const bannerTitle = document.getElementById("bannerTitle");
 
-      // List of dashboards
+      // 🧠 DASHBOARD LIST
       const dashboards = [
-        { url: "Beibora_Telesales_Statistics.html", duration: 120000 },
+        { url: "Beibora_Telesales_Statistics.html", duration: 20000 },
         { url: "Beibora_CRO_Statistics.html", duration: 20000 }
       ];
 
       let index = 0;
       let showingBanner = false;
 
-      // Load dashboard content
+      // 🧩 Load dashboard content
       function loadDashboard(i) {
         const src = dashboards[i].url + "?t=" + Date.now();
-        console.log("Loading:", src);
+        console.log("Loading dashboard:", src);
         frame.src = src;
       }
 
-      // Show dashboard screen
+      // 🧩 Show dashboard
       function showDashboard(i) {
         showingBanner = false;
         banner.classList.remove("active");
@@ -117,7 +117,7 @@
         loadDashboard(i);
       }
 
-      // Show banner
+      // 🧩 Show banner
       function showBanner() {
         showingBanner = true;
         dashboard.classList.remove("active");
@@ -125,7 +125,7 @@
         updateBannerTitle();
       }
 
-      // Update banner title every second
+      // 🧩 Update banner title every second
       function updateBannerTitle() {
         const update = () => {
           const now = new Date().toLocaleString("en-GB", {
@@ -136,34 +136,53 @@
             minute: "2-digit",
             second: "2-digit"
           }).replace(",", "");
-          bannerTitle.textContent = `BEIBORA FLIP UPDATED SALES PERFORMANCE AS AT ${now} | # OPERATION NIGHT HAMMER`;
+          bannerTitle.textContent =
+            `BEIBORA FLIP UPDATED SALES PERFORMANCE AS AT ${now} | # OPERATION NIGHT HAMMER`;
         };
         update();
         setInterval(update, 1000);
       }
 
-      // Rotation logic
+      // 🧭 Rotation logic — FIXED
       function rotate() {
+        console.log("🔄 Rotating: showingBanner =", showingBanner, "index =", index);
         if (showingBanner) {
+          // After banner → start dashboards again
           index = 0;
           showDashboard(index);
-          setTimeout(rotate, dashboards[index].duration);
+          setTimeout(nextDashboard, dashboards[index].duration);
         } else {
+          // After dashboards → show banner
           showBanner();
-          setTimeout(rotate, 30000);
+          setTimeout(rotate, 10000);
         }
       }
 
-      // Fallback if iframe cannot load
+      // 🔁 Move to next dashboard
+      function nextDashboard() {
+        index++;
+        if (index < dashboards.length) {
+          showDashboard(index);
+          console.log("➡️ Showing next dashboard:", dashboards[index].url);
+          setTimeout(nextDashboard, dashboards[index].duration);
+        } else {
+          console.log("🏁 All dashboards done, showing banner next...");
+          showBanner();
+          setTimeout(rotate, 10000);
+        }
+      }
+
+      // ⚠️ Fallback if iframe fails to load
       frame.addEventListener("error", () => {
-        frame.srcdoc = "<h2 style='color:white;text-align:center;margin-top:40vh;'>⚠️ Dashboard not found.<br>Ensure Pharma_Telesales_Statistics.html exists in this folder.</h2>";
+        frame.srcdoc =
+          "<h2 style='color:white;text-align:center;margin-top:40vh;'>⚠️ Dashboard not found.<br>Ensure Pharma_Telesales_Statistics.html exists in this folder.</h2>";
       });
 
-      // Start initial load
+      // 🚀 Start sequence
       showDashboard(index);
-      setTimeout(rotate, dashboards[index].duration);
+      setTimeout(nextDashboard, dashboards[index].duration);
 
-      // Optional: Auto-refresh trigger file check
+      // ♻️ Optional: auto-refresh trigger file check
       async function checkForUpdate() {
         try {
           const res = await fetch("refresh_all.json?nocache=" + Date.now());
@@ -175,7 +194,7 @@
           }
           window._lastCheck = data.timestamp;
         } catch (e) {
-          // No refresh_all.json found — ignore
+          // Ignore missing file
         }
       }
       setInterval(checkForUpdate, 10000);
