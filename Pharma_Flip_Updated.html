@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pharma_Dashboard_Flip_Updated</title>
+  <title>Pharma_Dashboard_Flip</title>
   <style>
     html, body {
       margin: 0;
@@ -11,65 +11,37 @@
       overflow: hidden;
       background: black;
       font-family: Arial, sans-serif;
-      perspective: 1500px;
     }
 
-    .flippable {
+    .screen {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0;
-      transform-origin: center;
-      transform: rotateY(15deg) scale(1.02);
-      transition:
-        opacity 2s ease-in-out,
-        transform 2s ease-in-out;
-      backface-visibility: hidden;
       display: none;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
     }
 
-    .flippable.active {
-      opacity: 1;
-      transform: rotateY(0deg) scale(1);
-      z-index: 2;
+    .screen.active {
       display: block;
+      opacity: 1;
     }
 
     iframe {
-      border: none;
       width: 100%;
       height: 100%;
+      border: none;
       background: black;
     }
 
-    #imageOverlay {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
+    #banner {
       background: black;
       color: white;
     }
 
-    #imageOverlay header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(90deg, #001f1f, #004d4d);
-      padding: 6px 0;
-      text-align: center;
-      font-size: 1em;
-      font-weight: bold;
-      color: #00ffcc;
-      text-shadow: 1px 1px 4px black;
-      z-index: 3;
-      border-bottom: 2px solid #00ffcc;
-    }
-
-    #imageOverlay img {
+    #banner img {
       position: absolute;
       top: 0;
       left: 0;
@@ -77,153 +49,136 @@
       height: 100%;
       object-fit: cover;
       opacity: 0.85;
-      z-index: 2;
-      animation: slowZoom 20s ease-in-out infinite alternate;
+      animation: zoom 20s ease-in-out infinite alternate;
     }
 
-    @keyframes slowZoom {
+    #banner header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 0;
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      color: #00ffcc;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 1px 1px 4px black;
+      border-bottom: 2px solid #00ffcc;
+      z-index: 2;
+    }
+
+    @keyframes zoom {
       from { transform: scale(1); }
       to { transform: scale(1.05); }
     }
   </style>
 </head>
-
 <body>
-  <!-- Set iframe visible by default -->
-  <iframe id="dashboardFrame" class="flippable active"></iframe>
 
-  <div id="imageOverlay" class="flippable">
-    <img src="Logo_Title.jpg" alt="Telesales Performance">
-    <header id="overlayTitle"></header>
+  <!-- Dashboard iframe -->
+  <div id="dashboard" class="screen active">
+    <iframe id="dashboardFrame"></iframe>
+  </div>
+
+  <!-- Banner overlay -->
+  <div id="banner" class="screen">
+    <img src="Logo_Title.jpg" alt="Banner Background">
+    <header id="bannerTitle"></header>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", initializeDashboard);
-
-    function initializeDashboard() {
+    document.addEventListener("DOMContentLoaded", () => {
       const frame = document.getElementById("dashboardFrame");
-      const overlay = document.getElementById("imageOverlay");
-      const overlayTitle = document.getElementById("overlayTitle");
+      const dashboard = document.getElementById("dashboard");
+      const banner = document.getElementById("banner");
+      const bannerTitle = document.getElementById("bannerTitle");
 
-      // Make all flippable elements displayable (required for animations)
-      document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
-
+      // List of dashboards
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 150000 }
       ];
 
-      let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
-      let isBanner = localStorage.getItem("isBanner") === "true";
-      let rotationTimer;
-      let timeUpdater;
-      let lastCheck = null;
+      let index = 0;
+      let showingBanner = false;
 
-      // === Live Clock ===
-      function getFormattedTime() {
-        const now = new Date();
-        return now.toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }).replace(',', '');
-      }
-
-      function startLiveClock() {
-        if (timeUpdater) clearInterval(timeUpdater);
-        overlayTitle.textContent = `PHARMA_FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
-        timeUpdater = setInterval(() => {
-          overlayTitle.textContent =
-            `PHARMA_FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
-        }, 1000);
-      }
-
-      // === Dashboard Loader ===
+      // Load dashboard content
       function loadDashboard(i) {
-        frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+        const src = dashboards[i].url + "?t=" + Date.now();
+        console.log("Loading:", src);
+        frame.src = src;
       }
 
+      // Show dashboard screen
       function showDashboard(i) {
-        overlay.classList.remove("active");
-        frame.classList.add("active");
+        showingBanner = false;
+        banner.classList.remove("active");
+        dashboard.classList.add("active");
         loadDashboard(i);
-        localStorage.setItem("isBanner", "false");
-        localStorage.setItem("currentDashboardIndex", i);
       }
 
+      // Show banner
       function showBanner() {
-        frame.classList.remove("active");
-        overlay.classList.add("active");
-        startLiveClock();
-        localStorage.setItem("isBanner", "true");
+        showingBanner = true;
+        dashboard.classList.remove("active");
+        banner.classList.add("active");
+        updateBannerTitle();
       }
 
+      // Update banner title every second
+      function updateBannerTitle() {
+        const update = () => {
+          const now = new Date().toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          }).replace(",", "");
+          bannerTitle.textContent = `PHARMA_FLIP SALES PERFORMANCE AS AT ${now} | # OPERATION NIGHT HAMMER`;
+        };
+        update();
+        setInterval(update, 1000);
+      }
+
+      // Rotation logic
       function rotate() {
-        clearTimeout(rotationTimer);
-        if (index < dashboards.length) {
+        if (showingBanner) {
+          index = 0;
           showDashboard(index);
-          rotationTimer = setTimeout(() => {
-            index++;
-            rotate();
-          }, dashboards[index].duration);
+          setTimeout(rotate, dashboards[index].duration);
         } else {
           showBanner();
-          rotationTimer = setTimeout(() => {
-            index = 0;
-            rotate();
-          }, 30000);
+          setTimeout(rotate, 30000);
         }
       }
 
-      // === Initial State ===
-      if (isBanner) {
-        showBanner();
-        rotationTimer = setTimeout(() => {
-          index = 0;
-          rotate();
-        }, 30000);
-      } else {
-        showDashboard(index);
-        rotationTimer = setTimeout(() => {
-          index++;
-          rotate();
-        }, dashboards[index].duration);
-      }
-
-      // === Save State on Unload ===
-      window.addEventListener("beforeunload", () => {
-        localStorage.setItem("currentDashboardIndex", index);
-        localStorage.setItem("isBanner", overlay.classList.contains("active"));
-      });
-
-      // === Fallback: If iframe fails to load, show message ===
+      // Fallback if iframe cannot load
       frame.addEventListener("error", () => {
-        frame.style.display = "block";
-        frame.style.opacity = "1";
-        frame.srcdoc = "<h2 style='color:white;text-align:center;margin-top:40vh;'>⚠️ Dashboard file not found. Please ensure 'Pharma_Telesales_Statistics.html' exists.</h2>";
+        frame.srcdoc = "<h2 style='color:white;text-align:center;margin-top:40vh;'>⚠️ Dashboard not found.<br>Ensure Pharma_Telesales_Statistics.html exists in this folder.</h2>";
       });
 
-      // === Auto Refresh Check ===
+      // Start initial load
+      showDashboard(index);
+      setTimeout(rotate, dashboards[index].duration);
+
+      // Optional: Auto-refresh trigger file check
       async function checkForUpdate() {
         try {
-          const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
+          const res = await fetch("refresh_all.json?nocache=" + Date.now());
           if (!res.ok) return;
           const data = await res.json();
-          if (lastCheck && data.timestamp !== lastCheck) {
-            console.log("Detected update — refreshing dashboard...");
+          if (window._lastCheck && data.timestamp !== window._lastCheck) {
+            console.log("Detected update, refreshing...");
             location.reload(true);
           }
-          lastCheck = data.timestamp;
+          window._lastCheck = data.timestamp;
         } catch (e) {
-          console.warn("Update check failed:", e);
+          // No refresh_all.json found — ignore
         }
       }
-
-      // Check every 10 seconds
       setInterval(checkForUpdate, 10000);
-    }
+    });
   </script>
 </body>
 </html>
