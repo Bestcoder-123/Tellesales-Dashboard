@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Pharma_Dashboard_Flip_Updated</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+      perspective: 1500px;
+    }
+
+    .flippable {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform-origin: center;
+      transform: rotateY(15deg) scale(1.02);
+      transition:
+        opacity 2s ease-in-out,
+        transform 2s ease-in-out;
+      backface-visibility: hidden;
+      display: none;
+    }
+
+    .flippable.active {
+      opacity: 1;
+      transform: rotateY(0deg) scale(1);
+      z-index: 2;
+      display: block;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+
+    #imageOverlay {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      z-index: 1;
+      background: black;
+      color: white;
+    }
+
+    #imageOverlay header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      padding: 6px 0;
+      text-align: center;
+      font-size: 1em;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+      z-index: 3;
+      border-bottom: 2px solid #00ffcc;
+    }
+
+    #imageOverlay img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      z-index: 2;
+      animation: slowZoom 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes slowZoom {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", initializeDashboard);
+
+    function initializeDashboard() {
+      const frame = document.getElementById("dashboardFrame");
+      const overlay = document.getElementById("imageOverlay");
+      const overlayTitle = document.getElementById("overlayTitle");
+
+      document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
+
+      // ✅ Use full relative path for GitHub Pages
+      const dashboards = [
+        { url: "https://bestcoder-123.github.io/Tellesales-Dashboard/Pharma_Telesales_Statistics.html", duration: 150000 }
+      ];
+
+      let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
+      let isBanner = localStorage.getItem("isBanner") === "true";
+      let rotationTimer;
+      let timeUpdater;
+
+      function getFormattedTime() {
+        const now = new Date();
+        return now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(',', '');
+      }
+
+      function startLiveClock() {
+        if (timeUpdater) clearInterval(timeUpdater);
+        timeUpdater = setInterval(() => {
+          overlayTitle.textContent =
+            `PHARMA_FLIP_UPDATED SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+        }, 1000);
+      }
+
+      function loadDashboard(i) {
+        if (!dashboards[i]) return;
+        frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+      }
+
+      function showDashboard(i) {
+        localStorage.setItem("isBanner", "false");
+        localStorage.setItem("currentDashboardIndex", i);
+        overlay.classList.remove("active");
+        setTimeout(() => {
+          loadDashboard(i);
+          frame.classList.add("active");
+        }, 1000);
+      }
+
+      function showBanner() {
+        localStorage.setItem("isBanner", "true");
+        frame.classList.remove("active");
+        setTimeout(() => {
+          startLiveClock();
+          overlay.classList.add("active");
+        }, 1000);
+      }
+
+      function rotate() {
+        if (index < dashboards.length) {
+          showDashboard(index);
+          rotationTimer = setTimeout(() => {
+            index++;
+            rotate();
+          }, dashboards[index].duration);
+        } else {
+          showBanner();
+          rotationTimer = setTimeout(() => {
+            index = 0;
+            localStorage.setItem("currentDashboardIndex", index);
+            localStorage.setItem("isBanner", "false");
+            rotate();
+          }, 30000);
+        }
+      }
+
+      if (isBanner) {
+        showBanner();
+        rotationTimer = setTimeout(() => {
+          index = 0;
+          localStorage.setItem("currentDashboardIndex", index);
+          localStorage.setItem("isBanner", "false");
+          rotate();
+        }, 30000);
+      } else {
+        showDashboard(index);
+        rotationTimer = setTimeout(() => {
+          index++;
+          rotate();
+        }, dashboards[index].duration);
+      }
+
+      window.addEventListener("beforeunload", () => {
+        localStorage.setItem("currentDashboardIndex", index);
+        localStorage.setItem("isBanner", overlay.classList.contains("active"));
+      });
+
+      // --- 🔄 AUTO REFRESH MECHANISM ---
+      let lastCheck = null;
+
+      async function checkForUpdate() {
+        try {
+          const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
+          if (!res.ok) return;
+          const data = await res.json();
+
+          if (lastCheck && data.timestamp !== lastCheck) {
+            console.log("Detected update — refreshing dashboard...");
+            location.reload(true);
+          }
+          lastCheck = data.timestamp;
+        } catch (e) {
+          console.warn("Update check failed:", e);
+        }
+      }
+
+      setInterval(checkForUpdate, 10000);
+    }
+  </script>
+</head>
+
+<body>
+  <iframe id="dashboardFrame" class="flippable"></iframe>
+
+  <div id="imageOverlay" class="flippable">
+    <img src="Logo_Title.jpg" alt="Telesales Performance">
+    <header id="overlayTitle"></header>
+  </div>
+</body>
+</html>
