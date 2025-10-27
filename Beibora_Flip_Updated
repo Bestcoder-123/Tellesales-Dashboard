@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Beibora_Dashboard_Flip_Updated</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+    }
+
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+    }
+
+    .screen.active {
+      display: block;
+      opacity: 1;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: black;
+    }
+
+    #banner {
+      background: black;
+      color: white;
+    }
+
+    #banner img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      animation: zoom 20s ease-in-out infinite alternate;
+    }
+
+    #banner header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 0;
+      background: linear-gradient(90deg, #001f1f, #004d4d);
+      color: #00ffcc;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 1px 1px 4px black;
+      border-bottom: 2px solid #00ffcc;
+      z-index: 2;
+    }
+
+    @keyframes zoom {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dashboard iframe -->
+  <div id="dashboard" class="screen active">
+    <iframe id="dashboardFrame"></iframe>
+  </div>
+
+  <!-- Banner overlay -->
+  <div id="banner" class="screen">
+    <img src="Logo_Title.jpg" alt="Banner Background">
+    <header id="bannerTitle"></header>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const frame = document.getElementById("dashboardFrame");
+      const dashboard = document.getElementById("dashboard");
+      const banner = document.getElementById("banner");
+      const bannerTitle = document.getElementById("bannerTitle");
+
+      // List of dashboards
+      const dashboards = [
+        { url: "Pharma_Telesales_Statistics.html", duration: 150000 }
+      ];
+
+      let index = 0;
+      let showingBanner = false;
+
+      // Load dashboard content
+      function loadDashboard(i) {
+        const src = dashboards[i].url + "?t=" + Date.now();
+        console.log("Loading:", src);
+        frame.src = src;
+      }
+
+      // Show dashboard screen
+      function showDashboard(i) {
+        showingBanner = false;
+        banner.classList.remove("active");
+        dashboard.classList.add("active");
+        loadDashboard(i);
+      }
+
+      // Show banner
+      function showBanner() {
+        showingBanner = true;
+        dashboard.classList.remove("active");
+        banner.classList.add("active");
+        updateBannerTitle();
+      }
+
+      // Update banner title every second
+      function updateBannerTitle() {
+        const update = () => {
+          const now = new Date().toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          }).replace(",", "");
+          bannerTitle.textContent = `PHARMA_FLIP SALES PERFORMANCE AS AT ${now} | # OPERATION NIGHT HAMMER`;
+        };
+        update();
+        setInterval(update, 1000);
+      }
+
+      // Rotation logic
+      function rotate() {
+        if (showingBanner) {
+          index = 0;
+          showDashboard(index);
+          setTimeout(rotate, dashboards[index].duration);
+        } else {
+          showBanner();
+          setTimeout(rotate, 30000);
+        }
+      }
+
+      // Fallback if iframe cannot load
+      frame.addEventListener("error", () => {
+        frame.srcdoc = "<h2 style='color:white;text-align:center;margin-top:40vh;'>⚠️ Dashboard not found.<br>Ensure Pharma_Telesales_Statistics.html exists in this folder.</h2>";
+      });
+
+      // Start initial load
+      showDashboard(index);
+      setTimeout(rotate, dashboards[index].duration);
+
+      // Optional: Auto-refresh trigger file check
+      async function checkForUpdate() {
+        try {
+          const res = await fetch("refresh_all.json?nocache=" + Date.now());
+          if (!res.ok) return;
+          const data = await res.json();
+          if (window._lastCheck && data.timestamp !== window._lastCheck) {
+            console.log("Detected update, refreshing...");
+            location.reload(true);
+          }
+          window._lastCheck = data.timestamp;
+        } catch (e) {
+          // No refresh_all.json found — ignore
+        }
+      }
+      setInterval(checkForUpdate, 10000);
+    });
+  </script>
+</body>
+</html>
