@@ -96,6 +96,7 @@
       const overlay = document.getElementById("imageOverlay");
       const overlayTitle = document.getElementById("overlayTitle");
 
+      // Ensure all .flippable elements start visible
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
       const dashboards = [
@@ -190,7 +191,7 @@
         localStorage.setItem("isBanner", overlay.classList.contains("active"));
       });
 
-      // --- 🔄 AUTO REFRESH MECHANISM (added) ---
+      // --- 🔄 SAFE AUTO REFRESH (local friendly) ---
       let lastCheck = null;
 
       async function checkForUpdate() {
@@ -198,19 +199,28 @@
           const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
           if (!res.ok) return;
           const data = await res.json();
-
           if (lastCheck && data.timestamp !== lastCheck) {
             console.log("Detected update from R script — refreshing dashboard...");
             location.reload(true);
           }
           lastCheck = data.timestamp;
         } catch (e) {
-          console.warn("Update check failed:", e);
+          // Ignore local file fetch errors
         }
       }
 
-      // Check every 10 seconds for updates
-      setInterval(checkForUpdate, 10000);
+      // Only run update check if served over HTTP/HTTPS (not file://)
+      if (location.protocol.startsWith("http")) {
+        setInterval(checkForUpdate, 10000);
+      }
+
+      // Fallback: show banner immediately if nothing else loads
+      setTimeout(() => {
+        if (!frame.src) {
+          overlay.classList.add("active");
+          startLiveClock();
+        }
+      }, 2000);
     }
   </script>
 </head>
@@ -224,6 +234,4 @@
   </div>
 </body>
 </html>
-
-
 
