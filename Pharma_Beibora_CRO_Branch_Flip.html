@@ -100,11 +100,11 @@
 
       const dashboards = [
         { url: "Pharma_Telesales_Statistics.html", duration: 150000 },
-        { url: "Beibora_Telesales_Statistics.html", duration: 60000 },
+        { url: "Beibora_Telesales_Statistics.html", duration: 120000 },
         { url: "Pharma_CRO_Statistics.html", duration: 150000 },
         { url: "Beibora_CRO_Statistics.html", duration: 150000 },
         { url: "Pharma_Branch_Performance_Statistics.html", duration: 150000 },
-        { url: "Beibora_Branch_Performance_Statistics.html", duration: 60000 }
+        { url: "Beibora_Branch_Performance_Statistics.html", duration: 120000 }
       ];
 
       let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
@@ -112,23 +112,23 @@
       let rotationTimer;
       let timeUpdater;
 
-      function getFormattedTime() {
-        const now = new Date();
-        return now.toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }).replace(',', '');
-      }
-
+     function getFormattedTime() {
+  const now = new Date();
+  return now.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'long',      // full month name (e.g., "October")
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).replace(',', '').toUpperCase(); // 🔥 converts everything to uppercase
+}
+      
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
         timeUpdater = setInterval(() => {
           overlayTitle.textContent =
-            `PHARMA_BEIBORA_CRO SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+            `PHARMA_BEIBORA_CRO_BRANCH SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
