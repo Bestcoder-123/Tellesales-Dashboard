@@ -126,22 +126,29 @@
       }
 
       // 🧩 Update banner title every second
-      function updateBannerTitle() {
-        const update = () => {
-          const now = new Date().toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-          }).replace(",", "");
-          bannerTitle.textContent =
-            `PHARMA_FLIP SALES PERFORMANCE AS AT ${now} | # OPERATION NIGHT HAMMER`;
-        };
-        update();
-        setInterval(update, 1000);
-      }
+function updateBannerTitle() {
+  const update = () => {
+    const now = new Date();
+
+    // Get components with capitalized month
+    const day = now.toLocaleString("en-GB", { day: "2-digit" });
+    const month = now.toLocaleString("en-GB", { month: "long" }).toUpperCase(); // 🔥 Auto-uppercase month
+    const year = now.toLocaleString("en-GB", { year: "numeric" });
+    const time = now.toLocaleString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+
+    const formatted = `${day} ${month} ${year} ${time}`;
+
+    bannerTitle.textContent =
+      `PHARMA CRO FLIP UPDATED SALES PERFORMANCE AS AT ${formatted} | # OPERATION NIGHT HAMMER`;
+  };
+
+  update();
+  setInterval(update, 1000);
+}
 
       // 🧭 Rotation logic — FIXED
       function rotate() {
