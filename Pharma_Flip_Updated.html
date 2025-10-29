@@ -101,11 +101,22 @@
 
       let index = 0;
       let showingBanner = false;
+      let dashboardTimer = null;
 
       // 🧩 Load dashboard content
       function loadDashboard(i) {
         const src = dashboards[i].url + "?t=" + Date.now();
         console.log("Loading dashboard:", src);
+
+        // Clear any existing timers before switching
+        if (dashboardTimer) clearTimeout(dashboardTimer);
+
+        frame.onload = () => {
+          console.log("✅ Dashboard loaded:", src);
+          // Start timer only after iframe fully loads
+          dashboardTimer = setTimeout(nextDashboard, dashboards[i].duration);
+        };
+
         frame.src = src;
       }
 
@@ -123,45 +134,42 @@
         dashboard.classList.remove("active");
         banner.classList.add("active");
         updateBannerTitle();
+
+        // Wait 60s on banner, then rotate again
+        setTimeout(rotate, 60000);
       }
 
       // 🧩 Update banner title every second
-function updateBannerTitle() {
-  const update = () => {
-    const now = new Date();
+      function updateBannerTitle() {
+        const update = () => {
+          const now = new Date();
+          const day = now.toLocaleString("en-GB", { day: "2-digit" });
+          const month = now.toLocaleString("en-GB", { month: "long" }).toUpperCase();
+          const year = now.toLocaleString("en-GB", { year: "numeric" });
+          const time = now.toLocaleString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          });
+          const formatted = `${day} ${month} ${year} ${time}`;
+          bannerTitle.textContent =
+            `PHARMA CRO FLIP UPDATED SALES PERFORMANCE AS AT ${formatted} | # OPERATION NIGHT HAMMER`;
+        };
 
-    // Get components with capitalized month
-    const day = now.toLocaleString("en-GB", { day: "2-digit" });
-    const month = now.toLocaleString("en-GB", { month: "long" }).toUpperCase(); // 🔥 Auto-uppercase month
-    const year = now.toLocaleString("en-GB", { year: "numeric" });
-    const time = now.toLocaleString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
+        update();
+        setInterval(update, 1000);
+      }
 
-    const formatted = `${day} ${month} ${year} ${time}`;
-
-    bannerTitle.textContent =
-      `PHARMA CRO FLIP UPDATED SALES PERFORMANCE AS AT ${formatted} | # OPERATION NIGHT HAMMER`;
-  };
-
-  update();
-  setInterval(update, 1000);
-}
-
-      // 🧭 Rotation logic — FIXED
+      // 🧭 Rotation logic
       function rotate() {
         console.log("🔄 Rotating: showingBanner =", showingBanner, "index =", index);
         if (showingBanner) {
           // After banner → start dashboards again
           index = 0;
           showDashboard(index);
-          setTimeout(nextDashboard, dashboards[index].duration);
         } else {
           // After dashboards → show banner
           showBanner();
-          setTimeout(rotate, 60000);
         }
       }
 
@@ -169,13 +177,11 @@ function updateBannerTitle() {
       function nextDashboard() {
         index++;
         if (index < dashboards.length) {
-          showDashboard(index);
           console.log("➡️ Showing next dashboard:", dashboards[index].url);
-          setTimeout(nextDashboard, dashboards[index].duration);
+          showDashboard(index);
         } else {
           console.log("🏁 All dashboards done, showing banner next...");
           showBanner();
-          setTimeout(rotate, 60000);
         }
       }
 
@@ -187,7 +193,6 @@ function updateBannerTitle() {
 
       // 🚀 Start sequence
       showDashboard(index);
-      setTimeout(nextDashboard, dashboards[index].duration);
 
       // ♻️ Optional: auto-refresh trigger file check
       async function checkForUpdate() {
@@ -209,4 +214,5 @@ function updateBannerTitle() {
   </script>
 </body>
 </html>
+
 
