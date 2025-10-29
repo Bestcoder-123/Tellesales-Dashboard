@@ -101,12 +101,20 @@
 
       let index = 0;
       let showingBanner = false;
+      let dashboardTimer = null; // track active timer
 
       // 🧩 Load dashboard content
       function loadDashboard(i) {
         const src = dashboards[i].url + "?t=" + Date.now();
         console.log("Loading dashboard:", src);
         frame.src = src;
+
+        // Wait until the iframe fully loads before starting timer
+        frame.onload = () => {
+          console.log("✅ Dashboard loaded:", dashboards[i].url);
+          clearTimeout(dashboardTimer);
+          dashboardTimer = setTimeout(nextDashboard, dashboards[i].duration);
+        };
       }
 
       // 🧩 Show dashboard
@@ -126,42 +134,38 @@
       }
 
       // 🧩 Update banner title every second
-function updateBannerTitle() {
-  const update = () => {
-    const now = new Date();
+      function updateBannerTitle() {
+        const update = () => {
+          const now = new Date();
 
-    // Get components with capitalized month
-    const day = now.toLocaleString("en-GB", { day: "2-digit" });
-    const month = now.toLocaleString("en-GB", { month: "long" }).toUpperCase(); // 🔥 Auto-uppercase month
-    const year = now.toLocaleString("en-GB", { year: "numeric" });
-    const time = now.toLocaleString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
+          const day = now.toLocaleString("en-GB", { day: "2-digit" });
+          const month = now.toLocaleString("en-GB", { month: "long" }).toUpperCase();
+          const year = now.toLocaleString("en-GB", { year: "numeric" });
+          const time = now.toLocaleString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          });
 
-    const formatted = `${day} ${month} ${year} ${time}`;
+          const formatted = `${day} ${month} ${year} ${time}`;
 
-    bannerTitle.textContent =
-      `BEIBORA CRO FLIP UPDATED SALES PERFORMANCE AS AT ${formatted} | # OPERATION NIGHT HAMMER`;
-  };
+          bannerTitle.textContent =
+            `BEIBORA CRO FLIP UPDATED SALES PERFORMANCE AS AT ${formatted} | # OPERATION NIGHT HAMMER`;
+        };
 
-  update();
-  setInterval(update, 1000);
-}
+        update();
+        setInterval(update, 1000);
+      }
 
-      // 🧭 Rotation logic — FIXED
+      // 🧭 Rotation logic
       function rotate() {
         console.log("🔄 Rotating: showingBanner =", showingBanner, "index =", index);
         if (showingBanner) {
-          // After banner → start dashboards again
           index = 0;
           showDashboard(index);
-          setTimeout(nextDashboard, dashboards[index].duration);
         } else {
-          // After dashboards → show banner
           showBanner();
-          setTimeout(rotate, 60000);
+          setTimeout(rotate, 60000); // Banner duration: 60 sec
         }
       }
 
@@ -171,11 +175,10 @@ function updateBannerTitle() {
         if (index < dashboards.length) {
           showDashboard(index);
           console.log("➡️ Showing next dashboard:", dashboards[index].url);
-          setTimeout(nextDashboard, dashboards[index].duration);
         } else {
           console.log("🏁 All dashboards done, showing banner next...");
           showBanner();
-          setTimeout(rotate, 60000);
+          setTimeout(rotate, 60000); // Banner shows 1 minute
         }
       }
 
@@ -187,7 +190,6 @@ function updateBannerTitle() {
 
       // 🚀 Start sequence
       showDashboard(index);
-      setTimeout(nextDashboard, dashboards[index].duration);
 
       // ♻️ Optional: auto-refresh trigger file check
       async function checkForUpdate() {
