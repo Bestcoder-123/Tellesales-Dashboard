@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Beibora_Dashboard_Flip</title>
+  <title>Beibora_Telesales_Dashboard_Flip</title>
   <style>
     html, body {
       margin: 0;
@@ -11,7 +11,6 @@
       overflow: hidden;
       background: black;
       font-family: Arial, sans-serif;
-      perspective: 1500px;
     }
 
     .flippable {
@@ -22,10 +21,7 @@
       height: 100%;
       opacity: 0;
       transform-origin: center;
-      transform: rotateY(15deg) scale(1.02);
-      transition:
-        opacity 2s ease-in-out,
-        transform 2s ease-in-out;
+      transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
       backface-visibility: hidden;
       display: none;
     }
@@ -47,44 +43,31 @@
     #imageOverlay {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-      z-index: 1;
+      align-items: center;
+      justify-content: center;
       background: black;
       color: white;
+      z-index: 1;
     }
 
     #imageOverlay header {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       background: linear-gradient(90deg, #001f1f, #004d4d);
-      padding: 6px 0;
+      padding: 10px 0;
       text-align: center;
-      font-size: 1em;
+      font-size: 1.2em;
       font-weight: bold;
       color: #00ffcc;
       text-shadow: 1px 1px 4px black;
-      z-index: 3;
       border-bottom: 2px solid #00ffcc;
     }
 
     #imageOverlay img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      margin-bottom: 20px;
       opacity: 0.85;
-      z-index: 2;
-      animation: slowZoom 20s ease-in-out infinite alternate;
-    }
-
-    @keyframes slowZoom {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
     }
   </style>
 
@@ -96,147 +79,69 @@
       const overlay = document.getElementById("imageOverlay");
       const overlayTitle = document.getElementById("overlayTitle");
 
-      // ✅ Ensure both flippable elements start visible for transition
+      // Show flippable elements
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Define dashboards
+      // Only one dashboard now
       const dashboards = [
-        { url: "Beibora_Telesales_Statistics.html", duration: 120000 }, // 2 min
-        { url: "Beibora_CRO_Statistics.html", duration: 150000 }        // 2.5 min
+        { url: "Beibora_Telesales_Statistics.html", duration: 120000 } // 2 min
       ];
 
-      let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
-      let isBanner = localStorage.getItem("isBanner") === "true";
+      let index = 0;
+      let isBanner = true; // start with banner
       let rotationTimer;
       let timeUpdater;
-      let lastCheck = null;
 
-      // ✅ Format live clock
+      // Live clock
       function getFormattedTime() {
-  const now = new Date();
-  return now.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'long',      // full month name (e.g., "October")
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  }).replace(',', '').toUpperCase(); // 🔥 converts everything to uppercase
-}
+        const now = new Date();
+        return now.toLocaleString('en-GB', {
+          day: '2-digit', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }).replace(',', '').toUpperCase();
+      }
 
-      // ✅ Update banner title every second
       function startLiveClock() {
         if (timeUpdater) clearInterval(timeUpdater);
-        overlayTitle.textContent = `BEIBORA_CRO FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+        overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()}`;
         timeUpdater = setInterval(() => {
-          overlayTitle.textContent =
-            `BEIBORA_CRO FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+          overlayTitle.textContent = `BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()}`;
         }, 1000);
       }
 
-      // ✅ Load a specific dashboard into the iframe
-      function loadDashboard(i) {
-        if (!dashboards[i]) {
-          console.warn("Invalid dashboard index detected:", i);
-          index = 0;
-        }
-        frame.src = dashboards[index].url + "?v=" + new Date().getTime();
-      }
-
-      // ✅ Show dashboard view
-      function showDashboard(i) {
-        if (!dashboards[i]) i = 0;
-        localStorage.setItem("isBanner", "false");
-        localStorage.setItem("currentDashboardIndex", i);
+      function showDashboard() {
         overlay.classList.remove("active");
-        setTimeout(() => {
-          loadDashboard(i);
-          frame.classList.add("active");
-        }, 1000);
+        frame.classList.add("active");
+        frame.src = dashboards[0].url + "?v=" + new Date().getTime();
       }
 
-      // ✅ Show banner view
       function showBanner() {
-        localStorage.setItem("isBanner", "true");
         frame.classList.remove("active");
-        setTimeout(() => {
-          startLiveClock();
-          overlay.classList.add("active");
-        }, 1000);
+        overlay.classList.add("active");
+        startLiveClock();
       }
 
-      // ✅ Main rotation logic
       function rotate() {
-        if (index < dashboards.length) {
-          showDashboard(index);
+        if (isBanner) {
+          showDashboard();
           rotationTimer = setTimeout(() => {
-            index++;
+            isBanner = false;
             rotate();
-          }, dashboards[index].duration);
+          }, dashboards[0].duration);
         } else {
           showBanner();
           rotationTimer = setTimeout(() => {
-            index = 0;
-            localStorage.setItem("currentDashboardIndex", index);
-            localStorage.setItem("isBanner", "false");
+            isBanner = true;
             rotate();
-          }, 30000); // Banner visible for 30 seconds
+          }, 30000); // banner visible 30 sec
         }
       }
 
-      // ✅ Resume state after reload
-      if (isBanner) {
-        showBanner();
-        rotationTimer = setTimeout(() => {
-          index = 0;
-          localStorage.setItem("currentDashboardIndex", index);
-          localStorage.setItem("isBanner", "false");
-          rotate();
-        }, 30000);
-      } else {
-        if (!dashboards[index]) index = 0;
-        showDashboard(index);
-        rotationTimer = setTimeout(() => {
-          index++;
-          rotate();
-        }, dashboards[index].duration);
-      }
+      rotate(); // start rotation
 
-      // ✅ Save state before close
       window.addEventListener("beforeunload", () => {
-        localStorage.setItem("currentDashboardIndex", index);
-        localStorage.setItem("isBanner", overlay.classList.contains("active"));
+        localStorage.setItem("isBanner", isBanner);
       });
-
-      // ✅ Safe auto-refresh (local + web friendly)
-      async function checkForUpdate() {
-        try {
-          const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
-          if (!res.ok) return;
-          const data = await res.json();
-          if (lastCheck && data.timestamp !== lastCheck) {
-            console.log("Detected update from R script — refreshing dashboard...");
-            location.reload(true);
-          }
-          lastCheck = data.timestamp;
-        } catch (e) {
-          // Ignore local file fetch errors
-        }
-      }
-
-      // Only check for updates if running via http/https
-      if (location.protocol.startsWith("http")) {
-        setInterval(checkForUpdate, 10000);
-      }
-
-      // ✅ Fallback: show banner if no dashboard loaded
-      setTimeout(() => {
-        if (!frame.src) {
-          console.warn("Fallback triggered — showing banner.");
-          overlay.classList.add("active");
-          startLiveClock();
-        }
-      }, 2000);
     }
   </script>
 </head>
@@ -245,10 +150,9 @@
   <iframe id="dashboardFrame" class="flippable"></iframe>
 
   <div id="imageOverlay" class="flippable">
-    <img src="Logo_Title.jpg" alt="Beibora Logo">
+    <img src="Logo_Beibora.jpg" alt="Beibora Logo">
     <header id="overlayTitle"></header>
   </div>
 </body>
 </html>
-
 
