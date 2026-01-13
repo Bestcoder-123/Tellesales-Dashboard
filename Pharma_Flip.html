@@ -23,9 +23,7 @@
       opacity: 0;
       transform-origin: center;
       transform: rotateY(15deg) scale(1.02);
-      transition:
-        opacity 2s ease-in-out,
-        transform 2s ease-in-out;
+      transition: opacity 2s ease-in-out, transform 2s ease-in-out;
       backface-visibility: hidden;
       display: none;
     }
@@ -96,68 +94,52 @@
       const overlay = document.getElementById("imageOverlay");
       const overlayTitle = document.getElementById("overlayTitle");
 
-      // ✅ Ensure both flippable elements start visible for transition
       document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-      // ✅ Define dashboards
+      // ✅ ONLY ONE DASHBOARD NOW
       const dashboards = [
-        { url: "Pharma_Telesales_Statistics.html", duration: 120000 }, // 2 min
-        { url: "Pharma_CRO_Statistics.html", duration: 150000 }        // 2.5 min
+        { url: "Pharma_Telesales_Statistics.html", duration: 120000 } // 2 minutes
       ];
 
-      let index = parseInt(localStorage.getItem("currentDashboardIndex")) || 0;
-      let isBanner = localStorage.getItem("isBanner") === "true";
+      let index = 0;
       let rotationTimer;
       let timeUpdater;
-      let lastCheck = null;
 
-      // ✅ Format live clock
-    function getFormattedTime() {
-  const now = new Date();
-  return now.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'long',      // full month name (e.g., "October")
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  }).replace(',', '').toUpperCase(); // 🔥 converts everything to uppercase
-}
+      function getFormattedTime() {
+        const now = new Date();
+        return now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(',', '').toUpperCase();
+      }
 
-      // ✅ Update banner title every second
       function startLiveClock() {
-        if (timeUpdater) clearInterval(timeUpdater);
-        overlayTitle.textContent = `PHARMA_CRO FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+        clearInterval(timeUpdater);
+        overlayTitle.textContent =
+          `PHARMA FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         timeUpdater = setInterval(() => {
           overlayTitle.textContent =
-            `PHARMA_CRO FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
+            `PHARMA FLIP SALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION NIGHT HAMMER`;
         }, 1000);
       }
 
-      // ✅ Load a specific dashboard into the iframe
-      function loadDashboard(i) {
-        if (!dashboards[i]) {
-          console.warn("Invalid dashboard index detected:", i);
-          index = 0;
-        }
-        frame.src = dashboards[index].url + "?v=" + new Date().getTime();
+      function loadDashboard() {
+        frame.src = dashboards[0].url + "?v=" + Date.now();
       }
 
-      // ✅ Show dashboard view
-      function showDashboard(i) {
-        if (!dashboards[i]) i = 0;
-        localStorage.setItem("isBanner", "false");
-        localStorage.setItem("currentDashboardIndex", i);
+      function showDashboard() {
         overlay.classList.remove("active");
         setTimeout(() => {
-          loadDashboard(i);
+          loadDashboard();
           frame.classList.add("active");
         }, 1000);
       }
 
-      // ✅ Show banner view
       function showBanner() {
-        localStorage.setItem("isBanner", "true");
         frame.classList.remove("active");
         setTimeout(() => {
           startLiveClock();
@@ -165,78 +147,35 @@
         }, 1000);
       }
 
-      // ✅ Main rotation logic
       function rotate() {
-        if (index < dashboards.length) {
-          showDashboard(index);
-          rotationTimer = setTimeout(() => {
-            index++;
-            rotate();
-          }, dashboards[index].duration);
-        } else {
+        showDashboard();
+        rotationTimer = setTimeout(() => {
           showBanner();
           rotationTimer = setTimeout(() => {
-            index = 0;
-            localStorage.setItem("currentDashboardIndex", index);
-            localStorage.setItem("isBanner", "false");
             rotate();
-          }, 30000); // Banner visible for 30 seconds
-        }
+          }, 30000); // banner for 30 seconds
+        }, dashboards[0].duration);
       }
 
-      // ✅ Resume state after reload
-      if (isBanner) {
-        showBanner();
-        rotationTimer = setTimeout(() => {
-          index = 0;
-          localStorage.setItem("currentDashboardIndex", index);
-          localStorage.setItem("isBanner", "false");
-          rotate();
-        }, 30000);
-      } else {
-        if (!dashboards[index]) index = 0;
-        showDashboard(index);
-        rotationTimer = setTimeout(() => {
-          index++;
-          rotate();
-        }, dashboards[index].duration);
-      }
+      rotate();
 
-      // ✅ Save state before close
-      window.addEventListener("beforeunload", () => {
-        localStorage.setItem("currentDashboardIndex", index);
-        localStorage.setItem("isBanner", overlay.classList.contains("active"));
-      });
-
-      // ✅ Safe auto-refresh (local + web friendly)
+      // Auto refresh trigger from R
+      let lastCheck = null;
       async function checkForUpdate() {
         try {
-          const res = await fetch("refresh_all.json?nocache=" + new Date().getTime());
+          const res = await fetch("refresh_all.json?nocache=" + Date.now());
           if (!res.ok) return;
           const data = await res.json();
           if (lastCheck && data.timestamp !== lastCheck) {
-            console.log("Detected update from R script — refreshing dashboard...");
             location.reload(true);
           }
           lastCheck = data.timestamp;
-        } catch (e) {
-          // Ignore local file fetch errors
-        }
+        } catch (e) {}
       }
 
-      // Only check for updates if running via http/https
       if (location.protocol.startsWith("http")) {
         setInterval(checkForUpdate, 10000);
       }
-
-      // ✅ Fallback: show banner if no dashboard loaded
-      setTimeout(() => {
-        if (!frame.src) {
-          console.warn("Fallback triggered — showing banner.");
-          overlay.classList.add("active");
-          startLiveClock();
-        }
-      }, 2000);
     }
   </script>
 </head>
@@ -250,3 +189,4 @@
   </div>
 </body>
 </html>
+
