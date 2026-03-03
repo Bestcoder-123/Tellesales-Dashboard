@@ -146,18 +146,26 @@
       }
 
       function rotate() {
-        if (!showingBanner) {
-          flipTransition(true);
-          showingBanner = true;
-          clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotate, 10000);
-        } else {
-          flipTransition(false);
-          showingBanner = false;
-          clearTimeout(rotationTimer);
-          rotationTimer = setTimeout(rotate, dashboards[index].duration);
-        }
-      }
+  clearTimeout(rotationTimer);
+
+  if (!showingBanner) {
+    // Show banner
+    flipTransition(true);
+    showingBanner = true;
+
+    rotationTimer = setTimeout(rotate, 10000);
+  } else {
+    // STOP CLOCK when leaving banner
+    if (timeUpdater) clearInterval(timeUpdater);
+
+    index = (index + 1) % dashboards.length;
+
+    flipTransition(false);
+    showingBanner = false;
+
+    rotationTimer = setTimeout(rotate, dashboards[index].duration);
+  }
+}
 
       // Start
       loadDashboard(index);
@@ -176,5 +184,6 @@
   </div>
 </body>
 </html>
+
 
 
