@@ -130,21 +130,19 @@
       }
 
       function flipTransition(showBannerNext) {
-        frame.classList.remove("active");
-        overlay.classList.remove("active");
+  frame.classList.remove("active");
+  overlay.classList.remove("active");
 
-        setTimeout(() => {
-          if (showBannerNext) {
-            startLiveClock();
-            overlay.classList.add("active");
-          } else {
-            index = (index + 1) % dashboards.length;
-            loadDashboard(index);
-            frame.classList.add("active");
-          }
-        }, 1000);
-      }
-
+  setTimeout(() => {
+    if (showBannerNext) {
+      startLiveClock();
+      overlay.classList.add("active");
+    } else {
+      loadDashboard(index);
+      frame.classList.add("active");
+    }
+  }, 1000);
+}
       function rotate() {
   clearTimeout(rotationTimer);
 
@@ -184,6 +182,7 @@
   </div>
 </body>
 </html>
+
 
 
 
