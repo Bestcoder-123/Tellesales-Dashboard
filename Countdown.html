@@ -21,6 +21,23 @@
 body {
   background:#000;
   font-family:'Barlow',sans-serif;
+  overflow: hidden;
+}
+
+/* Logos at top corners */
+#logos {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+#logos img {
+  height: 60px;
+  width: auto;
 }
 
 /* BACKGROUND */
@@ -28,11 +45,7 @@ body {
   min-height:100vh;
   position:relative;
   overflow:hidden;
-
-  background:
-    linear-gradient(rgba(10,22,40,0.7), rgba(10,22,40,0.9)),
-    url('file:///F:/REPORTS/Philmed new logo.png') center/900px no-repeat;
-
+  background: linear-gradient(rgba(10,22,40,0.7), rgba(10,22,40,0.9));
   display:flex;
   align-items:center;
   justify-content:center;
@@ -194,6 +207,12 @@ button {
 
 <body>
 
+<!-- Logos -->
+<div id="logos">
+  <img src="Philmed_logo.png" alt="Philmed Logo Left">
+  <img src="Philmed_logo.png" alt="Philmed Logo Right">
+</div>
+
 <div class="advert">
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
@@ -227,13 +246,16 @@ button {
         <p>SECONDS</p>
       </div>
     </div>
+
     <div class="body">
       Every Call counts. #EXECUTION LIKE A BEAST. Every Minute Counts<br>
       <strong>PLAN. ALLIGN. EXECUTE.</strong>
     </div>
-<div class="body">
-   <strong>TRUST. LOYALTY. COMMITMENT.</strong>
-</div>
+
+    <div class="body">
+       <strong>TRUST. LOYALTY. COMMITMENT.</strong>
+    </div>
+
     <div class="buttons">
       <button class="primary">HOLD THE ROPE</button>
       <button class="secondary">CLOSE Q1 STRONG</button>
@@ -266,7 +288,6 @@ function updateCountdown() {
   document.getElementById('minutes').innerText = String(m).padStart(2,'0');
   document.getElementById('seconds').innerText = String(s).padStart(2,'0');
 
-  /* URGENCY EFFECT */
   if (d === 0 && h < 12) {
     document.getElementById('hours').classList.add('urgent');
     document.getElementById('minutes').classList.add('urgent');
