@@ -50,13 +50,13 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
+  // Only main dashboards
   const dashboards = [
-    { url: "Pharma_Telesales_Statistics.html", duration: 5 * 60 * 1000, scroll: true },
-    { url: "Countdown.html", duration: 1 * 60 * 1000, scroll: false },
-    { url: "Beibora_Telesales_Statistics.html", duration: 3 * 60 * 1000, scroll: true },
-    { url: "Countdown.html", duration: 1 * 60 * 1000, scroll: false }
+    { url: "Pharma_Telesales_Statistics.html", duration: 5*60*1000, scroll: true },
+    { url: "Beibora_Telesales_Statistics.html", duration: 3*60*1000, scroll: true }
   ];
 
+  const countdownDuration = 1*60*1000; // 1 minute for Countdown overlay
   let index = 0;
   const frame = document.getElementById("dashboardFrame");
   const overlay = document.getElementById("countdownOverlay");
@@ -67,21 +67,21 @@ document.addEventListener("DOMContentLoaded", function() {
   function smoothScroll(iframe, cycles = 2, speed = 1.2) {
     const doc = iframe.contentWindow.document.documentElement;
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
-    let direction = 1; // 1 = down, -1 = up
-    let currentCycle = 0;
     let pos = 0;
+    let direction = 1;
+    let cycle = 0;
 
     function step() {
       pos += direction * speed;
-      if (pos >= scrollHeight) { pos = scrollHeight; direction = -1; }
-      if (pos <= 0) { pos = 0; direction = 1; currentCycle++; }
+      if(pos >= scrollHeight) { pos = scrollHeight; direction = -1; }
+      if(pos <= 0) { pos = 0; direction = 1; cycle++; }
 
       iframe.contentWindow.scrollTo(0, pos);
 
-      if (currentCycle < cycles) {
+      if(cycle < cycles) {
         scrollAnimationId = requestAnimationFrame(step);
       } else {
-        rotate(); // proceed to next dashboard
+        showCountdown();
       }
     }
 
@@ -91,32 +91,34 @@ document.addEventListener("DOMContentLoaded", function() {
   function loadDashboard(i) {
     cancelAnimationFrame(scrollAnimationId);
 
-    frame.classList.remove("active");
     overlay.style.display = "none";
+    frame.classList.remove("active");
 
-    // Reload data on flip
     frame.src = dashboards[i].url + "?v=" + new Date().getTime();
 
     frame.onload = () => {
       frame.classList.add("active");
 
-      if (dashboards[i].url.includes("Countdown.html")) {
-        overlay.style.display = "block";
-        setTimeout(() => rotate(), dashboards[i].duration);
-      } else if (dashboards[i].scroll) {
-        smoothScroll(frame, 2, 1.2); // medium speed, 2 cycles
+      if(dashboards[i].scroll) {
+        smoothScroll(frame, 2, 1.2);
       } else {
-        setTimeout(() => rotate(), dashboards[i].duration);
+        setTimeout(() => showCountdown(), dashboards[i].duration);
       }
     };
   }
 
-  function rotate() {
-    index = (index + 1) % dashboards.length;
-    loadDashboard(index);
+  function showCountdown() {
+    frame.classList.remove("active");
+    overlay.style.display = "block";
+
+    setTimeout(() => {
+      overlay.style.display = "none";
+      index = (index + 1) % dashboards.length;
+      loadDashboard(index);
+    }, countdownDuration);
   }
 
-  // Start
+  // Start with Pharma
   loadDashboard(index);
 
 });
@@ -125,8 +127,6 @@ document.addEventListener("DOMContentLoaded", function() {
 <body>
 
 <iframe id="dashboardFrame" class="flippable"></iframe>
-
-<!-- Fullscreen overlay for Countdown dashboard -->
 <div id="countdownOverlay"></div>
 
 </body>
