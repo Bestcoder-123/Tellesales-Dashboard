@@ -1,188 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Pharma_Beibora_Flip</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      overflow: hidden;
-      background: black;
-      font-family: Arial, sans-serif;
-      perspective: 1500px;
-    }
-
-    .flippable {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      transform-origin: center;
-      transform: rotateY(180deg);
-      transition: opacity 1.5s ease-in-out, transform 4s ease-in-out;
-      backface-visibility: hidden;
-      display: none;
-    }
-
-    .flippable.active {
-      opacity: 1;
-      transform: rotateY(0deg);
-      z-index: 2;
-      display: block;
-    }
-
-    iframe {
-      border: none;
-      width: 100%;
-      height: 100%;
-      background: black;
-    }
-
-    #imageOverlay {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
-      z-index: 1;
-      background: black;
-      color: white;
-    }
-
-    #imageOverlay header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(90deg, #001f1f, #004d4d);
-      padding: 6px 0;
-      text-align: center;
-      font-size: 1em;
-      font-weight: bold;
-      color: #00ffcc;
-      text-shadow: 1px 1px 4px black;
-      z-index: 3;
-      border-bottom: 2px solid #00ffcc;
-    }
-
-    #imageOverlay img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.85;
-      z-index: 2;
-      animation: slowZoom 20s ease-in-out infinite alternate;
-    }
-
-    @keyframes slowZoom {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
-    }
-  </style>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", initializeDashboard);
-
-    function initializeDashboard() {
-      const frame = document.getElementById("dashboardFrame");
-      const overlay = document.getElementById("imageOverlay");
-      const overlayTitle = document.getElementById("overlayTitle");
-
-      document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
-
-      const dashboards = [
-        { url: "Pharma_Telesales_Statistics.html", duration: 300000 },
-        { url: "Beibora_Telesales_Statistics.html", duration: 120000 }
-      ];
-
-      let index = 0;
-      let showingBanner = false;
-      let rotationTimer;
-      let timeUpdater;
-
-      function getFormattedTime() {
-        const now = new Date();
-        return now.toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        }).replace(',', '');
-      }
-
-      function startLiveClock() {
-        if (timeUpdater) clearInterval(timeUpdater);
-        timeUpdater = setInterval(() => {
-          overlayTitle.textContent = `PHARMA/BEIBORA TELESALES PERFORMANCE AS AT ${getFormattedTime()} | # OPERATION EXECUTION LIKE A BEAST`;
-        }, 1000);
-      }
-
-      function loadDashboard(i) {
-        frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-      }
-
-      function flipTransition(showBannerNext) {
-  frame.classList.remove("active");
-  overlay.classList.remove("active");
-
-  setTimeout(() => {
-    if (showBannerNext) {
-      startLiveClock();
-      overlay.classList.add("active");
-    } else {
-      loadDashboard(index);
-      frame.classList.add("active");
-    }
-  }, 1000);
-}
-      function rotate() {
-  clearTimeout(rotationTimer);
-
-  if (!showingBanner) {
-    // Show banner
-    flipTransition(true);
-    showingBanner = true;
-
-    rotationTimer = setTimeout(rotate, 10000);
-  } else {
-    // STOP CLOCK when leaving banner
-    if (timeUpdater) clearInterval(timeUpdater);
-
-    index = (index + 1) % dashboards.length;
-
-    flipTransition(false);
-    showingBanner = false;
-
-    rotationTimer = setTimeout(rotate, dashboards[index].duration);
+<meta charset="UTF-8">
+<title>Pharma_Beibora_Flip</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: black;
+    font-family: Arial, sans-serif;
   }
-}
 
-      // Start
+  .flippable {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    display: none;
+  }
+
+  .flippable.active {
+    opacity: 1;
+    display: block;
+  }
+
+  iframe {
+    border: none;
+    width: 100%;
+    height: 100%;
+    background: black;
+  }
+
+  /* Logos for Countdown page */
+  #logos {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 5;
+  }
+
+  #logos img {
+    height: 60px;
+    width: auto;
+  }
+
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const dashboards = [
+    { url: "Pharma_Telesales_Statistics.html", scroll: true },
+    { url: "Countdown.html", scroll: false },
+    { url: "Beibora_Telesales_Statistics.html", scroll: true }
+  ];
+
+  let index = 0;
+  const frame = document.getElementById("dashboardFrame");
+
+  document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
+
+  function scrollDashboard(iframe, cycles = 2, duration = 5000) {
+    let step = 0;
+    const maxStep = cycles * 2;
+    const scrollDoc = iframe.contentWindow.document.documentElement;
+    const scrollHeight = scrollDoc.scrollHeight - scrollDoc.clientHeight;
+
+    const interval = setInterval(() => {
+      if(step < maxStep){
+        const top = (step % 2 === 0) ? scrollHeight : 0;
+        iframe.contentWindow.scrollTo({ top: top, behavior: 'smooth' });
+        step++;
+      } else {
+        clearInterval(interval);
+        rotate();
+      }
+    }, duration);
+  }
+
+  function loadDashboard(i) {
+    frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+
+    if(dashboards[i].scroll){
+      frame.onload = () => scrollDashboard(frame);
+    } else {
+      // Countdown page: show for 10s
+      frame.onload = () => setTimeout(rotate, 10000);
+    }
+  }
+
+  function flipTransition() {
+    frame.classList.remove("active");
+    setTimeout(() => {
       loadDashboard(index);
       frame.classList.add("active");
-      rotationTimer = setTimeout(rotate, dashboards[index].duration);
-    }
-  </script>
-</head>
+    }, 500);
+  }
 
+  function rotate() {
+    index = (index + 1) % dashboards.length;
+    flipTransition();
+  }
+
+  // Start first dashboard
+  loadDashboard(index);
+  frame.classList.add("active");
+});
+</script>
+</head>
 <body>
   <iframe id="dashboardFrame" class="flippable"></iframe>
 
-  <div id="imageOverlay" class="flippable">
-    <img src="https://bestcoder-123.github.io/Tellesales-Dashboard/Logo_Title.jpg" alt="Telesales Performance">
-    <header id="overlayTitle"></header>
+  <!-- Logos appear only for Countdown page -->
+  <div id="logos">
+    <img src="Philmed_logo.png" alt="Philmed Logo Left">
+    <img src="Philmed_logo.png" alt="Philmed Logo Right">
   </div>
 </body>
 </html>
-
-
-
-
