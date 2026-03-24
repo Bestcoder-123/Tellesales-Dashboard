@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pharma_Beibora_Flip</title>
 <style>
   html, body {
     margin: 0;
     padding: 0;
-    height: 100vh;
+    height: 100%;
+    width: 100%;
     overflow: hidden;
     background: black;
     font-family: Arial, sans-serif;
@@ -15,14 +17,11 @@
 
   .flippable {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     opacity: 0;
     transition: opacity 1s ease-in-out;
     display: none;
-    overflow: hidden;
   }
 
   .flippable.active {
@@ -39,68 +38,80 @@
 
   #countdownOverlay {
     position: absolute;
-    top:0; left:0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     z-index: 10;
     display: none;
     background: url('Philmed_logo.png') center/cover no-repeat;
+    background-size: cover;
   }
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-  // Only main dashboards
   const dashboards = [
     { url: "Pharma_Telesales_Statistics.html", duration: 5*60*1000, scroll: true },
     { url: "Beibora_Telesales_Statistics.html", duration: 3*60*1000, scroll: true }
   ];
 
-  const countdownDuration = 1*60*1000; // 1 minute for Countdown overlay
+  const countdownDuration = 1*60*1000; // 1 minute
   let index = 0;
   const frame = document.getElementById("dashboardFrame");
   const overlay = document.getElementById("countdownOverlay");
-  let scrollAnimationId;
+  let scrollTimer;
 
   document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-  function smoothScroll(iframe, cycles = 2, speed = 1.2) {
+  function smoothScrollTimeBased(iframe, cycles = 2, duration = 40000) {
+    // Scroll top→bottom→top→bottom over time (duration = total time for all cycles)
     const doc = iframe.contentWindow.document.documentElement;
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
-    let pos = 0;
-    let direction = 1;
+    let start = null;
     let cycle = 0;
 
-    function step() {
-      pos += direction * speed;
-      if(pos >= scrollHeight) { pos = scrollHeight; direction = -1; }
-      if(pos <= 0) { pos = 0; direction = 1; cycle++; }
+    function step(timestamp) {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const totalCycles = cycles * 2; // down + up per cycle
+
+      // normalized progress 0→1 for each half cycle
+      const progress = (elapsed / duration) * totalCycles;
+      const phase = Math.floor(progress); // which half-cycle
+      const t = progress - phase; // 0→1 within half-cycle
+
+      let pos;
+      if (phase % 2 === 0) { // scrolling down
+        pos = t * scrollHeight;
+      } else { // scrolling up
+        pos = (1 - t) * scrollHeight;
+      }
 
       iframe.contentWindow.scrollTo(0, pos);
 
-      if(cycle < cycles) {
-        scrollAnimationId = requestAnimationFrame(step);
+      if (elapsed < duration) {
+        scrollTimer = requestAnimationFrame(step);
       } else {
         showCountdown();
       }
     }
 
-    step();
+    scrollTimer = requestAnimationFrame(step);
   }
 
   function loadDashboard(i) {
-    cancelAnimationFrame(scrollAnimationId);
+    cancelAnimationFrame(scrollTimer);
 
-    overlay.style.display = "none";
     frame.classList.remove("active");
+    overlay.style.display = "none";
 
+    // Reload dashboard with cache-busting
     frame.src = dashboards[i].url + "?v=" + new Date().getTime();
 
     frame.onload = () => {
       frame.classList.add("active");
 
-      if(dashboards[i].scroll) {
-        smoothScroll(frame, 2, 1.2);
+      if (dashboards[i].scroll) {
+        smoothScrollTimeBased(frame, 2, 40000); // 2 cycles, ~40s total
       } else {
         setTimeout(() => showCountdown(), dashboards[i].duration);
       }
