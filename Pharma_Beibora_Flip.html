@@ -51,18 +51,19 @@
     display: none;
   }
 
-  #countdownOverlay .background {
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: url('Philmed_logo.png') center/cover no-repeat;
-    filter: blur(8px) brightness(0.4);
-    z-index:1;
+  /* Corner logos */
+  #countdownOverlay .logo {
+    position: absolute;
+    width: 80px;
+    height: auto;
+    z-index: 11;
   }
+  #countdownOverlay .top-left { top: 10px; left: 10px; }
+  #countdownOverlay .top-right { top: 10px; right: 10px; }
 
   #countdownOverlay .content {
     position: relative;
-    z-index:2;
+    z-index:12;
     display:flex;
     flex-direction: column;
     align-items:center;
@@ -78,12 +79,8 @@
   }
 
   @media (max-width:768px){
-    #countdownOverlay .content {
-      font-size:4vw;
-    }
-    #countdownOverlay .content .counter {
-      font-size:8vw;
-    }
+    #countdownOverlay .content { font-size:4vw; }
+    #countdownOverlay .content .counter { font-size:8vw; }
   }
 </style>
 </head>
@@ -91,9 +88,11 @@
 
 <iframe id="dashboardFrame" class="flippable"></iframe>
 
-<!-- Fullscreen Countdown overlay -->
+<!-- Fullscreen Countdown overlay with corner logos -->
 <div id="countdownOverlay">
-  <div class="background"></div>
+  <img src="Philmed_logo.png" class="logo top-left" />
+  <img src="Philmed_logo.png" class="logo top-right" />
+
   <div class="content">
     <div class="counter" id="minutes">00</div>
     <div class="counter" id="seconds">00</div>
@@ -117,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const overlay = document.getElementById("countdownOverlay");
   let scrollTimer, countdownTimer;
 
-  // Smooth scroll for 2 cycles over dashboard duration
+  // Smooth scroll for N cycles over duration
   function smoothScroll(iframe, cycles, duration){
     const doc = iframe.contentWindow.document.documentElement;
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
@@ -126,14 +125,14 @@ document.addEventListener("DOMContentLoaded", function() {
     function step(timestamp){
       if(!start) start = timestamp;
       const elapsed = timestamp - start;
-      const totalCycles = cycles * 2; // down+up
+      const totalCycles = cycles * 2; // down + up
       const progress = (elapsed / duration) * totalCycles;
       const phase = Math.floor(progress);
       const t = progress - phase;
 
       let pos;
-      if(phase % 2 === 0){ pos = t * scrollHeight; }
-      else { pos = (1-t) * scrollHeight; }
+      if(phase % 2 === 0) pos = t * scrollHeight;
+      else pos = (1-t) * scrollHeight;
 
       iframe.contentWindow.scrollTo(0,pos);
 
@@ -187,14 +186,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     frame.onload = () => {
       frame.classList.add("active");
-      // Wait 1s for iframe content to settle
       setTimeout(()=>{
         if(dashboards[i].scroll){
-          // Scroll duration = 10s per cycle (example), can be adjusted
-          const duration = 10000 * scrollCycles;
+          // Scroll duration: 30s per cycle * 2 cycles = 60s (adjust if needed)
+          const duration = 30000 * scrollCycles;
           smoothScroll(frame, scrollCycles, duration);
         } else {
-          // If no scroll, show countdown immediately after 1 min
           setTimeout(showCountdown, countdownDuration);
         }
       }, 1000);
