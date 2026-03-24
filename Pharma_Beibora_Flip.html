@@ -22,6 +22,7 @@
     opacity: 0;
     transition: opacity 1s ease-in-out;
     display: none;
+    overflow: hidden;
   }
 
   .flippable.active {
@@ -36,7 +37,6 @@
     background: black;
   }
 
-  /* Logos for Countdown page */
   #logos {
     position: absolute;
     top: 10px;
@@ -45,79 +45,87 @@
     justify-content: space-between;
     padding: 0 20px;
     z-index: 5;
+    display: none; /* Initially hidden */
   }
 
   #logos img {
     height: 60px;
     width: auto;
   }
-
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+
   const dashboards = [
     { url: "Pharma_Telesales_Statistics.html", scroll: true },
-    { url: "Countdown.html", scroll: false },
+    { url: "Countdown.html", scroll: false, duration: 60000 }, // 1 minute
     { url: "Beibora_Telesales_Statistics.html", scroll: true }
   ];
 
   let index = 0;
   const frame = document.getElementById("dashboardFrame");
+  const logos = document.getElementById("logos");
 
   document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-  function scrollDashboard(iframe, cycles = 2, duration = 5000) {
-    let step = 0;
-    const maxStep = cycles * 2;
-    const scrollDoc = iframe.contentWindow.document.documentElement;
-    const scrollHeight = scrollDoc.scrollHeight - scrollDoc.clientHeight;
+  function smoothScroll(iframe, cycles = 2, speed = 1) {
+    const doc = iframe.contentWindow.document.documentElement;
+    const scrollHeight = doc.scrollHeight - doc.clientHeight;
+    let direction = 1; // 1=down, -1=up
+    let currentCycle = 0;
+    let pos = 0;
 
-    const interval = setInterval(() => {
-      if(step < maxStep){
-        const top = (step % 2 === 0) ? scrollHeight : 0;
-        iframe.contentWindow.scrollTo({ top: top, behavior: 'smooth' });
-        step++;
+    function step() {
+      pos += direction * speed;
+      if(pos >= scrollHeight) { pos = scrollHeight; direction = -1; }
+      if(pos <= 0) { pos = 0; direction = 1; currentCycle++; }
+
+      iframe.contentWindow.scrollTo(0, pos);
+
+      if(currentCycle < cycles) {
+        requestAnimationFrame(step);
       } else {
-        clearInterval(interval);
-        rotate();
+        rotate(); // proceed to next dashboard
       }
-    }, duration);
+    }
+
+    requestAnimationFrame(step);
   }
 
   function loadDashboard(i) {
+    frame.classList.remove("active");
+    logos.style.display = "none"; // hide logos by default
+
     frame.src = dashboards[i].url + "?v=" + new Date().getTime();
 
-    if(dashboards[i].scroll){
-      frame.onload = () => scrollDashboard(frame);
-    } else {
-      // Countdown page: show for 10s
-      frame.onload = () => setTimeout(rotate, 10000);
-    }
-  }
-
-  function flipTransition() {
-    frame.classList.remove("active");
-    setTimeout(() => {
-      loadDashboard(index);
+    frame.onload = () => {
       frame.classList.add("active");
-    }, 500);
+
+      // Show logos only for Countdown.html
+      if(dashboards[i].url.includes("Countdown.html")) {
+        logos.style.display = "flex";
+        setTimeout(() => rotate(), dashboards[i].duration || 60000);
+      } else if(dashboards[i].scroll) {
+        // smooth scrolling for dashboards
+        smoothScroll(frame, 2, 1.2); // medium speed
+      }
+    };
   }
 
   function rotate() {
     index = (index + 1) % dashboards.length;
-    flipTransition();
+    loadDashboard(index);
   }
 
-  // Start first dashboard
+  // Start
   loadDashboard(index);
-  frame.classList.add("active");
 });
 </script>
 </head>
 <body>
   <iframe id="dashboardFrame" class="flippable"></iframe>
 
-  <!-- Logos appear only for Countdown page -->
+  <!-- Logos appear only for Countdown.html -->
   <div id="logos">
     <img src="Philmed_logo.png" alt="Philmed Logo Left">
     <img src="Philmed_logo.png" alt="Philmed Logo Right">
