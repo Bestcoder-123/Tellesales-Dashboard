@@ -36,14 +36,54 @@
     background: black;
   }
 
+  /* Countdown overlay */
   #countdownOverlay {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 10;
-    display: none;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index:10;
+    display:none;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    text-align:center;
+  }
+
+  #countdownOverlay .background {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
     background: url('Philmed_logo.png') center/cover no-repeat;
-    background-size: cover;
+    filter: blur(8px) brightness(0.4);
+    z-index:1;
+  }
+
+  #countdownOverlay .content {
+    position: relative;
+    z-index:2;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    font-size:2.5vw;
+    line-height:1.2;
+  }
+
+  #countdownOverlay .content .counter {
+    font-size: 5vw;
+    font-weight: bold;
+    margin: 0.2em;
+  }
+
+  @media (max-width:768px){
+    #countdownOverlay .content {
+      font-size:4vw;
+    }
+    #countdownOverlay .content .counter {
+      font-size:8vw;
+    }
   }
 </style>
 <script>
@@ -58,78 +98,91 @@ document.addEventListener("DOMContentLoaded", function() {
   let index = 0;
   const frame = document.getElementById("dashboardFrame");
   const overlay = document.getElementById("countdownOverlay");
-  let scrollTimer;
+  let scrollTimer, countdownTimer;
 
   document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
   function smoothScrollTimeBased(iframe, cycles = 2, duration = 40000) {
-    // Scroll top→bottom→top→bottom over time (duration = total time for all cycles)
     const doc = iframe.contentWindow.document.documentElement;
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
     let start = null;
     let cycle = 0;
 
-    function step(timestamp) {
-      if (!start) start = timestamp;
+    function step(timestamp){
+      if(!start) start = timestamp;
       const elapsed = timestamp - start;
-      const totalCycles = cycles * 2; // down + up per cycle
-
-      // normalized progress 0→1 for each half cycle
+      const totalCycles = cycles * 2; // down+up
       const progress = (elapsed / duration) * totalCycles;
-      const phase = Math.floor(progress); // which half-cycle
-      const t = progress - phase; // 0→1 within half-cycle
+      const phase = Math.floor(progress);
+      const t = progress - phase;
 
       let pos;
-      if (phase % 2 === 0) { // scrolling down
-        pos = t * scrollHeight;
-      } else { // scrolling up
-        pos = (1 - t) * scrollHeight;
-      }
+      if(phase % 2 === 0){ pos = t * scrollHeight; }
+      else { pos = (1-t) * scrollHeight; }
 
-      iframe.contentWindow.scrollTo(0, pos);
+      iframe.contentWindow.scrollTo(0,pos);
 
-      if (elapsed < duration) {
+      if(elapsed < duration){
         scrollTimer = requestAnimationFrame(step);
-      } else {
-        showCountdown();
-      }
+      } else { showCountdown(); }
     }
 
     scrollTimer = requestAnimationFrame(step);
   }
 
-  function loadDashboard(i) {
+  function updateCountdown(){
+    const now = new Date();
+    const end = new Date(now.getFullYear(), 2, 31, 23, 59, 59);
+    const diff = end - now;
+
+    if(diff <=0) return;
+
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const s = Math.floor((diff % (1000*60))/1000);
+
+    overlay.querySelector('#days').innerText = String(d).padStart(2,'0');
+    overlay.querySelector('#hours').innerText = String(h).padStart(2,'0');
+    overlay.querySelector('#minutes').innerText = String(m).padStart(2,'0');
+    overlay.querySelector('#seconds').innerText = String(s).padStart(2,'0');
+  }
+
+  function loadDashboard(i){
     cancelAnimationFrame(scrollTimer);
+    clearInterval(countdownTimer);
 
     frame.classList.remove("active");
     overlay.style.display = "none";
 
-    // Reload dashboard with cache-busting
     frame.src = dashboards[i].url + "?v=" + new Date().getTime();
 
     frame.onload = () => {
       frame.classList.add("active");
 
-      if (dashboards[i].scroll) {
-        smoothScrollTimeBased(frame, 2, 40000); // 2 cycles, ~40s total
+      if(dashboards[i].scroll){
+        smoothScrollTimeBased(frame, 2, 40000);
       } else {
-        setTimeout(() => showCountdown(), dashboards[i].duration);
+        setTimeout(()=>showCountdown(), dashboards[i].duration);
       }
     };
   }
 
-  function showCountdown() {
+  function showCountdown(){
     frame.classList.remove("active");
-    overlay.style.display = "block";
+    overlay.style.display = "flex";
+    updateCountdown();
+    countdownTimer = setInterval(updateCountdown,1000);
 
-    setTimeout(() => {
-      overlay.style.display = "none";
-      index = (index + 1) % dashboards.length;
+    setTimeout(()=>{
+      overlay.style.display="none";
+      clearInterval(countdownTimer);
+      index = (index+1)%dashboards.length;
       loadDashboard(index);
     }, countdownDuration);
   }
 
-  // Start with Pharma
+  // Start
   loadDashboard(index);
 
 });
@@ -138,7 +191,18 @@ document.addEventListener("DOMContentLoaded", function() {
 <body>
 
 <iframe id="dashboardFrame" class="flippable"></iframe>
-<div id="countdownOverlay"></div>
+
+<!-- Fullscreen Countdown overlay with blurred Philmed_logo.png -->
+<div id="countdownOverlay">
+  <div class="background"></div>
+  <div class="content">
+    <div class="counter" id="days">00</div>
+    <div class="counter" id="hours">00</div>
+    <div class="counter" id="minutes">00</div>
+    <div class="counter" id="seconds">00</div>
+    <div>Countdown to Q1 end</div>
+  </div>
+</div>
 
 </body>
 </html>
