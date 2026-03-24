@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Q1 Pharma Sales Command Center</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #0A1628;
+  --teal: #00C2A8;
+  --accent: #E74C3C;
+  --light: #E6EEF8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#000;
+  font-family:'Barlow',sans-serif;
+}
+
+/* BACKGROUND */
+.advert {
+  min-height:100vh;
+  position:relative;
+  overflow:hidden;
+
+  background:
+    linear-gradient(rgba(10,22,40,0.7), rgba(10,22,40,0.9)),
+    url('file:///F:/REPORTS/Philmed new logo.png') center/900px no-repeat;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* GRID */
+.bg-grid {
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size:70px 70px;
+}
+
+/* GLOW */
+.bg-glow {
+  position:absolute;
+  width:700px;
+  height:700px;
+  background:radial-gradient(circle, rgba(0,194,168,0.15), transparent 70%);
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* TOP BAR */
+.red-bar {
+  position:absolute;
+  top:0;
+  width:100%;
+  height:4px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* CONTENT */
+.content {
+  position:relative;
+  z-index:2;
+  text-align:center;
+  width:90%;
+  max-width:1100px;
+
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+  padding:50px;
+  border-radius:12px;
+}
+
+/* BADGE */
+.badge {
+  color:var(--teal);
+  letter-spacing:4px;
+  font-size:13px;
+  margin-bottom:20px;
+}
+
+/* TAGLINE */
+.tagline {
+  font-family:'Bebas Neue';
+  font-size:clamp(60px,8vw,110px);
+  color:#fff;
+  line-height:1;
+}
+
+.accent { color:var(--teal); }
+.accent-red { color:var(--accent); }
+
+/* COUNTERS */
+.counters {
+  display:flex;
+  justify-content:center;
+  margin:40px 0;
+  flex-wrap:wrap;
+}
+
+.counter {
+  margin:10px;
+  padding:25px 35px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  min-width:140px;
+}
+
+.counter h1 {
+  font-family:'Bebas Neue';
+  font-size:70px;
+  color:#fff;
+}
+
+.counter p {
+  font-size:12px;
+  color:rgba(255,255,255,0.6);
+  letter-spacing:2px;
+}
+
+/* URGENCY EFFECT */
+.urgent {
+  animation: pulseRed 1s infinite;
+}
+
+@keyframes pulseRed {
+  0%,100% { color:#fff; }
+  50% { color:var(--accent); }
+}
+
+/* TEXT */
+.body {
+  color:rgba(255,255,255,0.75);
+  font-size:18px;
+  margin-bottom:30px;
+}
+
+/* BUTTONS */
+.buttons {
+  display:flex;
+  justify-content:center;
+  gap:20px;
+}
+
+button {
+  padding:16px 40px;
+  font-weight:bold;
+  letter-spacing:2px;
+  cursor:pointer;
+}
+
+.primary {
+  background:var(--accent);
+  color:#fff;
+}
+
+.secondary {
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.2);
+  color:#fff;
+}
+
+/* TICKER */
+.ticker {
+  position:absolute;
+  bottom:10px;
+  width:100%;
+  overflow:hidden;
+  color:rgba(255,255,255,0.5);
+}
+
+.ticker div {
+  white-space:nowrap;
+  animation:scroll 25s linear infinite;
+}
+
+@keyframes scroll {
+  from { transform:translateX(100%); }
+  to { transform:translateX(-100%); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="advert">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="red-bar"></div>
+
+  <div class="content">
+
+    <div class="badge">Q1 FINAL SPRINT</div>
+
+    <div class="tagline">
+      90 DAYS<br>
+      <span class="accent">90 MINUTES</span><br>
+      <span class="accent-red">1 MISSION</span>
+    </div>
+
+    <div class="counters">
+      <div class="counter">
+        <h1 id="days">00</h1>
+        <p>DAYS</p>
+      </div>
+      <div class="counter">
+        <h1 id="hours">00</h1>
+        <p>HOURS</p>
+      </div>
+      <div class="counter">
+        <h1 id="minutes">00</h1>
+        <p>MINUTES</p>
+      </div>
+      <div class="counter">
+        <h1 id="seconds">00</h1>
+        <p>SECONDS</p>
+      </div>
+    </div>
+    <div class="body">
+      Every Call counts. #EXECUTION LIKE A BEAST. Every Minute Counts<br>
+      <strong>PLAN. ALLIGN. EXECUTE.</strong>
+    </div>
+<div class="body">
+   <strong>TRUST. LOYALTY. COMMITMENT.</strong>
+</div>
+    <div class="buttons">
+      <button class="primary">HOLD THE ROPE</button>
+      <button class="secondary">CLOSE Q1 STRONG</button>
+    </div>
+
+  </div>
+
+  <div class="ticker">
+    <div>
+      EVERY SECOND COUNTS • CLOSE STRONG • EXECUTE • WIN • #EXECUTION LIKE A BEAST • PLAN,ALLIGN,EXECUTE • OWN THE NUMBERS
+    </div>
+  </div>
+</div>
+
+<script>
+function updateCountdown() {
+  const now = new Date();
+  const end = new Date(now.getFullYear(), 2, 31, 23, 59, 59);
+  const diff = end - now;
+
+  if (diff <= 0) return;
+
+  const d = Math.floor(diff / (1000*60*60*24));
+  const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const s = Math.floor((diff % (1000*60)) / 1000);
+
+  document.getElementById('days').innerText = String(d).padStart(2,'0');
+  document.getElementById('hours').innerText = String(h).padStart(2,'0');
+  document.getElementById('minutes').innerText = String(m).padStart(2,'0');
+  document.getElementById('seconds').innerText = String(s).padStart(2,'0');
+
+  /* URGENCY EFFECT */
+  if (d === 0 && h < 12) {
+    document.getElementById('hours').classList.add('urgent');
+    document.getElementById('minutes').classList.add('urgent');
+    document.getElementById('seconds').classList.add('urgent');
+  }
+}
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+</script>
+
+</body>
+</html>
