@@ -42,13 +42,12 @@
     top:0; left:0;
     width:100%; height:100%;
     z-index:10;
-    display:none;
-    overflow:hidden;
     display:flex;
     align-items:center;
     justify-content:center;
     color:white;
     text-align:center;
+    overflow:hidden;
   }
 
   #countdownOverlay .background {
@@ -102,52 +101,65 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-  function smoothScrollTimeBased(iframe, cycles = 2, duration = 40000) {
+  // Smooth scrolling within iframe for given duration
+  function smoothScrollTimeBased(iframe, cycles = 2, duration){
     const doc = iframe.contentWindow.document.documentElement;
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
     let start = null;
-    let cycle = 0;
 
     function step(timestamp){
-      if(!start) start = timestamp;
-      const elapsed = timestamp - start;
-      const totalCycles = cycles * 2; // down+up
-      const progress = (elapsed / duration) * totalCycles;
-      const phase = Math.floor(progress);
-      const t = progress - phase;
+        if(!start) start = timestamp;
+        const elapsed = timestamp - start;
+        const totalCycles = cycles * 2; // down+up
+        const progress = (elapsed / duration) * totalCycles;
+        const phase = Math.floor(progress);
+        const t = progress - phase;
 
-      let pos;
-      if(phase % 2 === 0){ pos = t * scrollHeight; }
-      else { pos = (1-t) * scrollHeight; }
+        let pos;
+        if(phase % 2 === 0){ pos = t * scrollHeight; }
+        else { pos = (1-t) * scrollHeight; }
 
-      iframe.contentWindow.scrollTo(0,pos);
+        iframe.contentWindow.scrollTo(0,pos);
 
-      if(elapsed < duration){
-        scrollTimer = requestAnimationFrame(step);
-      } else { showCountdown(); }
+        if(elapsed < duration){
+            scrollTimer = requestAnimationFrame(step);
+        }
     }
 
     scrollTimer = requestAnimationFrame(step);
   }
 
+  // Countdown overlay update
   function updateCountdown(){
     const now = new Date();
-    const end = new Date(now.getFullYear(), 2, 31, 23, 59, 59);
+    const end = new Date(now.getTime() + countdownDuration);
     const diff = end - now;
 
     if(diff <=0) return;
 
-    const d = Math.floor(diff / (1000*60*60*24));
-    const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-    const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const m = Math.floor(diff / (1000*60));
     const s = Math.floor((diff % (1000*60))/1000);
 
-    overlay.querySelector('#days').innerText = String(d).padStart(2,'0');
-    overlay.querySelector('#hours').innerText = String(h).padStart(2,'0');
     overlay.querySelector('#minutes').innerText = String(m).padStart(2,'0');
     overlay.querySelector('#seconds').innerText = String(s).padStart(2,'0');
   }
 
+  // Show countdown overlay for exact countdownDuration
+  function showCountdown(){
+    frame.classList.remove("active");
+    overlay.style.display = "flex";
+    updateCountdown();
+    countdownTimer = setInterval(updateCountdown, 1000);
+
+    setTimeout(()=>{
+      overlay.style.display="none";
+      clearInterval(countdownTimer);
+      index = (index+1)%dashboards.length;
+      loadDashboard(index);
+    }, countdownDuration);
+  }
+
+  // Load dashboard at index i
   function loadDashboard(i){
     cancelAnimationFrame(scrollTimer);
     clearInterval(countdownTimer);
@@ -160,29 +172,18 @@ document.addEventListener("DOMContentLoaded", function() {
     frame.onload = () => {
       frame.classList.add("active");
 
+      const dashDuration = dashboards[i].duration;
+
       if(dashboards[i].scroll){
-        smoothScrollTimeBased(frame, 2, 40000);
-      } else {
-        setTimeout(()=>showCountdown(), dashboards[i].duration);
+        smoothScrollTimeBased(frame, 2, dashDuration);
       }
+
+      // Show countdown after dashboard duration
+      setTimeout(showCountdown, dashDuration);
     };
   }
 
-  function showCountdown(){
-    frame.classList.remove("active");
-    overlay.style.display = "flex";
-    updateCountdown();
-    countdownTimer = setInterval(updateCountdown,1000);
-
-    setTimeout(()=>{
-      overlay.style.display="none";
-      clearInterval(countdownTimer);
-      index = (index+1)%dashboards.length;
-      loadDashboard(index);
-    }, countdownDuration);
-  }
-
-  // Start
+  // Start cycle
   loadDashboard(index);
 
 });
@@ -192,12 +193,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <iframe id="dashboardFrame" class="flippable"></iframe>
 
-<!-- Fullscreen Countdown overlay with blurred Philmed_logo.png -->
+<!-- Fullscreen Countdown overlay -->
 <div id="countdownOverlay">
   <div class="background"></div>
   <div class="content">
-    <div class="counter" id="days">00</div>
-    <div class="counter" id="hours">00</div>
     <div class="counter" id="minutes">00</div>
     <div class="counter" id="seconds">00</div>
     <div>Countdown to Q1 end</div>
