@@ -48,6 +48,7 @@
     color:white;
     text-align:center;
     overflow:hidden;
+    display: none;
   }
 
   #countdownOverlay .background {
@@ -85,109 +86,6 @@
     }
   }
 </style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-
-  const dashboards = [
-    { url: "Pharma_Telesales_Statistics.html", duration: 5*60*1000, scroll: true },
-    { url: "Beibora_Telesales_Statistics.html", duration: 3*60*1000, scroll: true }
-  ];
-
-  const countdownDuration = 1*60*1000; // 1 minute
-  let index = 0;
-  const frame = document.getElementById("dashboardFrame");
-  const overlay = document.getElementById("countdownOverlay");
-  let scrollTimer, countdownTimer;
-
-  document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
-
-  // Smooth scrolling within iframe for given duration
-  function smoothScrollTimeBased(iframe, cycles = 2, duration){
-    const doc = iframe.contentWindow.document.documentElement;
-    const scrollHeight = doc.scrollHeight - doc.clientHeight;
-    let start = null;
-
-    function step(timestamp){
-        if(!start) start = timestamp;
-        const elapsed = timestamp - start;
-        const totalCycles = cycles * 2; // down+up
-        const progress = (elapsed / duration) * totalCycles;
-        const phase = Math.floor(progress);
-        const t = progress - phase;
-
-        let pos;
-        if(phase % 2 === 0){ pos = t * scrollHeight; }
-        else { pos = (1-t) * scrollHeight; }
-
-        iframe.contentWindow.scrollTo(0,pos);
-
-        if(elapsed < duration){
-            scrollTimer = requestAnimationFrame(step);
-        }
-    }
-
-    scrollTimer = requestAnimationFrame(step);
-  }
-
-  // Countdown overlay update
-  function updateCountdown(){
-    const now = new Date();
-    const end = new Date(now.getTime() + countdownDuration);
-    const diff = end - now;
-
-    if(diff <=0) return;
-
-    const m = Math.floor(diff / (1000*60));
-    const s = Math.floor((diff % (1000*60))/1000);
-
-    overlay.querySelector('#minutes').innerText = String(m).padStart(2,'0');
-    overlay.querySelector('#seconds').innerText = String(s).padStart(2,'0');
-  }
-
-  // Show countdown overlay for exact countdownDuration
-  function showCountdown(){
-    frame.classList.remove("active");
-    overlay.style.display = "flex";
-    updateCountdown();
-    countdownTimer = setInterval(updateCountdown, 1000);
-
-    setTimeout(()=>{
-      overlay.style.display="none";
-      clearInterval(countdownTimer);
-      index = (index+1)%dashboards.length;
-      loadDashboard(index);
-    }, countdownDuration);
-  }
-
-  // Load dashboard at index i
-  function loadDashboard(i){
-    cancelAnimationFrame(scrollTimer);
-    clearInterval(countdownTimer);
-
-    frame.classList.remove("active");
-    overlay.style.display = "none";
-
-    frame.src = dashboards[i].url + "?v=" + new Date().getTime();
-
-    frame.onload = () => {
-      frame.classList.add("active");
-
-      const dashDuration = dashboards[i].duration;
-
-      if(dashboards[i].scroll){
-        smoothScrollTimeBased(frame, 2, dashDuration);
-      }
-
-      // Show countdown after dashboard duration
-      setTimeout(showCountdown, dashDuration);
-    };
-  }
-
-  // Start cycle
-  loadDashboard(index);
-
-});
-</script>
 </head>
 <body>
 
@@ -199,9 +97,114 @@ document.addEventListener("DOMContentLoaded", function() {
   <div class="content">
     <div class="counter" id="minutes">00</div>
     <div class="counter" id="seconds">00</div>
-    <div>Countdown to Q1 end</div>
+    <div>Countdown</div>
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  const dashboards = [
+    { url: "Pharma_Telesales_Statistics.html", scroll: true },
+    { url: "Beibora_Telesales_Statistics.html", scroll: true }
+  ];
+
+  const scrollCycles = 2;       // 2 complete scroll cycles
+  const countdownDuration = 1*60*1000; // 1 minute
+  let index = 0;
+
+  const frame = document.getElementById("dashboardFrame");
+  const overlay = document.getElementById("countdownOverlay");
+  let scrollTimer, countdownTimer;
+
+  // Smooth scroll for 2 cycles over dashboard duration
+  function smoothScroll(iframe, cycles, duration){
+    const doc = iframe.contentWindow.document.documentElement;
+    const scrollHeight = doc.scrollHeight - doc.clientHeight;
+    let start = null;
+
+    function step(timestamp){
+      if(!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const totalCycles = cycles * 2; // down+up
+      const progress = (elapsed / duration) * totalCycles;
+      const phase = Math.floor(progress);
+      const t = progress - phase;
+
+      let pos;
+      if(phase % 2 === 0){ pos = t * scrollHeight; }
+      else { pos = (1-t) * scrollHeight; }
+
+      iframe.contentWindow.scrollTo(0,pos);
+
+      if(elapsed < duration){
+        scrollTimer = requestAnimationFrame(step);
+      } else {
+        showCountdown();
+      }
+    }
+
+    scrollTimer = requestAnimationFrame(step);
+  }
+
+  // Countdown overlay update
+  function updateCountdown(endTime){
+    const now = new Date();
+    let diff = endTime - now;
+    if(diff < 0) diff = 0;
+
+    const m = Math.floor(diff / (1000*60));
+    const s = Math.floor((diff % (1000*60))/1000);
+
+    overlay.querySelector('#minutes').innerText = String(m).padStart(2,'0');
+    overlay.querySelector('#seconds').innerText = String(s).padStart(2,'0');
+  }
+
+  function showCountdown(){
+    cancelAnimationFrame(scrollTimer);
+    overlay.style.display = "flex";
+
+    const endTime = new Date(new Date().getTime() + countdownDuration);
+    updateCountdown(endTime);
+    countdownTimer = setInterval(()=>updateCountdown(endTime), 1000);
+
+    setTimeout(()=>{
+      overlay.style.display = "none";
+      clearInterval(countdownTimer);
+      index = (index + 1) % dashboards.length;
+      loadDashboard(index);
+    }, countdownDuration);
+  }
+
+  function loadDashboard(i){
+    cancelAnimationFrame(scrollTimer);
+    clearInterval(countdownTimer);
+
+    frame.classList.remove("active");
+    overlay.style.display = "none";
+
+    frame.src = dashboards[i].url + "?v=" + new Date().getTime();
+
+    frame.onload = () => {
+      frame.classList.add("active");
+      // Wait 1s for iframe content to settle
+      setTimeout(()=>{
+        if(dashboards[i].scroll){
+          // Scroll duration = 10s per cycle (example), can be adjusted
+          const duration = 10000 * scrollCycles;
+          smoothScroll(frame, scrollCycles, duration);
+        } else {
+          // If no scroll, show countdown immediately after 1 min
+          setTimeout(showCountdown, countdownDuration);
+        }
+      }, 1000);
+    };
+  }
+
+  loadDashboard(index);
+
+});
+</script>
 
 </body>
 </html>
