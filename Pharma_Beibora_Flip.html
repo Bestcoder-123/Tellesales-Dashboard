@@ -37,77 +37,76 @@
     background: black;
   }
 
-  #logos {
+  #countdownOverlay {
     position: absolute;
-    top: 10px;
+    top:0; left:0;
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 5;
-    display: none; /* Initially hidden */
-  }
-
-  #logos img {
-    height: 60px;
-    width: auto;
+    height: 100%;
+    z-index: 10;
+    display: none;
+    background: url('Philmed_logo.png') center/cover no-repeat;
   }
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
   const dashboards = [
-    { url: "Pharma_Telesales_Statistics.html", scroll: true },
-    { url: "Countdown.html", scroll: false, duration: 60000 }, // 1 minute
-    { url: "Beibora_Telesales_Statistics.html", scroll: true }
+    { url: "Pharma_Telesales_Statistics.html", duration: 5 * 60 * 1000, scroll: true },
+    { url: "Countdown.html", duration: 1 * 60 * 1000, scroll: false },
+    { url: "Beibora_Telesales_Statistics.html", duration: 3 * 60 * 1000, scroll: true },
+    { url: "Countdown.html", duration: 1 * 60 * 1000, scroll: false }
   ];
 
   let index = 0;
   const frame = document.getElementById("dashboardFrame");
-  const logos = document.getElementById("logos");
+  const overlay = document.getElementById("countdownOverlay");
+  let scrollAnimationId;
 
   document.querySelectorAll(".flippable").forEach(el => el.style.display = "block");
 
-  function smoothScroll(iframe, cycles = 2, speed = 1) {
+  function smoothScroll(iframe, cycles = 2, speed = 1.2) {
     const doc = iframe.contentWindow.document.documentElement;
     const scrollHeight = doc.scrollHeight - doc.clientHeight;
-    let direction = 1; // 1=down, -1=up
+    let direction = 1; // 1 = down, -1 = up
     let currentCycle = 0;
     let pos = 0;
 
     function step() {
       pos += direction * speed;
-      if(pos >= scrollHeight) { pos = scrollHeight; direction = -1; }
-      if(pos <= 0) { pos = 0; direction = 1; currentCycle++; }
+      if (pos >= scrollHeight) { pos = scrollHeight; direction = -1; }
+      if (pos <= 0) { pos = 0; direction = 1; currentCycle++; }
 
       iframe.contentWindow.scrollTo(0, pos);
 
-      if(currentCycle < cycles) {
-        requestAnimationFrame(step);
+      if (currentCycle < cycles) {
+        scrollAnimationId = requestAnimationFrame(step);
       } else {
         rotate(); // proceed to next dashboard
       }
     }
 
-    requestAnimationFrame(step);
+    step();
   }
 
   function loadDashboard(i) {
-    frame.classList.remove("active");
-    logos.style.display = "none"; // hide logos by default
+    cancelAnimationFrame(scrollAnimationId);
 
+    frame.classList.remove("active");
+    overlay.style.display = "none";
+
+    // Reload data on flip
     frame.src = dashboards[i].url + "?v=" + new Date().getTime();
 
     frame.onload = () => {
       frame.classList.add("active");
 
-      // Show logos only for Countdown.html
-      if(dashboards[i].url.includes("Countdown.html")) {
-        logos.style.display = "flex";
-        setTimeout(() => rotate(), dashboards[i].duration || 60000);
-      } else if(dashboards[i].scroll) {
-        // smooth scrolling for dashboards
-        smoothScroll(frame, 2, 1.2); // medium speed
+      if (dashboards[i].url.includes("Countdown.html")) {
+        overlay.style.display = "block";
+        setTimeout(() => rotate(), dashboards[i].duration);
+      } else if (dashboards[i].scroll) {
+        smoothScroll(frame, 2, 1.2); // medium speed, 2 cycles
+      } else {
+        setTimeout(() => rotate(), dashboards[i].duration);
       }
     };
   }
@@ -119,16 +118,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Start
   loadDashboard(index);
+
 });
 </script>
 </head>
 <body>
-  <iframe id="dashboardFrame" class="flippable"></iframe>
 
-  <!-- Logos appear only for Countdown.html -->
-  <div id="logos">
-    <img src="Philmed_logo.png" alt="Philmed Logo Left">
-    <img src="Philmed_logo.png" alt="Philmed Logo Right">
-  </div>
+<iframe id="dashboardFrame" class="flippable"></iframe>
+
+<!-- Fullscreen overlay for Countdown dashboard -->
+<div id="countdownOverlay"></div>
+
 </body>
 </html>
