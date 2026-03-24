@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Q1 Pharma Sales Command Center</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
@@ -21,23 +20,6 @@
 body {
   background:#000;
   font-family:'Barlow',sans-serif;
-  overflow: hidden;
-}
-
-/* Logos at top corners */
-#logos {
-  position: absolute;
-  top: 10px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20px;
-  z-index: 10;
-}
-
-#logos img {
-  height: 60px;
-  width: auto;
 }
 
 /* BACKGROUND */
@@ -45,7 +27,9 @@ body {
   min-height:100vh;
   position:relative;
   overflow:hidden;
-  background: linear-gradient(rgba(10,22,40,0.7), rgba(10,22,40,0.9));
+  background:
+    linear-gradient(rgba(10,22,40,0.7), rgba(10,22,40,0.9)),
+    url('Philmed_logo.png') center/cover no-repeat;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -202,16 +186,21 @@ button {
   from { transform:translateX(100%); }
   to { transform:translateX(-100%); }
 }
+
+/* IFRAME DASHBOARD */
+#dashboardFrame {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  border:none;
+  display:none;
+  z-index:3;
+}
+#dashboardFrame.active { display:block; }
 </style>
 </head>
 
 <body>
-
-<!-- Logos -->
-<div id="logos">
-  <img src="Philmed_logo.png" alt="Philmed Logo Left">
-  <img src="Philmed_logo.png" alt="Philmed Logo Right">
-</div>
 
 <div class="advert">
   <div class="bg-grid"></div>
@@ -246,16 +235,13 @@ button {
         <p>SECONDS</p>
       </div>
     </div>
-
     <div class="body">
       Every Call counts. #EXECUTION LIKE A BEAST. Every Minute Counts<br>
       <strong>PLAN. ALLIGN. EXECUTE.</strong>
     </div>
-
     <div class="body">
        <strong>TRUST. LOYALTY. COMMITMENT.</strong>
     </div>
-
     <div class="buttons">
       <button class="primary">HOLD THE ROPE</button>
       <button class="secondary">CLOSE Q1 STRONG</button>
@@ -268,35 +254,98 @@ button {
       EVERY SECOND COUNTS • CLOSE STRONG • EXECUTE • WIN • #EXECUTION LIKE A BEAST • PLAN,ALLIGN,EXECUTE • OWN THE NUMBERS
     </div>
   </div>
+
+  <!-- DASHBOARD IFRAME -->
+  <iframe id="dashboardFrame"></iframe>
 </div>
 
 <script>
-function updateCountdown() {
+const dashboards = [
+  { url: "Pharma_Telesales_Statistics.html", duration: 5*60*1000, scroll:true },
+  { url: "Beibora_Telesales_Statistics.html", duration: 3*60*1000, scroll:true }
+];
+const countdownDuration = 1*60*1000;
+
+let index=0;
+const frame = document.getElementById('dashboardFrame');
+let scrollTimer, countdownTimer;
+
+// Countdown update (DD:HH:MM:SS)
+function updateCountdown(){
   const now = new Date();
   const end = new Date(now.getFullYear(), 2, 31, 23, 59, 59);
   const diff = end - now;
-
-  if (diff <= 0) return;
-
-  const d = Math.floor(diff / (1000*60*60*24));
-  const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-  const m = Math.floor((diff % (1000*60*60)) / (1000*60));
-  const s = Math.floor((diff % (1000*60)) / 1000);
+  if(diff<=0) return;
+  const d = Math.floor(diff/(1000*60*60*24));
+  const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+  const m = Math.floor((diff%(1000*60*60))/(1000*60));
+  const s = Math.floor((diff%(1000*60))/1000);
 
   document.getElementById('days').innerText = String(d).padStart(2,'0');
   document.getElementById('hours').innerText = String(h).padStart(2,'0');
   document.getElementById('minutes').innerText = String(m).padStart(2,'0');
   document.getElementById('seconds').innerText = String(s).padStart(2,'0');
 
-  if (d === 0 && h < 12) {
+  if(d===0 && h<12){
     document.getElementById('hours').classList.add('urgent');
     document.getElementById('minutes').classList.add('urgent');
     document.getElementById('seconds').classList.add('urgent');
   }
 }
 
+// Smooth scroll for iframe
+function smoothScrollTimeBased(iframe, cycles, duration){
+  const doc = iframe.contentWindow.document.documentElement;
+  const scrollHeight = doc.scrollHeight - doc.clientHeight;
+  let start=null;
+
+  function step(timestamp){
+    if(!start) start = timestamp;
+    const elapsed = timestamp-start;
+    const totalCycles = cycles*2;
+    const progress = (elapsed/duration)*totalCycles;
+    const phase = Math.floor(progress);
+    const t = progress - phase;
+    let pos;
+    if(phase%2===0) pos = t*scrollHeight;
+    else pos = (1-t)*scrollHeight;
+    iframe.contentWindow.scrollTo(0,pos);
+    if(elapsed<duration) scrollTimer = requestAnimationFrame(step);
+  }
+  scrollTimer = requestAnimationFrame(step);
+}
+
+// Show countdown overlay
+function showCountdown(){
+  frame.classList.remove('active');
+  updateCountdown();
+  countdownTimer = setInterval(updateCountdown,1000);
+  setTimeout(()=>{
+    clearInterval(countdownTimer);
+    index=(index+1)%dashboards.length;
+    loadDashboard(index);
+  }, countdownDuration);
+}
+
+// Load dashboard
+function loadDashboard(i){
+  cancelAnimationFrame(scrollTimer);
+  clearInterval(countdownTimer);
+
+  frame.src = dashboards[i].url+"?v="+new Date().getTime();
+  frame.onload = ()=>{
+    frame.classList.add('active');
+    if(dashboards[i].scroll){
+      smoothScrollTimeBased(frame,2,dashboards[i].duration);
+    }
+    setTimeout(showCountdown,dashboards[i].duration);
+  };
+}
+
+// Start
 updateCountdown();
-setInterval(updateCountdown, 1000);
+setInterval(updateCountdown,1000);
+loadDashboard(index);
 </script>
 
 </body>
